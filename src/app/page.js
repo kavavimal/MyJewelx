@@ -4,6 +4,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 
 export default function Home() {
   const { data: session } = useSession();
+  console.log("sessionnnnnnnn", session)
 
   // checking if sessions exists
   if (session) {
@@ -19,7 +20,7 @@ export default function Home() {
           />
         </div>
         <p className="text-2xl mb-2">
-          Welcome <span className="font-bold">{session.user?.name}</span>.
+          Welcome <span className="font-bold">{session.user?.username}</span>.
           Signed In As
         </p>
         <p className="font-bold mb-4">{session.user?.email}</p>

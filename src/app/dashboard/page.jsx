@@ -1,8 +1,11 @@
+"use client";
 import { redirect } from "next/navigation";
-import React from "react";
+import { useSession } from "next-auth/react";
 
-const page = () => {
+const Page = () => {
+  const session = useSession();
+  console.log("session", session.data);
   return redirect("/dashboard/home");
 };
 
-export default page;
+export default Page;

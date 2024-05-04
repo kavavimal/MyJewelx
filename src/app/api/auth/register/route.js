@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { hash } from "bcrypt";
 import { NextResponse } from "next/server";
 import * as z from 'zod';
-// import { AcountType } from "@prisma/client";
+import { AcountType } from "@prisma/client";
 
 //Define schema for input validation
 const userSchema = z
@@ -33,17 +33,17 @@ export async function POST(req ) {
           // first_name: "admin",
           // last_name: "",
           // phone_number: "",
-          // account_type: AcountType.CUSTOMER,
-          // role: {
-          //   connectOrCreate: {
-          //     where: {
-          //       role_name: "customer",
-          //     },
-          //     create: {
-          //       role_name: "customer",
-          //     }
-          //   },
-          // },
+          account_type: AcountType.CUSTOMER,
+          role: {
+            connectOrCreate: {
+              where: {
+                role_name: "customer",
+              },
+              create: {
+                role_name: "customer",
+              }
+            },
+          },
         },
       });
 

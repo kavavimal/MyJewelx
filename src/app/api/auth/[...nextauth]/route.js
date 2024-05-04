@@ -1,6 +1,8 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import FacebookProvider from "next-auth/providers/facebook";
+// import InstagramProvider from "next-auth/providers/instagram"
 import prisma from "@/lib/prisma";
 import { compare } from "bcrypt";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -85,7 +87,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 // };
 
 const authOptions = {
-  // adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma),
   session: {
     strategy :  'jwt',
   },
@@ -97,7 +99,70 @@ const authOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      profile(profile){
+        return ({
+          id: profile.sub,
+          username: `${profile.given_name} ${profile.family_name}`,
+          email: profile.email,
+          emailVerified: profile.email_verified,
+          image: profile.picture,
+          role: {
+            connectOrCreate: {
+              where: {
+                role_name: "customer",
+              },
+              create: {
+                role_name: "customer",
+              }
+            },
+          },
+        })
+      }
     }),
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+      profile(profile) {
+        return {
+          id: profile.id,
+          username: profile.name,
+          email: profile.email,
+          image: profile.picture.data.url,
+          role: {
+            connectOrCreate: {
+              where: {
+                role_name: "customer",
+              },
+              create: {
+                role_name: "customer",
+              }
+            },
+          },
+        }
+      },
+    }),
+    // InstagramProvider({
+    //   clientId: process.env.INSTAGRAM_CLIENT_ID,
+    //   clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
+    //   profile(profile) {
+    //     return {
+    //       id: profile.id,
+    //       username: profile.name,
+    //       email: profile.email,
+    //       image: profile.picture.data.url,
+    //       role: {
+    //         connectOrCreate: {
+    //           where: {
+    //             role_name: "customer",
+    //           },
+    //           create: {
+    //             role_name: "customer",
+    //           }
+    //         },
+    //       },
+    //     }
+    //   },
+    // }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -130,23 +195,47 @@ const authOptions = {
     })
   ],
   callbacks: {
+    // async jwt({ token, user }) {
+    //   /* Step 1: update the token based on the user object */
+    //   console.log("user at jwt", user);
+    //   if (user) {
+    //     token.role = user.role;
+    //   }
+    //   return token;
+    // },
     async jwt({ token, user }) {
-      /* Step 1: update the token based on the user object */
-      console.log("user at jwt", user);
-      if (user) {
-        token.role = user.role;
+      console.log('token', token, 'user', user);
+      if(user){
+        return {
+          ...user,
+          username : user.username,
+          image : user.image
+        }
       }
-      return token;
+      return token
     },
+    
     async session({ session, token }) {
-      /* Step 2: update the session.user based on the token object */
-      console.log("user at session", session, token);
-      if (token && token.role) {
-        // session.user.role = token.role;
-        session.user = { ...session.user, role: token.role }
+      console.log('session', session, 'token', token);
+      return {
+        ...session,
+        user : {
+          ...session.user,
+          username: token.username,
+          image: token.image
+        }
       }
-      return session;
     },
+    
+    // async session({ session, token }) {
+    //   /* Step 2: update the session.user based on the token object */
+    //   console.log("user at session", session, token);
+    //   if (token && token.role) {
+    //     // session.user.role = token.role;
+    //     session.user = { ...session.user, role: token.role }
+    //   }
+    //   return session;
+    // },
   },
 }
 

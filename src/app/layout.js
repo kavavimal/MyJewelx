@@ -14,8 +14,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SessionWrapper>{children}</SessionWrapper>
-      </body>
+        <SessionWrapper>
+          {children}
+        </SessionWrapper>
+        </body>
       <Script async src="/ripple.js" />
     </html>
   );
