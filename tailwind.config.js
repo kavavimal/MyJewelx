@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-import withMT from "@material-tailwind/html/utils/withMT";
+import withMT from "@material-tailwind/react/utils/withMT";
 
 export default withMT({
   content: [
@@ -17,6 +17,18 @@ export default withMT({
       boxShadow: {
         "3xl":
           "0 0 2px 0 rgba(145, 158, 171, 0.08), 0 12px 24px -4px rgba(145, 158, 171, 0.08)",
+      },
+      colors: {
+        primary: {
+          50: "#078dee14",
+          100: "#078dee29",
+          200: "#078dee",
+        },
+        blueGray: {
+          50: "#919eab1f",
+          100: "#919eab14",
+          200: "#637381",
+        },
       },
     },
   },

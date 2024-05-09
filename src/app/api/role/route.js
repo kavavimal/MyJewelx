@@ -7,11 +7,22 @@ export async function POST(request) {
 
     const name = res.get("name");
     const description = res.get("description");
+    const permissions = res.get("permissions");
+    const permissionArray = permissions.split(",");
 
     const result = await prisma.role.create({
       data: {
         role_name: name ? String(name) : "",
         description: description ? String(description) : "",
+        permissions: {
+          create: [
+            ...permissionArray.map((permissionId) => ({
+              permission: {
+                connect: { permission_id: parseInt(permissionId) },
+              },
+            })),
+          ],
+        },
       },
     });
 

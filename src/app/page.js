@@ -1,10 +1,10 @@
 "use client";
 import Image from "next/image";
 import { useSession, signIn, signOut } from "next-auth/react";
+import Link from "next/link";
 
 export default function Home() {
   const { data: session } = useSession();
-  console.log("sessionnnnnnnn", session)
 
   // checking if sessions exists
   if (session) {
@@ -30,6 +30,7 @@ export default function Home() {
         >
           Sign out
         </button>
+        <Link href="/admin">Dashboard</Link>
       </div>
     );
   }

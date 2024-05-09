@@ -1,23 +1,34 @@
 "use client";
-import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import LoadingDots from "@/components/loading-dots";
+import Select from "react-select";
 
-export default function AddRole() {
+export default function AddRole({ permissions }) {
   const [formData, setFormData] = useState({ name: "", description: "" });
   const router = useRouter();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const options = permissions.map((permission) => ({
+    value: permission.permission_id,
+    label: permission.permission_name,
+  }));
   const handleInputChange = (event) => {
-    setFormData({ ...formData, [event.target.name]: event.target.value });
+    if (event.target.name === "permissions[]") {
+      const selectedOptions = Array.from(
+        event.target.selectedOptions,
+        (option) => option.value
+      );
+      setFormData({ ...formData, [event.target.name]: selectedOptions });
+    } else
+      setFormData({ ...formData, [event.target.name]: event.target.value });
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const dataValues = new FormData();
-    
+
     Object.entries(formData).forEach(([key, value]) => {
       dataValues.set(key, value);
     });
@@ -37,7 +48,7 @@ export default function AddRole() {
         // Reset form and navigate on success
         setFormData({ name: "", description: "" });
         setError(null);
-        router.push("/dashboard/roles");
+        router.push("/admin/roles");
       }
       setLoading(false);
     } catch (error) {
@@ -50,12 +61,6 @@ export default function AddRole() {
   return (
     <div>
       <div className="flex items-center  h-10 intro-y">
-        <Link
-          href="/dashboard/roles"
-          className="mx-1 bg-gray-500 hover:bg-gray-700 text-white  py-1 px-2 rounded-full"
-        >
-          {`< Back`}
-        </Link>
         <h2 className="mr-5 text-lg font-medium truncate">New Role</h2>
       </div>
       {error && (
@@ -99,6 +104,68 @@ export default function AddRole() {
             value={formData?.description || ""}
             name="description"
             onChange={handleInputChange}
+          />
+        </div>
+        <div className="mb-2">
+          <label
+            className="block text-gray-700 text-sm font-bold mb-2"
+            htmlFor="account_type"
+          >
+            Permission
+          </label>
+          {/* <select
+            name="permissions[]"
+            multiple
+            size="8"
+            onChange={handleInputChange}
+          >
+            {permissions.map((permission) => (
+              <option
+                key={permission.permission_id}
+                value={permission.permission_id}
+              >
+                {permission.permission_name}
+              </option>
+            ))}
+          </select> */}
+          <Select
+            styles={{
+              control: (provided, state) => ({
+                ...provided,
+                borderWidth: "1px",
+                borderColor: "#000",
+                backgroundColor: "#fff",
+                padding: ".2rem",
+                color: "#222",
+                boxShadow: state.isFocused
+                  ? "0 0 0 calc(1px + #fff) rgb(255 255 255)"
+                  : "",
+                ":hover": {
+                  borderColor: "#000",
+                },
+              }),
+              option: (provided, state) => ({
+                ...provided,
+                backgroundColor: state.isSelected ? "#000" : "white",
+                color: state.isSelected ? "white" : "#1E293B",
+                borderRadius: ".5rem",
+                ":hover": {
+                  backgroundColor: state.isSelected
+                    ? "#222"
+                    : "rgba(145, 158, 171, 0.16)",
+                },
+              }),
+              menu: (provided) => ({
+                ...provided,
+                padding: ".7rem",
+              }),
+              singleValue: (provided, state) => ({
+                ...provided,
+                color: state.isSelected ? "#fff" : "",
+              }),
+            }}
+            options={options}
+            isMulti
           />
         </div>
 
