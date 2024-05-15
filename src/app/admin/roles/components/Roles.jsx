@@ -1,34 +1,37 @@
 "use client";
-import { Button, IconButton } from "@material-tailwind/react";
-import axios from "axios";
+import {
+  Button,
+  IconButton,
+  Menu,
+  MenuHandler,
+  MenuItem,
+  MenuList,
+} from "@material-tailwind/react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import DataTable from "react-data-table-component";
+import DeleteRole from "./DeleteRole";
 
-const Users = ({ users }) => {
+const Roles = ({ roles }) => {
   const columns = [
     {
-      name: "Name",
-      selector: (row) => row.username,
+      name: "Id",
+      selector: (row) => row.role_id,
     },
     {
-      name: "Email",
-      selector: (row) => row.email,
+      name: "Role Name",
+      selector: (row) => row.role_name,
     },
     {
-      name: "Account Type",
-      selector: (row) => row.account_type,
+      name: "Role Description",
+      selector: (row) => row.description,
     },
     {
-      name: "User Role",
-      selector: (row) => row?.role?.role_name,
-    },
-    {
-      name: "Actions",
+      name: "Action",
       cell: (row) => (
         <>
-          <Link href={`/admin/users/edit/${row.id}`}>
-            <IconButton variant="text" className="rounded-full">
+          <Link href={`/admin/roles/edit/${row.role_id}`}>
+            <IconButton className="rounded-full" variant="text">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width={18}
@@ -42,8 +45,7 @@ const Users = ({ users }) => {
               </svg>
             </IconButton>
           </Link>
-
-          {/* <DeleteRole row={row} role_id={row.role_id} /> */}
+          <DeleteRole role_id={row.role_id} />
         </>
       ),
     },
@@ -51,11 +53,8 @@ const Users = ({ users }) => {
   return (
     <>
       <div className="flex justify-between items-center btn btn-primary mb-10">
-        <h2 className="text-2xl font-semibold ">Users</h2>
-        <Link
-          href="/admin/users/add"
-          className="flex justify-end btn btn-primary"
-        >
+        <h2 className="text-2xl font-semibold ">Roles</h2>
+        <Link href="/admin/roles/add">
           <Button
             variant="gradient"
             size="md"
@@ -72,13 +71,13 @@ const Users = ({ users }) => {
                 d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
               ></path>
             </svg>
-            Add New Users
+            Add New Roles
           </Button>
         </Link>
       </div>
-      <DataTable data={users} columns={columns} highlightOnHover />
+      <DataTable data={roles} columns={columns} highlightOnHover />
     </>
   );
 };
 
-export default Users;
+export default Roles;

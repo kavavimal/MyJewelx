@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,6 +5,122 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  username      String?
+  password      String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  emailVerified DateTime?  @map("email_verified")
+  image         String?
+  account_type  AcountType @default(CUSTOMER)
+  role_id       Int
+  phone_number  String?
+  otp           String?
+  products      Product[]
+  role          Role       @relation(fields: [role_id], references: [role_id])
+  accounts      Account[]
+}
+
+model Role {
+  role_id     Int              @id @default(autoincrement())
+  role_name   String           @unique
+  description String?
+  permissions RolePermission[]
+  users       User[]
+}
+
+model Permission {
+  permission_id   Int              @id @default(autoincrement())
+  permission_name String           @unique
+  description     String?
+  created_at      DateTime         @default(now())
+  roles           RolePermission[]
+}
+
+model RolePermission {
+  role_id       Int
+  permission_id Int
+  permission    Permission @relation(fields: [permission_id], references: [permission_id])
+  role          Role       @relation(fields: [role_id], references: [role_id])
+
+  @@id([role_id, permission_id])
+}
+
+model Product {
+  product_id  Int               @id @default(autoincrement())
+  name        String
+  caret       String
+  weight      Json
+  description String?
+  price       Json
+  images      String[]
+  created_at  DateTime          @default(now())
+  updated_at  DateTime          @updatedAt
+  status      ProductStatus     @default(REQUESTED)
+  user_id     String
+  user        User              @relation(fields: [user_id], references: [id])
+  category    ProductCategory[]
+  country     ProductCountry[]
+}
+
+model Category {
+  category_id Int               @id @default(autoincrement())
+  name        String            @unique
+  description String?
+  category_image String?
+  created_at  DateTime          @default(now())
+  updated_at  DateTime          @updatedAt
+  products    ProductCategory[]
+}
+
+model ProductCategory {
+  category_id Int
+  product_id  Int
+  category    Category @relation(fields: [category_id], references: [category_id])
+  product     Product  @relation(fields: [product_id], references: [product_id])
+
+  @@id([category_id, product_id])
+}
+
+model Country {
+  country_id  Int              @id @default(autoincrement())
+  name        String           @unique
+  description String?
+  created_at  DateTime         @default(now())
+  updated_at  DateTime         @updatedAt
+  products    ProductCountry[]
+}
+
+model ProductCountry {
+  country_id Int
+  product_id Int
+  country    Country @relation(fields: [country_id], references: [country_id])
+  product    Product @relation(fields: [product_id], references: [product_id])
+
+  @@id([country_id, product_id])
 }
 
 enum AcountType {
@@ -24,138 +134,4 @@ enum ProductStatus {
   APPROVED
   DISABLED
   SOLD
-}
-model Account {
-  id                 String  @id @default(cuid())
-  userId             String  @map("user_id")
-  type               String
-  provider           String
-  providerAccountId  String  @map("provider_account_id")
-  refresh_token      String? @db.Text
-  access_token       String? @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String? @db.Text
-  session_state      String?
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  @@unique([provider, providerAccountId])
-  @@map("accounts")
-}
-
-model User {
-  id      String      @id @default(cuid())
-  email   String   @unique
-  username String?
-  password String?
-  emailVerified DateTime? @map("email_verified")
-  image         String?
-  account_type      AcountType @default(CUSTOMER)
-  role_id Int
-  role    Role @relation(fields: [role_id], references: [role_id])
-
-  accounts      Account[]
-  products Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-
-model Role {
-  role_id     Int     @id @default(autoincrement())
-  role_name   String  @unique
-  description String?
-
-  // users can have one role and one role can have multiple users
-  users       User[]
-  // Define the many-to-many relationship with permissions
-  permissions RolePermission[]
-}
-
-model Permission {
-  permission_id   Int      @id @default(autoincrement())
-  permission_name String   @unique
-  description     String?
-  created_at      DateTime @default(now())
-
-  // Define the many-to-many relationship with roles
-  roles RolePermission[]
-}
-
-// Junction table for the many-to-many relationship between roles and permissions
-model RolePermission {
-  role_id       Int
-  permission_id Int
-
-  // Define foreign key relationships
-  role       Role       @relation(fields: [role_id], references: [role_id])
-  permission Permission @relation(fields: [permission_id], references: [permission_id])
-
-  // Define the primary key
-  @@id([role_id, permission_id])
-}
-
-model Product {
-  product_id  Int           @id @default(autoincrement())
-  name        String
-  caret       String
-  weight      Json
-  description String?
-  price       Json
-  images      String[]
-  created_at  DateTime      @default(now())
-  updated_at  DateTime      @updatedAt
-  status      ProductStatus @default(REQUESTED)
-
-  category ProductCategory[]
-  country  ProductCountry[]
-  user_id  String
-  user     User              @relation(fields: [user_id], references: [id])
-}
-
-model Category {
-  category_id Int     @id @default(autoincrement())
-  name        String  @unique
-  description String?
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  products ProductCategory[]
-}
-
-model ProductCategory {
-  category_id Int
-  product_id  Int
-
-  // Define foreign key relationships
-  category Category @relation(fields: [category_id], references: [category_id])
-  product  Product  @relation(fields: [product_id], references: [product_id])
-
-  // Define the primary key
-  @@id([category_id, product_id])
-}
-
-model Country {
-  country_id  Int     @id @default(autoincrement())
-  name        String  @unique
-  description String?
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  products ProductCountry[]
-}
-
-model ProductCountry {
-  country_id Int
-  product_id Int
-
-  // Define foreign key relationships
-  country Country @relation(fields: [country_id], references: [country_id])
-  product Product @relation(fields: [product_id], references: [product_id])
-
-  // Define the primary key
-  @@id([country_id, product_id])
 }

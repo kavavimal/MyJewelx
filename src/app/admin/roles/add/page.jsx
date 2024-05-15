@@ -1,6 +1,4 @@
 import React from "react";
-import Users from "@/components/Users";
-import AddRole from "../components/addRole";
 import RoleForm from "../components/RoleForm";
 
 export const revalidate = 2;

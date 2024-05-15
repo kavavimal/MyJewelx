@@ -5,9 +5,11 @@ import {
   DialogBody,
   DialogFooter,
   DialogHeader,
+  IconButton,
   MenuItem,
 } from "@material-tailwind/react";
 import { useRouter } from "next/navigation";
+import { enqueueSnackbar } from "notistack";
 import { useState } from "react";
 
 export default function DeletePermission({ permission_id }) {
@@ -38,6 +40,23 @@ export default function DeletePermission({ permission_id }) {
         method: "DELETE",
       });
       router.refresh();
+      enqueueSnackbar("Permission deleted successfully", {
+        variant: "success",
+        preventDuplicates: true,
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "right",
+        },
+        autoHideDuration: 3000,
+        style: {
+          background: "white",
+          color: "black",
+          borderRadius: ".5rem",
+          boxShadow:
+            "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+          padding: "0 4px",
+        },
+      });
     } catch (e) {
       console.error(e);
     }
@@ -47,34 +66,24 @@ export default function DeletePermission({ permission_id }) {
 
   return (
     <>
-      <MenuItem
+      <IconButton
+        variant="text"
+        color="red"
+        className="rounded-full"
         onClick={handleOpen}
-        animate={{
-          mount: {
-            opacity: [0, 1],
-            transition: { duration: 0.3 },
-          },
-          unmount: {
-            opacity: [1, 0],
-            transition: { duration: 0.3 },
-          },
-        }}
       >
-        <button className="flex items-center gap-2 text-red-600 w-full">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={24}
-            height={24}
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentColor"
-              d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zm2-4h2V8H9zm4 0h2V8h-2z"
-            ></path>
-          </svg>
-          Delete
-        </button>
-      </MenuItem>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={18}
+          height={18}
+          viewBox="0 0 24 24"
+        >
+          <path
+            fill="currentColor"
+            d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zm2-4h2V8H9zm4 0h2V8h-2z"
+          ></path>
+        </svg>
+      </IconButton>
 
       <Dialog
         open={open}
@@ -109,11 +118,6 @@ export default function DeletePermission({ permission_id }) {
           </Button>
         </DialogFooter>
       </Dialog>
-      {/* {loading && (
-        <div className="fixed h-full w-full flex item-center justify-center bg-gray-400/[.5]  top-0 left-0 z-40">
-          <LoadingDots color="#808080" size="15px" />
-        </div>
-      )} */}
     </>
   );
 }

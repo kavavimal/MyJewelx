@@ -1,5 +1,7 @@
 "use client";
+import { checkPermission } from "@/utils/helper";
 import { ListItem, ListItemPrefix } from "@material-tailwind/react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -8,13 +10,41 @@ import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 
 const Sidebar = () => {
+  const { data: session, status } = useSession();
   const pathname = usePathname();
   const isActive = (name) => pathname.includes(name);
+
+  if (status === "loading") {
+    return (
+      <aside className="w-1/5">
+        <SimpleBar
+          style={{ height: "100vh", position: "sticky" }}
+          className="top-0 left-0 h-screen border-r border-dashed p-5 space-y-2 dark:bg-gray-50 dark:text-gray-800"
+        >
+          <div className="flex justify-start mb-7">Loading...</div>
+        </SimpleBar>
+      </aside>
+    );
+  }
 
   const navItems = [
     {
       name: "Dashboard",
       href: "/admin/dashboard",
+      permission: [
+        "vendors_view",
+        "vendor_create",
+        "vendor_update",
+        "vendor_delete",
+        "customers_view",
+        "customer_create",
+        "customer_update",
+        "customer_delete",
+        "products_view",
+        "product_create",
+        "product_update",
+        "product_delete",
+      ],
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -40,6 +70,12 @@ const Sidebar = () => {
     {
       name: "Vendors",
       href: "/admin/vendors",
+      permission: [
+        "vendors_view",
+        "vendor_create",
+        "vendor_update",
+        "vendor_delete",
+      ],
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -62,8 +98,14 @@ const Sidebar = () => {
       ),
     },
     {
-      name: "Users",
-      href: "/admin/users",
+      name: "Customers",
+      href: "/admin/customers",
+      permission: [
+        "customers_view",
+        "customer_create",
+        "customer_update",
+        "customer_delete",
+      ],
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -72,7 +114,9 @@ const Sidebar = () => {
           viewBox="0 0 24 24"
           fill="none"
           className={`fill-current ${
-            isActive("/admin/users") ? "text-primary-200" : "text-blueGray-200"
+            isActive("/admin/customers")
+              ? "text-primary-200"
+              : "text-blueGray-200"
           }`}
         >
           <path
@@ -86,6 +130,7 @@ const Sidebar = () => {
     {
       name: "Roles",
       href: "/admin/roles",
+      permission: ["roles_view", "role_create", "role_update", "role_delete"],
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -110,6 +155,12 @@ const Sidebar = () => {
     {
       name: "Permission",
       href: "/admin/permission",
+      permission: [
+        "permissions_view",
+        "permission_create",
+        "permission_update",
+        "permission_delete",
+      ],
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -149,8 +200,45 @@ const Sidebar = () => {
       ),
     },
     {
+      name: "Category",
+      href: "/admin/category",
+      permission: [
+        "categories_view",
+        "category_create",
+        "category_update",
+        "category_delete",
+      ],
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          className={`fill-current ${
+            isActive("/admin/category")
+              ? "text-primary-200"
+              : "text-blueGray-200"
+          }`}
+        >
+          <path
+            opacity="0.32"
+            fillRule="evenodd"
+            d="M21.1808 16.9703C20.8971 17.6255 20.2225 18 19.5086 18H14.8154C14.8462 17.9145 14.8735 17.8269 14.8971 17.7373C15.1709 16.6974 14.8825 15.639 14.2214 14.8963C14.4654 12.9091 14.6177 10.8733 14.7108 9.26516C14.7569 8.46731 13.7795 8.20081 13.4274 8.91526C12.7178 10.3553 11.8493 12.1958 11.0842 14.041C10.1467 14.3479 9.3768 15.1177 9.10295 16.1576C8.93642 16.7899 8.97782 17.4291 9.18451 18H4.49141C3.77747 18 3.10288 17.6255 2.81918 16.9703C2.29212 15.7533 2 14.4108 2 13C2 7.47715 6.47715 3 12 3C17.5229 3 22 7.47715 22 13C22 14.4108 21.7079 15.7533 21.1808 16.9703Z"
+          />
+          <path d="M14.7108 9.26516C14.7569 8.46731 13.7795 8.20081 13.4274 8.91526C12.7178 10.3553 11.8493 12.1958 11.0842 14.041C10.1467 14.3479 9.3768 15.1177 9.10295 16.1576C8.6742 17.7856 9.62375 19.459 11.2238 19.8953C12.8238 20.3315 14.4684 19.3654 14.8971 17.7373C15.1709 16.6974 14.8825 15.639 14.2214 14.8963C14.4654 12.9091 14.6177 10.8733 14.7108 9.26516Z" />
+        </svg>
+      ),
+    },
+    {
       name: "Products",
       href: "/admin/products",
+      permission: [
+        "products_view",
+        "product_create",
+        "product_update",
+        "product_delete",
+      ],
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -175,6 +263,7 @@ const Sidebar = () => {
     {
       name: "Chat",
       href: "/admin/chat",
+      permission: "products_view",
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -201,6 +290,12 @@ const Sidebar = () => {
     {
       name: "Orders",
       href: "/admin/orders",
+      permission: [
+        "orders_view",
+        "orders_create",
+        "orders_update",
+        "orders_delete",
+      ],
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -226,6 +321,12 @@ const Sidebar = () => {
     {
       name: "Wishlist",
       href: "/admin/wishlist",
+      permission: [
+        "wishList_view",
+        "whishList_product_add",
+        "whishList_product_update",
+        "whishList_product_remove",
+      ],
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -254,6 +355,12 @@ const Sidebar = () => {
     {
       name: "Feedback",
       href: "/admin/feedback",
+      permission: [
+        "feedbacks_view",
+        "feedback_create",
+        "feedback_update",
+        "feedback_delete",
+      ],
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -277,6 +384,7 @@ const Sidebar = () => {
     {
       name: "Reports",
       href: "/admin/reports",
+      permission: "products_view",
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -303,56 +411,70 @@ const Sidebar = () => {
       ),
     },
   ];
+
   return (
     <aside className="w-1/5">
       <SimpleBar
-        style={{ height: "100vh" }}
-        className="h-screen sticky left-0 top-0 border-r border-dashed p-5 space-y-2 dark:bg-gray-50 dark:text-gray-800"
+        style={{ height: "100vh", position: "sticky" }}
+        className="top-0 left-0 h-screen border-r border-dashed p-5 space-y-2 dark:bg-gray-50 dark:text-gray-800"
       >
         <div className="flex justify-start mb-7">
-          <Image width={40} height={40} src="/logo.svg" alt="logo" />
+          <Link href="/" className="flex items-center gap-2">
+            <Image width={40} height={40} src="/logo.svg" alt="logo" />{" "}
+            <span>MyJewlex</span>
+          </Link>
         </div>
         <div className="flex items-center py-5 px-6 space-x-4 bg-blueGray-50 rounded-xl mb-5">
-          <Image
-            width={100}
-            height={100}
-            src="/images/avatar.jpg"
-            alt=""
-            className="w-10 h-10 rounded-full dark:bg-gray-500"
-          />
+          <Link href="/">
+            <Image
+              width={100}
+              height={100}
+              src="/images/avatar.jpg"
+              alt=""
+              className="w-10 h-10 rounded-full dark:bg-gray-500"
+            />
+          </Link>
           <div>
-            <h2 className="text-sm font-semibold">Jaydon Frankie</h2>
+            <h2 className="text-sm font-semibold">{session?.user?.username}</h2>
           </div>
         </div>
         <div className="divide-y dark:divide-gray-300">
           <ul className="pt-2 pb-4 space-y-1 text-sm">
-            {navItems.map((item) => (
-              <li
-                key={item.name}
-                className="dark:bg-gray-100 dark:text-gray-900"
-              >
-                <Link href={item.href}>
-                  <ListItem
-                    className={`flex align-middle select-none transition-all items-center py-2.5 px-3 space-x-3 rounded-md ${
-                      isActive(item.href)
-                        ? "bg-primary-50 hover:bg-primary-100 focus:bg-primary-50"
-                        : "hover:bg-blueGray-100"
-                    }`}
+            {navItems.map((item) => {
+              if (
+                checkPermission(session?.user?.permissions, item.permission)
+              ) {
+                return (
+                  <li
+                    key={item.name}
+                    className="dark:bg-gray-100 dark:text-gray-900"
                   >
-                    <ListItemPrefix>{item.icon}</ListItemPrefix>
-                    <span
-                      className={`font-semibold ${
-                        isActive(item.href)
-                          ? "text-primary-200"
-                          : "text-blueGray-200"
-                      } `}
-                    >
-                      {item.name}
-                    </span>
-                  </ListItem>
-                </Link>
-              </li>
-            ))}
+                    <Link href={item.href}>
+                      <ListItem
+                        className={`flex align-middle select-none transition-all items-center py-2.5 px-3 space-x-3 rounded-md ${
+                          isActive(item.href)
+                            ? "bg-primary-50 hover:bg-primary-100 focus:bg-primary-50"
+                            : "hover:bg-blueGray-100"
+                        }`}
+                      >
+                        <ListItemPrefix>{item.icon}</ListItemPrefix>
+                        <span
+                          className={`font-semibold ${
+                            isActive(item.href)
+                              ? "text-primary-200"
+                              : "text-blueGray-200"
+                          } `}
+                        >
+                          {item.name}
+                        </span>
+                      </ListItem>
+                    </Link>
+                  </li>
+                );
+              } else {
+                return "";
+              }
+            })}
           </ul>
         </div>
       </SimpleBar>

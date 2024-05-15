@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { join } from "path";
 import { writeFile } from "fs/promises";
+import { AcountType } from "@prisma/client";
 
 export async function PUT(request, { params }) {
   try {
@@ -42,12 +43,12 @@ export async function PUT(request, { params }) {
 
     //   updateData.email = res.get("email");
     // }
-    if (
-      typeof res.get("account_type") === "string" &&
-      res.get("account_type") !== ""
-    ) {
-      updateData.account_type = res.get("account_type");
-    }
+    // if (
+    //   typeof res.get("account_type") === "string" &&
+    //   res.get("account_type") !== ""
+    // ) {
+    //   updateData.account_type = res.get("account_type");
+    // }
 
     if (
       typeof file === "object" &&
@@ -72,13 +73,15 @@ export async function PUT(request, { params }) {
 
     if (typeof res.get("role") === "string" && res.get("role") !== "") {
       const role = res.get("role");
+      const account_type = role == 2 ? AcountType.ADMIN : role == 6 ? AcountType.VENDOR : AcountType.CUSTOMER;
       updateData.role = {
         connect: {
           role_id: Number(role),
         },
       };
+
+      updateData.account_type = account_type;
     }
-    // const password = res.get("password");
 
     const result = await prisma.user.update({
       where: {

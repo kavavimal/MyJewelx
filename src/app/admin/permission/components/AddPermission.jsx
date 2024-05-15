@@ -5,6 +5,7 @@ import { post, update } from "@/utils/api";
 import { Button, Input } from "@material-tailwind/react";
 import { Formik, useFormik } from "formik";
 import { useRouter } from "next/navigation";
+import { enqueueSnackbar } from "notistack";
 import { useEffect, useState } from "react";
 
 export default function AddPermission({ edit = false }) {
@@ -105,10 +106,45 @@ export default function AddPermission({ edit = false }) {
           values
         );
         router.refresh();
+        formik.resetForm();
+        enqueueSnackbar("Permission updated successfully", {
+          variant: "success",
+          preventDuplicate: true,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
+          autoHideDuration: 3000,
+          style: {
+            background: "white",
+            color: "black",
+            borderRadius: ".5rem",
+            boxShadow:
+              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+            padding: "0 4px",
+          },
+        });
       } else {
         const response = await post("/api/permission", values);
         router.refresh();
         formik.resetForm();
+        enqueueSnackbar("Permission created successfully", {
+          variant: "success",
+          preventDuplicate: true,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
+          autoHideDuration: 3000,
+          style: {
+            background: "white",
+            color: "black",
+            borderRadius: ".5rem",
+            boxShadow:
+              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+            padding: "0 4px",
+          },
+        });
       }
     },
   });

@@ -11,6 +11,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { del } from "@/utils/api";
+import { enqueueSnackbar } from "notistack";
 
 const DeleteUser = ({ id }) => {
   const [loading, setLoading] = useState(false);
@@ -27,6 +28,23 @@ const DeleteUser = ({ id }) => {
     }
     setOpen(false);
     setLoading(false);
+    enqueueSnackbar("User deleted successfully", {
+      variant: "success",
+      preventDuplicates: true,
+      anchorOrigin: {
+        vertical: "top",
+        horizontal: "right",
+      },
+      autoHideDuration: 3000,
+      style: {
+        background: "white",
+        color: "black",
+        borderRadius: ".5rem",
+        boxShadow:
+          "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+        padding: "0 4px",
+      },
+    });
   };
   return (
     <>

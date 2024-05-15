@@ -5,3 +5,7 @@
 .rdt_TableHeadRow {
   @apply text-base font-semibold;
 }
+
+#notistack-snackbar {
+  @apply py-[4px] pr-2 gap-2 text-black font-medium;
+}

@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { AcountType } from "@prisma/client";
 import LoadingDots from "@/components/loading-dots";
 import Image from "next/image";
-import { Button, Input, Option, Select } from "@material-tailwind/react";
+import { Alert, Button, Input, Option, Select } from "@material-tailwind/react";
 import { Formik, useFormik } from "formik";
 import { post, update } from "@/utils/api";
 import { userValidationSchema } from "@/schemas/ValidationSchema";
+import { enqueueSnackbar } from "notistack";
 export default function UserForm({ roles, user }) {
   const [loading, setLoading] = useState(false);
   // const userRoles = roles?.map((role) => {
@@ -30,22 +31,75 @@ export default function UserForm({ roles, user }) {
       password: user ? user?.password : "",
       confirm_password: user ? user?.password : "",
       role: user ? user?.role_id : "",
-      account_type: user ? user?.account_type : "",
+      // account_type: user ? user?.account_type : "",
       file: file,
     },
     validationSchema: userValidationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
       if (user) {
-        const response = await update(`/api/user/${user.id}`, values);
-        router.push("/admin/users");
-        router.refresh();
+        try {
+          const response = await update(`/api/user/${user.id}`, values);
+          router.push("/admin/users");
+          router.refresh();
+          enqueueSnackbar("User updated successfully", {
+            variant: "success",
+            preventDuplicate: true,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
+            autoHideDuration: 3000,
+            style: {
+              background: "white",
+              color: "black",
+              borderRadius: ".5rem",
+              boxShadow:
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              padding: "0 4px",
+            },
+          });
+        } catch (error) {}
       } else {
         try {
           const response = await post("/api/user/", values);
           router.push("/admin/users");
           router.refresh();
-        } catch (error) {}
+          enqueueSnackbar("User created successfully", {
+            variant: "success",
+            preventDuplicate: true,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
+            autoHideDuration: 3000,
+            style: {
+              background: "white",
+              color: "black",
+              borderRadius: ".5rem",
+              boxShadow:
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              padding: "0 4px",
+            },
+          });
+        } catch (e) {
+          enqueueSnackbar(e.response?.data?.error, {
+            variant: "error",
+            preventDuplicate: true,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
+            style: {
+              background: "white",
+              color: "black",
+              borderRadius: ".5rem",
+              boxShadow:
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              padding: "0 4px",
+            },
+          });
+        }
       }
     },
   });
@@ -113,7 +167,7 @@ export default function UserForm({ roles, user }) {
                 size="lg"
               />
             </div>
-            <div className="w-full">
+            <div className="w-full col-span-2">
               <Select
                 label="Role"
                 size="lg"
@@ -130,7 +184,7 @@ export default function UserForm({ roles, user }) {
                 ))}
               </Select>
             </div>
-            <div className="w-full">
+            {/* <div className="w-full">
               <Select
                 label="Account Type"
                 size="lg"
@@ -150,7 +204,7 @@ export default function UserForm({ roles, user }) {
                   </Option>
                 ))}
               </Select>
-            </div>
+            </div> */}
             <div className="w-full">
               <Input
                 type="password"

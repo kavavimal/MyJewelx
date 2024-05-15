@@ -6,6 +6,7 @@ import { Button, Input } from "@material-tailwind/react";
 import { post, update } from "@/utils/api";
 import ReactSelect from "react-select";
 import { useRouter } from "next/navigation";
+import { enqueueSnackbar } from "notistack";
 const RoleForm = ({ permissions, role }) => {
   const router = useRouter();
   const options = permissions.map((permission) => ({
@@ -33,6 +34,23 @@ const RoleForm = ({ permissions, role }) => {
           const response = await update(`/api/role/${role.role_id}`, data);
           router.push("/admin/roles");
           router.refresh();
+          enqueueSnackbar("Role updated successfully", {
+            variant: "success",
+            preventDuplicate: true,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
+            autoHideDuration: 3000,
+            style: {
+              background: "white",
+              color: "black",
+              borderRadius: ".5rem",
+              boxShadow:
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              padding: "0 4px",
+            },
+          });
         } catch (error) {
           console.log(error);
         }
@@ -46,6 +64,23 @@ const RoleForm = ({ permissions, role }) => {
           const response = await post("/api/role", data);
           router.push("/admin/roles");
           router.refresh();
+          enqueueSnackbar("Role created successfully", {
+            variant: "success",
+            preventDuplicate: true,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
+            autoHideDuration: 3000,
+            style: {
+              background: "white",
+              color: "black",
+              borderRadius: ".5rem",
+              boxShadow:
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              padding: "0 4px",
+            },
+          });
         } catch (error) {
           console.log(error);
         }

@@ -6,6 +6,7 @@ import FacebookProvider from "next-auth/providers/facebook";
 import prisma from "@/lib/prisma";
 import { compare } from "bcrypt";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { AcountType } from "@prisma/client";
 // import InstagramProvider from "next-auth/providers/instagram"
 // import FacebookProvider from "next-auth/providers/facebook"
 
@@ -17,7 +18,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 //     signIn: '/login',
 //   },session: { strategy: "jwt" },
 //   providers: [
-//     //google, facebook, insta 
+//     //google, facebook, insta
 //     // InstagramProvider({
 //     //   clientId: process.env.INSTAGRAM_CLIENT_ID,
 //     //   clientSecret: process.env.INSTAGRAM_CLIENT_SECRET
@@ -89,18 +90,17 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 const authOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
-    strategy :  'jwt',
+    strategy: "jwt",
   },
   pages: {
     signIn: "/login",
   },
   providers: [
-
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      profile(profile){
-        return ({
+      profile(profile) {
+        return {
           id: profile.sub,
           username: `${profile.given_name} ${profile.family_name}`,
           email: profile.email,
@@ -109,15 +109,15 @@ const authOptions = {
           role: {
             connectOrCreate: {
               where: {
-                role_name: "customer",
+                role_name: AcountType.CUSTOMER,
               },
               create: {
-                role_name: "customer",
-              }
+                role_name: AcountType.CUSTOMER,
+              },
             },
           },
-        })
-      }
+        };
+      },
     }),
     FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID,
@@ -131,14 +131,14 @@ const authOptions = {
           role: {
             connectOrCreate: {
               where: {
-                role_name: "customer",
+                role_name: AcountType.CUSTOMER,
               },
               create: {
-                role_name: "customer",
-              }
+                role_name: AcountType.CUSTOMER,
+              },
             },
           },
-        }
+        };
       },
     }),
     // InstagramProvider({
@@ -153,10 +153,10 @@ const authOptions = {
     //       role: {
     //         connectOrCreate: {
     //           where: {
-    //             role_name: "customer",
+    //             role_name: AcountType.CUSTOMER
     //           },
     //           create: {
-    //             role_name: "customer",
+    //             role_name: AcountType.CUSTOMER
     //           }
     //         },
     //       },
@@ -170,74 +170,81 @@ const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("credentials", credentials);
-        if(!credentials.email){
+        if (!credentials.email) {
           return null;
         }
 
         const existingUser = await prisma.user.findUnique({
-          where: { email: credentials.email,}
+          where: { email: credentials.email },
+          include: {
+            role: {
+              include: {
+                permissions: {
+                  include: {
+                    permission: true,
+                  },
+                },
+              },
+            }, // Include the role relation
+          },
         });
-        if(!existingUser){
+        if (!existingUser) {
           return null;
         }
-        const passwordMatch = await compare(credentials.password, existingUser.password);
-        if (!passwordMatch){
+        const passwordMatch = await compare(
+          credentials.password,
+          existingUser.password
+        );
+        if (!passwordMatch) {
           return null;
         }
 
+        let permissions = [];
+        if (existingUser.role.permissions) {
+          permissions = existingUser.role.permissions.map((per) => {
+            return per.permission.permission_name;
+          });
+        }
         return {
-          id : existingUser.id,
+          id: existingUser.id,
           username: existingUser.username,
           email: existingUser.email,
-        }
-      }
-    })
+          account_type: existingUser.account_type,
+          role: existingUser.role.role_name,
+          roles: existingUser.role,
+          permissions: permissions,
+        };
+      },
+    }),
   ],
   callbacks: {
-    // async jwt({ token, user }) {
-    //   /* Step 1: update the token based on the user object */
-    //   console.log("user at jwt", user);
-    //   if (user) {
-    //     token.role = user.role;
-    //   }
-    //   return token;
-    // },
     async jwt({ token, user }) {
-      console.log('token', token, 'user', user);
-      if(user){
+      if (user) {
+        token.role = user.role;
         return {
           ...user,
-          username : user.username,
-          image : user.image
-        }
+          username: user.username,
+          image: user.image,
+        };
       }
-      return token
+      return token;
     },
-    
+
     async session({ session, token }) {
-      console.log('session', session, 'token', token);
       return {
         ...session,
-        user : {
+        user: {
           ...session.user,
+          ...token,
           username: token.username,
-          image: token.image
-        }
-      }
+          image: token.image,
+          account_type: token.account_type,
+          role: token.role,
+        },
+      };
     },
-    
-    // async session({ session, token }) {
-    //   /* Step 2: update the session.user based on the token object */
-    //   console.log("user at session", session, token);
-    //   if (token && token.role) {
-    //     // session.user.role = token.role;
-    //     session.user = { ...session.user, role: token.role }
-    //   }
-    //   return session;
-    // },
   },
-}
+};
 
 const handler = NextAuth(authOptions);
 

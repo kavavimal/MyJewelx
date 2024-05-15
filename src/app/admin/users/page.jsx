@@ -7,6 +7,9 @@ async function getUsers() {
     include: {
       role: true,
     },
+    where: {
+      role_id: 3,
+    },
   });
   return fetchUsers;
 }
