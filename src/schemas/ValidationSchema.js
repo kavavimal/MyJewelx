@@ -14,7 +14,8 @@ export const roleValidationSchema = Yup.object({
 });
 
 export const userValidationSchema = Yup.object({
-  username: Yup.string().required("Username is required"),
+  firstName: Yup.string().required("FirstName is required"),
+  lastName: Yup.string().required("LastName is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
   role: Yup.string().required("Role is required"),
   // account_type: Yup.string().required("Account type is required"),

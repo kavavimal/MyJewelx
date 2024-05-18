@@ -6,8 +6,11 @@ import LoadingDots from "@/components/loading-dots";
 // import toast from "react-hot-toast";
 import Link from "next/link";
 import { redirect, useRouter } from "next/navigation";
-import Image from "next/image";
 import { USER_ROLES } from "@/lib/constants";
+import { Button } from "@material-tailwind/react";
+import { enqueueSnackbar } from "notistack";
+import Image from "next/image";
+import { AcountType } from "@prisma/client";
 
 export default function Form({ type }) {
   const [loading, setLoading] = useState(false);
@@ -15,19 +18,136 @@ export default function Form({ type }) {
   const { data: session } = useSession();
   const role = session?.user?.role;
   const [loginError, setLoginError] = useState("");
+  const [formData, setFormData] = useState({});
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [otpSendTimeout, setOtpSendTimeout] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [otpError, setOtpError] = useState();
 
   if (session) {
-    if (role === USER_ROLES.ADMIN) {
+    if (role === AcountType.ADMIN) {
       redirect("/admin/dashboard");
     } else {
       redirect("/");
     }
   }
 
+  const startOtpTimeout = () => {
+    // Set otpSendTimeout to true
+    setOtpSendTimeout(false);
+    setTimeout(() => {
+      setOtpSendTimeout(true);
+    }, 10 * 1000); // 10 seconds in milliseconds
+  };
+
   const socialLogin = (socialMediaType) => {
     signIn(socialMediaType, {
       redirect: false,
     });
+  };
+
+  const requestOtp = (e) => {
+    e.preventDefault();
+    setOtpError("");
+    setLoading(true);
+    if (!formData.email || formData.email === "") {
+      setOtpError("email is required");
+      console.log("error email is required");
+    } else {
+      startOtpTimeout();
+      fetch("/api/auth/otp/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          phone_number: formData.phone_number,
+          mode: "registration",
+        }),
+      }).then(async (res) => {
+        setLoading(false);
+        if (res.status === 201) {
+          // toast.success("Account created! Redirecting to login...");
+          setIsOtpSent(true);
+        } else {
+          const { error } = await res.json();
+          setOtpError(error);
+          console.error("send Otp Failed", error);
+          // toast.error(error);
+        }
+      });
+    }
+  };
+
+  const requestResendOtp = (e) => {
+    e.preventDefault();
+    setOtpError("");
+    setLoading(true);
+    if (!formData.email || formData.email === "") {
+      setOtpError("email is required");
+      console.log("error email is required");
+    } else {
+      startOtpTimeout();
+      fetch("/api/auth/otp/resend", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          phone_number: formData.phone_number,
+          mode: "registration",
+        }),
+      }).then(async (res) => {
+        setLoading(false);
+        if (res.status === 201) {
+          // toast.success("Account created! Redirecting to login...");
+          setIsOtpSent(true);
+        } else {
+          const { error } = await res.json();
+          setOtpError("send Otp Failed");
+          console.error("send Otp Failed", error);
+          // toast.error(error);
+        }
+      });
+    }
+  };
+
+  const VerifyOtp = (e) => {
+    e.preventDefault();
+    setOtpError("");
+    setLoading(true);
+    if (!formData.email || formData.email === "") {
+      console.log("email is required");
+    } else if (!formData.otp || formData.otp === "") {
+      setOtpError("otp is required");
+      console.log("error otp is required");
+    } else {
+      fetch("/api/auth/otp/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          otp: formData.otp,
+        }),
+      }).then(async (res) => {
+        setLoading(false);
+        if (res.status === 201) {
+          // toast.success("Account created! Redirecting to login...");
+          setEmailVerified(true);
+          setIsOtpSent(false);
+          setFormData({});
+        } else {
+          const { error } = await res.json();
+          setOtpError("Verify Otp Failed");
+          console.error("Verify Otp Failed", error);
+          // toast.error(error);
+        }
+      });
+    }
   };
 
   return (
@@ -125,13 +245,13 @@ export default function Form({ type }) {
             })
               .then((res) => {
                 if (res?.error) {
-                  if (res?.status == 401){
+                  if (res?.status == 401) {
                     setLoginError("Your Provided credentials are Incorrect");
-                    }                      
+                  }
                   setLoading(false);
                   // toast.error(res?.error);
                 } else {
-                  // router.refresh();
+                  // router.push("/checkuser");
                   window.location.replace("/checkuser");
                 }
               })
@@ -145,19 +265,37 @@ export default function Form({ type }) {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                username: e.currentTarget.username.value,
-                phone_number: e.currentTarget.phone_number.value,
+                firstName: e.currentTarget.firstName.value,
+                lastName: e.currentTarget.lastName.value,
+                // phone_number: e.currentTarget.phone_number.value,
                 email: e.currentTarget.email.value,
                 password: e.currentTarget.password.value,
-                confirmpassword: e.currentTarget.confirmpassword.value,
+                confirmPassword: e.currentTarget.confirmPassword.value,
               }),
             }).then(async (res) => {
               setLoading(false);
               if (res.status === 201) {
-                // toast.success("Account created! Redirecting to login...");
-                setTimeout(() => {
-                  router.push("/login");
-                }, 2000);
+                enqueueSnackbar("Registration Successfull", {
+                  variant: "success",
+                  preventDuplicate: true,
+                  anchorOrigin: {
+                    vertical: "top",
+                    horizontal: "right",
+                  },
+                  autoHideDuration: 3000,
+                  style: {
+                    background: "white",
+                    color: "black",
+                    borderRadius: ".5rem",
+                    boxShadow:
+                      "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                    padding: "0 4px",
+                  },
+                });
+                // setTimeout(() => {
+                //   router.push("/login");
+                // }, 2000);
+                router.push("/login");
               } else {
                 const { error } = await res.json();
                 console.error("Registration Failed");
@@ -168,46 +306,66 @@ export default function Form({ type }) {
         }}
       >
         <div className="flex flex-col gap-5">
-        {loginError.length > 0 && <span className="text-sm text-red-400">{loginError}</span>}
+          {loginError.length > 0 && (
+            <span className="text-sm text-red-400">{loginError}</span>
+          )}
+          {type === "register" ? (
+            <>
+              <div className="relative w-full min-w-[200px] h-11">
+                <input
+                  name="firstName"
+                  type="text"
+                  className="w-full h-full px-3 py-4 font-sans text-sm font-normal transition-all bg-transparent border rounded-md peer text-blue-gray-700 outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 border-t-transparent focus:border-t-transparent border-blue-gray-200 focus:border-gray-900"
+                  placeholder=" "
+                />
+                <label className="flex text-base w-full h-full select-none pointer-events-none absolute left-0 font-normal !overflow-visible truncate peer-placeholder-shown:text-blue-gray-500 leading-tight peer-focus:leading-tight peer-disabled:text-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500 transition-all -top-1.5 peer-placeholder-shown:text-sm text-[11px] peer-focus:text-[11px] before:content[' '] before:block before:box-border before:w-2.5 before:h-1.5 before:mt-[6.5px] before:mr-1 peer-placeholder-shown:before:border-transparent before:rounded-tl-md before:border-t peer-focus:before:border-t-2 before:border-l peer-focus:before:border-l-2 before:pointer-events-none before:transition-all peer-disabled:before:border-transparent after:content[' '] after:block after:flex-grow after:box-border after:w-2.5 after:h-1.5 after:mt-[6.5px] after:ml-1 peer-placeholder-shown:after:border-transparent after:rounded-tr-md after:border-t peer-focus:after:border-t-2 after:border-r peer-focus:after:border-r-2 after:pointer-events-none after:transition-all peer-disabled:after:border-transparent peer-placeholder-shown:leading-[4.1] text-gray-500 peer-focus:text-gray-900 before:border-blue-gray-200 peer-focus:before:!border-gray-900 after:border-blue-gray-200 peer-focus:after:!border-gray-900">
+                  First Name
+                </label>
+              </div>
+              <div className="relative w-full min-w-[200px] h-11">
+                <input
+                  name="lastName"
+                  type="text"
+                  className="w-full h-full px-3 py-4 font-sans text-sm font-normal transition-all bg-transparent border rounded-md peer text-blue-gray-700 outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 border-t-transparent focus:border-t-transparent border-blue-gray-200 focus:border-gray-900"
+                  placeholder=" "
+                />
+                <label className="flex text-base w-full h-full select-none pointer-events-none absolute left-0 font-normal !overflow-visible truncate peer-placeholder-shown:text-blue-gray-500 leading-tight peer-focus:leading-tight peer-disabled:text-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500 transition-all -top-1.5 peer-placeholder-shown:text-sm text-[11px] peer-focus:text-[11px] before:content[' '] before:block before:box-border before:w-2.5 before:h-1.5 before:mt-[6.5px] before:mr-1 peer-placeholder-shown:before:border-transparent before:rounded-tl-md before:border-t peer-focus:before:border-t-2 before:border-l peer-focus:before:border-l-2 before:pointer-events-none before:transition-all peer-disabled:before:border-transparent after:content[' '] after:block after:flex-grow after:box-border after:w-2.5 after:h-1.5 after:mt-[6.5px] after:ml-1 peer-placeholder-shown:after:border-transparent after:rounded-tr-md after:border-t peer-focus:after:border-t-2 after:border-r peer-focus:after:border-r-2 after:pointer-events-none after:transition-all peer-disabled:after:border-transparent peer-placeholder-shown:leading-[4.1] text-gray-500 peer-focus:text-gray-900 before:border-blue-gray-200 peer-focus:before:!border-gray-900 after:border-blue-gray-200 peer-focus:after:!border-gray-900">
+                  Last Name
+                </label>
+              </div>
+              {/* <div className="relative w-full min-w-[200px] h-11">
+                <input
+                  name="phone_number"
+                  type="text"
+                  className="w-full h-full px-3 py-4 font-sans text-sm font-normal transition-all bg-transparent border rounded-md peer text-blue-gray-700 outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 border-t-transparent focus:border-t-transparent border-blue-gray-200 focus:border-gray-900"
+                  placeholder=" "
+                  onChange={(e) => {
+                    setFormData({ ...formData, phone_number: e.target.value });
+                  }}
+                />
+                <label className="flex text-base w-full h-full select-none pointer-events-none absolute left-0 font-normal !overflow-visible truncate peer-placeholder-shown:text-blue-gray-500 leading-tight peer-focus:leading-tight peer-disabled:text-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500 transition-all -top-1.5 peer-placeholder-shown:text-sm text-[11px] peer-focus:text-[11px] before:content[' '] before:block before:box-border before:w-2.5 before:h-1.5 before:mt-[6.5px] before:mr-1 peer-placeholder-shown:before:border-transparent before:rounded-tl-md before:border-t peer-focus:before:border-t-2 before:border-l peer-focus:before:border-l-2 before:pointer-events-none before:transition-all peer-disabled:before:border-transparent after:content[' '] after:block after:flex-grow after:box-border after:w-2.5 after:h-1.5 after:mt-[6.5px] after:ml-1 peer-placeholder-shown:after:border-transparent after:rounded-tr-md after:border-t peer-focus:after:border-t-2 after:border-r peer-focus:after:border-r-2 after:pointer-events-none after:transition-all peer-disabled:after:border-transparent peer-placeholder-shown:leading-[4.1] text-gray-500 peer-focus:text-gray-900 before:border-blue-gray-200 peer-focus:before:!border-gray-900 after:border-blue-gray-200 peer-focus:after:!border-gray-900">
+                  Phone Number
+                </label>
+              </div> */}
+            </>
+          ) : (
+            ""
+          )}
           <div className="relative w-full min-w-[200px] h-11">
             <input
               name="email"
               type="email"
               className="w-full h-full px-3 py-4 font-sans text-sm font-normal transition-all bg-transparent border rounded-md peer text-blue-gray-700 outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 border-t-transparent focus:border-t-transparent border-blue-gray-200 focus:border-gray-900"
               placeholder=" "
+              onChange={(e) => {
+                setFormData({ ...formData, email: e.target.value });
+              }}
+              disabled={isOtpSent}
             />
             <label className="flex text-base w-full h-full select-none pointer-events-none absolute left-0 font-normal !overflow-visible truncate peer-placeholder-shown:text-blue-gray-500 leading-tight peer-focus:leading-tight peer-disabled:text-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500 transition-all -top-1.5 peer-placeholder-shown:text-sm text-[11px] peer-focus:text-[11px] before:content[' '] before:block before:box-border before:w-2.5 before:h-1.5 before:mt-[6.5px] before:mr-1 peer-placeholder-shown:before:border-transparent before:rounded-tl-md before:border-t peer-focus:before:border-t-2 before:border-l peer-focus:before:border-l-2 before:pointer-events-none before:transition-all peer-disabled:before:border-transparent after:content[' '] after:block after:flex-grow after:box-border after:w-2.5 after:h-1.5 after:mt-[6.5px] after:ml-1 peer-placeholder-shown:after:border-transparent after:rounded-tr-md after:border-t peer-focus:after:border-t-2 after:border-r peer-focus:after:border-r-2 after:pointer-events-none after:transition-all peer-disabled:after:border-transparent peer-placeholder-shown:leading-[4.1] text-gray-500 peer-focus:text-gray-900 before:border-blue-gray-200 peer-focus:before:!border-gray-900 after:border-blue-gray-200 peer-focus:after:!border-gray-900">
               Email
             </label>
           </div>
-          {type === "register" ? (
-            <>
-              <div className="relative w-full min-w-[200px] h-11">
-                <input
-                  name="username"
-                  type="text"
-                  className="w-full h-full px-3 py-4 font-sans text-sm font-normal transition-all bg-transparent border rounded-md peer text-blue-gray-700 outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 border-t-transparent focus:border-t-transparent border-blue-gray-200 focus:border-gray-900"
-                  placeholder=" "
-                />
-                <label className="flex text-base w-full h-full select-none pointer-events-none absolute left-0 font-normal !overflow-visible truncate peer-placeholder-shown:text-blue-gray-500 leading-tight peer-focus:leading-tight peer-disabled:text-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500 transition-all -top-1.5 peer-placeholder-shown:text-sm text-[11px] peer-focus:text-[11px] before:content[' '] before:block before:box-border before:w-2.5 before:h-1.5 before:mt-[6.5px] before:mr-1 peer-placeholder-shown:before:border-transparent before:rounded-tl-md before:border-t peer-focus:before:border-t-2 before:border-l peer-focus:before:border-l-2 before:pointer-events-none before:transition-all peer-disabled:before:border-transparent after:content[' '] after:block after:flex-grow after:box-border after:w-2.5 after:h-1.5 after:mt-[6.5px] after:ml-1 peer-placeholder-shown:after:border-transparent after:rounded-tr-md after:border-t peer-focus:after:border-t-2 after:border-r peer-focus:after:border-r-2 after:pointer-events-none after:transition-all peer-disabled:after:border-transparent peer-placeholder-shown:leading-[4.1] text-gray-500 peer-focus:text-gray-900 before:border-blue-gray-200 peer-focus:before:!border-gray-900 after:border-blue-gray-200 peer-focus:after:!border-gray-900">
-                  Username
-                </label>
-              </div>
-              <div className="relative w-full min-w-[200px] h-11">
-                <input
-                  name="phone_number"
-                  type="text"
-                  className="w-full h-full px-3 py-4 font-sans text-sm font-normal transition-all bg-transparent border rounded-md peer text-blue-gray-700 outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 border-t-transparent focus:border-t-transparent border-blue-gray-200 focus:border-gray-900"
-                  placeholder=" "
-                />
-                <label className="flex text-base w-full h-full select-none pointer-events-none absolute left-0 font-normal !overflow-visible truncate peer-placeholder-shown:text-blue-gray-500 leading-tight peer-focus:leading-tight peer-disabled:text-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500 transition-all -top-1.5 peer-placeholder-shown:text-sm text-[11px] peer-focus:text-[11px] before:content[' '] before:block before:box-border before:w-2.5 before:h-1.5 before:mt-[6.5px] before:mr-1 peer-placeholder-shown:before:border-transparent before:rounded-tl-md before:border-t peer-focus:before:border-t-2 before:border-l peer-focus:before:border-l-2 before:pointer-events-none before:transition-all peer-disabled:before:border-transparent after:content[' '] after:block after:flex-grow after:box-border after:w-2.5 after:h-1.5 after:mt-[6.5px] after:ml-1 peer-placeholder-shown:after:border-transparent after:rounded-tr-md after:border-t peer-focus:after:border-t-2 after:border-r peer-focus:after:border-r-2 after:pointer-events-none after:transition-all peer-disabled:after:border-transparent peer-placeholder-shown:leading-[4.1] text-gray-500 peer-focus:text-gray-900 before:border-blue-gray-200 peer-focus:before:!border-gray-900 after:border-blue-gray-200 peer-focus:after:!border-gray-900">
-                  Phone Number
-                </label>
-              </div>
-            </>
-          ) : (
-            ""
-          )}
           <div className="relative w-full min-w-[200px] h-11">
             <input
               name="password"
@@ -223,7 +381,7 @@ export default function Form({ type }) {
             <>
               <div className="relative w-full min-w-[200px] h-11">
                 <input
-                  name="confirmpassword"
+                  name="confirmPassword"
                   type="password"
                   className="w-full h-full px-3 py-4 font-sans text-sm font-normal transition-all bg-transparent border rounded-md peer text-blue-gray-700 outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 border-t-transparent focus:border-t-transparent border-blue-gray-200 focus:border-gray-900"
                   placeholder=" "
@@ -248,15 +406,121 @@ export default function Form({ type }) {
           ) : (
             ""
           )}
-          <div>
-            <button
+
+          {isOtpSent ? (
+            <div className="relative w-full min-w-[200px] h-11">
+              <input
+                name="otp"
+                type="password"
+                className="w-full h-full px-3 py-4 font-sans text-sm font-normal transition-all bg-transparent border rounded-md peer text-blue-gray-700 outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 border-t-transparent focus:border-t-transparent border-blue-gray-200 focus:border-gray-900"
+                placeholder=" "
+                onChange={(e) => {
+                  setFormData({ ...formData, otp: e.target.value });
+                }}
+              />
+              <label className="flex text-base w-full h-full select-none pointer-events-none absolute left-0 font-normal !overflow-visible truncate peer-placeholder-shown:text-blue-gray-500 leading-tight peer-focus:leading-tight peer-disabled:text-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500 transition-all -top-1.5 peer-placeholder-shown:text-sm text-[11px] peer-focus:text-[11px] before:content[' '] before:block before:box-border before:w-2.5 before:h-1.5 before:mt-[6.5px] before:mr-1 peer-placeholder-shown:before:border-transparent before:rounded-tl-md before:border-t peer-focus:before:border-t-2 before:border-l peer-focus:before:border-l-2 before:pointer-events-none before:transition-all peer-disabled:before:border-transparent after:content[' '] after:block after:flex-grow after:box-border after:w-2.5 after:h-1.5 after:mt-[6.5px] after:ml-1 peer-placeholder-shown:after:border-transparent after:rounded-tr-md after:border-t peer-focus:after:border-t-2 after:border-r peer-focus:after:border-r-2 after:pointer-events-none after:transition-all peer-disabled:after:border-transparent peer-placeholder-shown:leading-[4.1] text-gray-500 peer-focus:text-gray-900 before:border-blue-gray-200 peer-focus:before:!border-gray-900 after:border-blue-gray-200 peer-focus:after:!border-gray-900">
+                Otp
+              </label>
+            </div>
+          ) : (
+            ""
+          )}
+          {otpError && (
+            <span className="text-sm text-red-400 leading-3">{otpError}</span>
+          )}
+          {type === "register" && !emailVerified && (
+            <div className="flex gap-2">
+              {isOtpSent ? (
+                // <button
+                //   data-ripple-light="true"
+                //   className="align-middle w-full select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+                //   type="button"
+                //   onClick={VerifyOtp}
+                // >
+                //   Verify Otp
+                // </button>
+                <Button
+                  onClick={VerifyOtp}
+                  loading={loading}
+                  className="w-full flex justify-center items-center"
+                >
+                  Verify Otp
+                </Button>
+              ) : (
+                // <button
+                //   data-ripple-light="true"
+                //   className="align-middle w-full select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+                //   type="button"
+                //   onClick={requestOtp}
+                //   disabled={emailVerified}
+                // >
+                //   Send Otp
+                // </button>
+                <Button
+                  onClick={requestOtp}
+                  loading={loading}
+                  className="w-full flex items-center justify-center"
+                >
+                  Send Otp
+                </Button>
+              )}
+              {isOtpSent && otpSendTimeout && (
+                // <button
+                //   data-ripple-light="true"
+                //   className="align-middle w-full select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+                //   type="button"
+                //   onClick={requestResendOtp}
+                // >
+                //   Resend OTP
+                // </button>
+                <Button
+                  onClick={requestResendOtp}
+                  loading={loading}
+                  className="w-full flex items-center justify-center"
+                >
+                  Resend OTP
+                </Button>
+              )}
+            </div>
+          )}
+
+          {type === "register" && emailVerified && (
+            <div>
+              {/* <button
+                data-ripple-light="true"
+                className="align-middle w-full select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+                type="submit"
+              >
+                Register
+              </button> */}
+              <Button
+                type="submit"
+                className="w-full flex justify-center items-center"
+                loading={loading}
+              >
+                Register
+              </Button>
+            </div>
+          )}
+
+          {type === "login" && (
+            <div>
+              {/* <button
               data-ripple-light="true"
               className="align-middle w-full select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
               type="submit"
             >
-              {type === "register" ? "Register" : "Login"}
-            </button>
-          </div>
+              Login
+            </button> */}
+              <Button
+                type="submit"
+                className="w-full flex justify-center items-center"
+                loading={loading}
+              >
+                Login
+              </Button>
+            </div>
+          )}
         </div>
       </form>
     </>

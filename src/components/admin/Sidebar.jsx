@@ -435,7 +435,7 @@ const Sidebar = () => {
             />
           </Link>
           <div>
-            <h2 className="text-sm font-semibold">{session?.user?.username}</h2>
+            <h2 className="text-sm font-semibold">{session?.user?.firstName + session?.user?.lastName}</h2>
           </div>
         </div>
         <div className="divide-y dark:divide-gray-300">

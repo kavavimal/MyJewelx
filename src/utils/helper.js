@@ -9,13 +9,9 @@ export function checkPermission(userPermissions = [], allowPermission = "") {
 
 // Function to generate OTP
 export function generateOTP() {
-  // Declare a digits variable
-  // which stores all digits
-  let digits = "0123456789abcdefghijklmnopqrstuvwxyz";
   let OTP = "";
-  let len = digits.length;
   for (let i = 0; i < 6; i++) {
-    OTP += digits[Math.floor(Math.random() * len)];
+    OTP += Math.floor(Math.random() * 10);
   }
   return OTP;
 }

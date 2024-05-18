@@ -1,5 +1,6 @@
 import React from "react";
 import Users from "./components/Users";
+import prisma from "@/lib/prisma";
 
 export const revalidate = 2;
 async function getUsers() {

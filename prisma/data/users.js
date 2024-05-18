@@ -4,7 +4,8 @@ const permissions = require("./permissions");
 module.exports = [
   {
     email: "admin@jewlex.com",
-    username: "admin",
+    firstName: "admin",
+    lastName: "user",
     account_type: AcountType.ADMIN,
     role: {
       connect: { role_name: AcountType.ADMIN },
@@ -12,7 +13,8 @@ module.exports = [
   },
   {
     email: "vendor@jewlex.com",
-    username: "vendor",
+    firstName: "vendor",
+    lastName: "user",
     account_type: AcountType.VENDOR,
     role: {
       connect: { role_name: AcountType.VENDOR },
@@ -20,11 +22,9 @@ module.exports = [
   },
   {
     email: "customer@jewlex.com",
-    username: "customer",
+    firstName: "customer",
+    lastName: "user",
     account_type: AcountType.CUSTOMER,
-    // first_name: "admin",
-    // last_name: "",
-    // phone_number: "",
     role: {
       connect: { role_name: AcountType.CUSTOMER },
     },

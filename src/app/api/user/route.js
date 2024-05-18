@@ -11,7 +11,8 @@ export async function POST(request) {
 
     // const first_name = res.get("first_name");
     // const last_name = res.get("last_name");
-    const username = res.get("username");
+    const firstName = res.get("firstName");
+    const lastName = res.get("lastName");
     const email = res.get("email");
 
     const existingEmail = await prisma.user.findUnique({
@@ -73,7 +74,8 @@ export async function POST(request) {
       data: {
         // first_name: first_name ? String(first_name) : "",
         // last_name: last_name ? String(last_name) : "",
-        username: username ? String(username) : "",
+        firstName: firstName ? String(firstName) : "",
+        lastName: lastName ? String(lastName) : "",
         email: email ? String(email) : "",
         // phone_number: phone_number ? String(phone_number) : "",
         password: password ? await hash(password, 10) : "",

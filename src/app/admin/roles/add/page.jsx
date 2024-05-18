@@ -1,5 +1,6 @@
 import React from "react";
 import RoleForm from "../components/RoleForm";
+import prisma from "@/lib/prisma";
 
 export const revalidate = 2;
 async function getPermissions() {

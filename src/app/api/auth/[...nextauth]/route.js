@@ -102,9 +102,9 @@ const authOptions = {
       profile(profile) {
         return {
           id: profile.sub,
-          username: `${profile.given_name} ${profile.family_name}`,
+          firstName: profile.given_name,
+          lastName: profile.family_name,
           email: profile.email,
-          emailVerified: profile.email_verified,
           image: profile.picture,
           role: {
             connectOrCreate: {
@@ -125,7 +125,8 @@ const authOptions = {
       profile(profile) {
         return {
           id: profile.id,
-          username: profile.name,
+          firstName: profile.name,
+          lastName: profile.name,
           email: profile.email,
           image: profile.picture.data.url,
           role: {
@@ -207,7 +208,8 @@ const authOptions = {
         }
         return {
           id: existingUser.id,
-          username: existingUser.username,
+          firstName: existingUser.firstName,
+          lastName: existingUser.lastName,
           email: existingUser.email,
           account_type: existingUser.account_type,
           role: existingUser.role.role_name,
@@ -223,7 +225,8 @@ const authOptions = {
         token.role = user.role;
         return {
           ...user,
-          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
           image: user.image,
         };
       }
@@ -236,7 +239,8 @@ const authOptions = {
         user: {
           ...session.user,
           ...token,
-          username: token.username,
+          firstName: token.firstName,
+          lastName: token.lastName,
           image: token.image,
           account_type: token.account_type,
           role: token.role,

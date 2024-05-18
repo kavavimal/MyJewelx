@@ -18,20 +18,12 @@ export async function PUT(request, { params }) {
     const file = res.get("file");
 
     let updateData = {};
-    // if (
-    //   typeof res.get("first_name") === "string" &&
-    //   res.get("first_name") !== ""
-    // ) {
-    //   updateData.first_name = res.get("first_name");
-    // }
-    // if (
-    //   typeof res.get("last_name") === "string" &&
-    //   res.get("last_name") !== ""
-    // ) {
-    //   updateData.last_name = res.get("last_name");
-    // }
-    if (typeof res.get("username") === "string" && res.get("username") !== "") {
-      updateData.username = res.get("username");
+
+    if (typeof res.get("firstName") === "string" && res.get("firstName") !== "") {
+      updateData.firstName = res.get("firstName");
+    }
+    if (typeof res.get("lastName") === "string" && res.get("lastName") !== "") {
+      updateData.lastName = res.get("lastName");
     }
     // if (
     //   typeof res.get("phone_number") === "string" &&

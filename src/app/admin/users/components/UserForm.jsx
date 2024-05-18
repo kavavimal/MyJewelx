@@ -26,7 +26,8 @@ export default function UserForm({ roles, user }) {
 
   const formik = useFormik({
     initialValues: {
-      username: user ? user?.username : "",
+      firstName: user ? user?.firstName : "",
+      lastName: user ? user?.lastName : "",
       email: user ? user?.email : "",
       password: user ? user?.password : "",
       confirm_password: user ? user?.password : "",
@@ -142,14 +143,27 @@ export default function UserForm({ roles, user }) {
           <div className="grid grid-cols-2 gap-5 items-center">
             <div className="w-full">
               <Input
-                label="Username"
+                label="FirstName"
                 type="text"
-                id="username"
-                name="username"
-                value={formik.values?.username ?? ""}
+                id="firstName"
+                name="firstName"
+                value={formik.values?.firstName ?? ""}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                error={formik.touched.username && formik.errors.username}
+                error={formik.touched.firstName && formik.errors.firstName}
+                size="lg"
+              />
+            </div>
+            <div className="w-full">
+              <Input
+                label="LastName"
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={formik.values?.lastName ?? ""}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.lastName && formik.errors.lastName}
                 size="lg"
               />
             </div>

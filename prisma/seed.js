@@ -60,7 +60,7 @@ async function seedRolesAndPermissions() {
 // Seed users with roles
 async function seedUsers() {
   for (const user of users) {
-    user.password = await hash(user.username + "@123", 10);
+    user.password = await hash(user.firstName + "@123", 10);
     const createUser = await prisma.user.upsert({
       create: user,
       update: user,

@@ -27,21 +27,21 @@ model Account {
 }
 
 model User {
-  id            String     @id @default(cuid())
-  email         String     @unique
-  username      String?
-  password      String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  emailVerified DateTime?  @map("email_verified")
-  image         String?
-  account_type  AcountType @default(CUSTOMER)
-  role_id       Int
-  phone_number  String?
-  otp           String?
-  products      Product[]
-  role          Role       @relation(fields: [role_id], references: [role_id])
-  accounts      Account[]
+  id           String     @id @default(cuid())
+  email        String     @unique
+  password     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  image        String?
+  account_type AcountType @default(CUSTOMER)
+  role_id      Int
+  phone_number String?
+  otp          String?
+  firstName    String
+  lastName     String
+  products     Product[]
+  role         Role       @relation(fields: [role_id], references: [role_id])
+  accounts     Account[]
 }
 
 model Role {
@@ -87,13 +87,13 @@ model Product {
 }
 
 model Category {
-  category_id Int               @id @default(autoincrement())
-  name        String            @unique
-  description String?
+  category_id    Int               @id @default(autoincrement())
+  name           String            @unique
+  description    String?
+  created_at     DateTime          @default(now())
+  updated_at     DateTime          @updatedAt
   category_image String?
-  created_at  DateTime          @default(now())
-  updated_at  DateTime          @updatedAt
-  products    ProductCategory[]
+  products       ProductCategory[]
 }
 
 model ProductCategory {
@@ -121,6 +121,19 @@ model ProductCountry {
   product    Product @relation(fields: [product_id], references: [product_id])
 
   @@id([country_id, product_id])
+}
+
+model OtpVerification {
+  id           Int      @id @default(autoincrement())
+  email        String?  @unique
+  phone_number String?  @unique
+  otp          String
+  mode         String
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  expiry       BigInt
+
+  @@unique([email, phone_number])
 }
 
 enum AcountType {

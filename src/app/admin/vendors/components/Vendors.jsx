@@ -8,7 +8,7 @@ const Vendors = ({ vendors }) => {
   const columns = [
     {
       name: "Name",
-      selector: (row) => row.username,
+      selector: (row) => row.firstName + " " + row.lastName,
     },
     {
       name: "Email",

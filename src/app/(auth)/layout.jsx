@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import FrontendHeader from "@/components/frontend/common/Header";
 import LoadingDots from "@/components/loading-dots";
 import "@/styles/globals.css";
+import SnackbarWrapper from "@/components/SnackbarWrapper";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -22,7 +23,7 @@ export default async function AuthLayout({ children }) {
           }
         >
           <FrontendHeader />
-          {children}
+          <SnackbarWrapper>{children}</SnackbarWrapper>
         </Suspense>
       </body>
     </html>
