@@ -70,24 +70,23 @@ model RolePermission {
 }
 
 model Product {
-  product_id  Int               @id @default(autoincrement())
-  name        String
-  caret       String
-  weight      Json
-  description String?
-  price       Json
-  images      String[]
-  created_at  DateTime          @default(now())
-  updated_at  DateTime          @updatedAt
-  status      ProductStatus     @default(REQUESTED)
-  user_id     String
-  user        User              @relation(fields: [user_id], references: [id])
-  category    ProductCategory[]
-  country     ProductCountry[]
+  product_id   Int                @id @default(autoincrement())
+  product_name String
+  sku          String             @unique
+  description  String?
+  images       String[]
+  status       ProductStatus      @default(DRAFT)
+  user_id      String
+  tags         ProductTag[]
+  attributes   ProductAttribute[]
+  category     ProductCategory[]
+  // attributes		Attribute[]
+  user         User               @relation(fields: [user_id], references: [id])
 }
 
 model Category {
   category_id    Int               @id @default(autoincrement())
+  parent_id      Int?
   name           String            @unique
   description    String?
   created_at     DateTime          @default(now())
@@ -106,22 +105,70 @@ model ProductCategory {
 }
 
 model Country {
-  country_id  Int              @id @default(autoincrement())
-  name        String           @unique
+  country_id Int      @id @default(autoincrement())
+  name       String   @unique
+  region     String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  // products    ProductCountry[]
+}
+
+model Tag {
+  tag_id      Int          @id @default(autoincrement())
+  name        String       @unique
   description String?
-  created_at  DateTime         @default(now())
-  updated_at  DateTime         @updatedAt
-  products    ProductCountry[]
+  products    ProductTag[]
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
 }
 
-model ProductCountry {
-  country_id Int
+model ProductTag {
   product_id Int
-  country    Country @relation(fields: [country_id], references: [country_id])
+  tag_id     Int
   product    Product @relation(fields: [product_id], references: [product_id])
+  tag        Tag     @relation(fields: [tag_id], references: [tag_id])
 
-  @@id([country_id, product_id])
+  @@id([tag_id, product_id])
 }
+
+model Attribute {
+  attribute_id Int                @id @default(autoincrement())
+  name         String             @unique
+  isRequired   Boolean            @default(false)
+  isMultiple   Boolean            @default(false)
+  description  String?
+  created_at   DateTime           @default(now())
+  updated_at   DateTime           @updatedAt
+  values       AttributeValue[]
+  products     ProductAttribute[]
+}
+
+model ProductAttribute {
+  product_id   Int
+  attribute_id Int
+  product      Product   @relation(fields: [product_id], references: [product_id])
+  attribute    Attribute @relation(fields: [attribute_id], references: [attribute_id])
+
+  @@id([attribute_id, product_id])
+}
+
+model AttributeValue {
+  id           Int       @id @default(autoincrement())
+  name         String    @unique
+  attribute    Attribute @relation(fields: [attribute_id], references: [attribute_id])
+  attribute_id Int
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+}
+
+// model ProductCountry {
+//   country_id Int
+//   product_id Int
+//   country    Country @relation(fields: [country_id], references: [country_id])
+//   product    Product @relation(fields: [product_id], references: [product_id])
+
+//   @@id([country_id, product_id])
+// }
 
 model OtpVerification {
   id           Int      @id @default(autoincrement())
@@ -143,8 +190,6 @@ enum AcountType {
 }
 
 enum ProductStatus {
-  REQUESTED
-  APPROVED
-  DISABLED
-  SOLD
+  DRAFT
+  PUBLISHED
 }

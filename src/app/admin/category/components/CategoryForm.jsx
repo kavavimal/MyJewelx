@@ -1,13 +1,13 @@
 "use client";
 import { userValidationSchema } from "@/schemas/ValidationSchema";
 import { post, update } from "@/utils/api";
-import { Button, Input } from "@material-tailwind/react";
+import { Button, Input, Option, Select } from "@material-tailwind/react";
 import { Form, Formik, useFormik } from "formik";
 import { useRouter } from "next/navigation";
 import { enqueueSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 
-const CategoryForm = ({ category }) => {
+const CategoryForm = ({ category, categories }) => {
   const [file, setFile] = useState(null);
   const [previewURL, setPreviewURL] = useState(null);
   const router = useRouter();
@@ -27,55 +27,96 @@ const CategoryForm = ({ category }) => {
     initialValues: {
       name: category?.name ?? "",
       description: category?.description ?? "",
+      parent_id: category?.parent_id ?? "",
     },
     // validationSchema: userValidationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
       if (category) {
-        const response = await update(
-          `/api/category/${category.category_id}`,
-          values
-        );
-        await router.push("/admin/category");
-        await router.refresh();
-        enqueueSnackbar("Category updated successfully", {
-          variant: "success",
-          preventDuplicate: true,
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "right",
-          },
-          autoHideDuration: 3000,
-          style: {
-            background: "white",
-            color: "black",
-            borderRadius: ".5rem",
-            boxShadow:
-              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-            padding: "0 4px",
-          },
-        });
+        try {
+          const response = await update(
+            `/api/category/${category.category_id}`,
+            values
+          );
+          await router.push("/admin/category");
+          await router.refresh();
+          enqueueSnackbar("Category updated successfully", {
+            variant: "success",
+            preventDuplicate: true,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
+            autoHideDuration: 3000,
+            style: {
+              background: "white",
+              color: "black",
+              borderRadius: ".5rem",
+              boxShadow:
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              padding: "0 4px",
+            },
+          });
+        } catch (error) {
+          enqueueSnackbar("Category updated failed", {
+            variant: "error",
+            preventDuplicate: true,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
+            autoHideDuration: 3000,
+            style: {
+              background: "white",
+              color: "black",
+              borderRadius: ".5rem",
+              boxShadow:
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              padding: "0 4px",
+            },
+          });
+        }
       } else {
-        const response = await post("/api/category", values);
-        await router.push("/admin/category");
-        await router.refresh();
-        enqueueSnackbar("Category created successfully", {
-          variant: "success",
-          preventDuplicate: true,
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "right",
-          },
-          autoHideDuration: 3000,
-          style: {
-            background: "white",
-            color: "black",
-            borderRadius: ".5rem",
-            boxShadow:
-              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-            padding: "0 4px",
-          },
-        });
+        try {
+          const response = await post("/api/category", values);
+          await router.push("/admin/category");
+          await router.refresh();
+          enqueueSnackbar("Category created successfully", {
+            variant: "success",
+            preventDuplicate: true,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
+            autoHideDuration: 3000,
+            style: {
+              background: "white",
+              color: "black",
+              borderRadius: ".5rem",
+              boxShadow:
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              padding: "0 4px",
+            },
+          });
+        } catch (error) {
+          enqueueSnackbar("Category created failed", {
+            variant: "error",
+            preventDuplicate: true,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
+            autoHideDuration: 3000,
+            style: {
+              background: "white",
+              color: "black",
+              borderRadius: ".5rem",
+              boxShadow:
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              padding: "0 4px",
+            },
+          });
+        }
       }
     },
   });
@@ -84,31 +125,49 @@ const CategoryForm = ({ category }) => {
       <Formik initialValues={formik.initialValues}>
         <Form onSubmit={formik.handleSubmit} className=" rounded p-7 mb-4">
           <div className="flex flex-col gap-5">
-            <div className="flex gap-5">
-              <div className="mb-2 w-1/2">
-                <Input
-                  label="Name"
-                  type="text"
-                  name="name"
-                  value={formik.values?.name ?? ""}
-                  onChange={formik.handleChange}
-                  error={formik.touched.name && formik.errors.name}
-                />
-              </div>
-              <div className="mb-2 w-1/2">
-                <Input
-                  label="Description"
-                  type="text"
-                  value={formik.values?.description ?? ""}
-                  name="description"
-                  onChange={formik.handleChange}
-                  error={
-                    formik.touched.description && formik.errors.description
-                  }
-                />
-              </div>
-            </div>
             <div>
+              <Select
+                label="Parent Category"
+                name="parent_id"
+                value={formik.values?.parent_id ?? ""}
+                onChange={(value) => formik.setFieldValue("parent_id", value)}
+              >
+                {categories?.map((category) => (
+                  <Option
+                    key={category.category_id}
+                    value={category.category_id}
+                  >
+                    {category.name}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+            <div className="flex flex-col gap-5">
+              <div className="flex gap-5">
+                <div className="mb-2 w-1/2">
+                  <Input
+                    label="Name"
+                    type="text"
+                    name="name"
+                    value={formik.values?.name ?? ""}
+                    onChange={formik.handleChange}
+                    error={formik.touched.name && formik.errors.name}
+                  />
+                </div>
+                <div className="mb-2 w-1/2">
+                  <Input
+                    label="Description"
+                    type="text"
+                    value={formik.values?.description ?? ""}
+                    name="description"
+                    onChange={formik.handleChange}
+                    error={
+                      formik.touched.description && formik.errors.description
+                    }
+                  />
+                </div>
+              </div>
+              {/* <div>
               <label
                 htmlFor="dropzone-file"
                 className="flex h-80 w-full flex-col items-center justify-center border-2 border-blueGray-100 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
@@ -147,12 +206,13 @@ const CategoryForm = ({ category }) => {
                   }}
                 />
               </label>
-            </div>
+            </div> */}
 
-            <div className="flex items-center justify-between">
-              <Button type="submit" loading={formik.isSubmitting}>
-                {category ? "Update" : "Add"}
-              </Button>
+              <div className="flex items-center justify-between">
+                <Button type="submit" loading={formik.isSubmitting}>
+                  {category ? "Update" : "Add"}
+                </Button>
+              </div>
             </div>
           </div>
         </Form>

@@ -14,9 +14,14 @@ async function getCategory(id) {
   }
 }
 
+const getCategories = async () => {
+  return await prisma.category.findMany({});
+};
+
 const CategoryEdit = async ({ params: { id } }) => {
   const category = await getCategory(id);
-  return <CategoryForm category={category} />;
+  const categories = await getCategories();
+  return <CategoryForm category={category} categories={categories} />;
 };
 
 export default CategoryEdit;

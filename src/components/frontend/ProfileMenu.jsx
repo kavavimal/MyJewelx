@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@material-tailwind/react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -25,7 +26,9 @@ export default function ProfileMenu() {
                   data-dropdown-toggle="dropdownNavbar"
                   className="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:border-gray-700 dark:hover:bg-gray-700 md:dark:hover:bg-transparent"
                 >
-                  <span>{session.user?.firstName + session?.user?.lastName} </span>
+                  <span>
+                    {session.user?.firstName + session?.user?.lastName}{" "}
+                  </span>
                   <svg
                     className="w-2.5 h-2.5 ms-2.5"
                     aria-hidden="true"
@@ -83,12 +86,13 @@ export default function ProfileMenu() {
             </>
           ) : (
             <li>
-              <Link
-                href="/login"
-                className="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500"
-                aria-current="page"
-              >
-                Login
+              <Link href="/login" aria-current="page">
+                <Button
+                  className="rounded text-primary-200 border-primary-200 font-emirates"
+                  variant="outlined"
+                >
+                  Login
+                </Button>
               </Link>
             </li>
           )}

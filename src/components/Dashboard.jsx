@@ -4,22 +4,22 @@ import React from "react";
 const Dashboard = () => {
   const cards = [
     {
-      image: "/images/glass_bag.png",
+      image: "assets/images/glass_bag.png",
       count: "714k",
       title: "Weekly Sales",
     },
     {
-      image: "/images/glass_users.png",
+      image: "assets/images/glass_users.png",
       count: "1.35m",
       title: "New Users",
     },
     {
-      image: "/images/glass_buy.png",
+      image: "assets/images/glass_buy.png",
       count: "1.72m",
       title: "Item Orders",
     },
     {
-      image: "/images/glass_message.png",
+      image: "assets/images/glass_message.png",
       count: "234",
       title: "Bug Reports",
     },

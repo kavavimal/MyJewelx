@@ -11,8 +11,12 @@ import DataTable from "react-data-table-component";
 import AddPermission from "./AddPermission";
 import DeletePermission from "./DeletePermission";
 import { useState } from "react";
-
+import SessionLoader from "@/components/SessionLoader";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 const Permissions = ({ permissions }) => {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [editData, setEditData] = useState(false);
   const columns = [
     {
@@ -57,6 +61,12 @@ const Permissions = ({ permissions }) => {
       ),
     },
   ];
+
+  if (status === "loading") {
+    return <SessionLoader />;
+  } else if (!session.user.permissions.includes("permissions_view")) {
+    router.push("/");
+  }
   return (
     <>
       <div className="flex items-center justify-between mb-10 intro-y">
@@ -80,7 +90,7 @@ const Permissions = ({ permissions }) => {
               d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
             ></path>
           </svg>
-          Add New Roles
+          Add New Permission
         </Button>
       </div>
       <AddPermission edit={editData} />

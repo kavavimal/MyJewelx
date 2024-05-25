@@ -10,8 +10,13 @@ import { Formik, useFormik } from "formik";
 import { post, update } from "@/utils/api";
 import { userValidationSchema } from "@/schemas/ValidationSchema";
 import { enqueueSnackbar } from "notistack";
+import { useSession } from "next-auth/react";
+import SessionLoader from "@/components/SessionLoader";
 export default function UserForm({ roles, user }) {
   const [loading, setLoading] = useState(false);
+
+  const { data: session, status } = useSession();
+
   // const userRoles = roles?.map((role) => {
   //   return { label: role.role_name, value: role.role_id };
   // });
@@ -127,6 +132,14 @@ export default function UserForm({ roles, user }) {
       setPreviewURL(user?.image);
     }
   }, [user]);
+
+  if (status === "loading") {
+    return <SessionLoader />;
+  } else if (user && !session.user.permissions.includes("customer_update")) {
+    router.push("/");
+  } else if (!session.user.permissions.includes("customer_create")) {
+    router.push("/");
+  }
 
   return (
     <div>

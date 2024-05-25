@@ -1,10 +1,16 @@
 import React from "react";
 import Products from "./componets/Products";
+import prisma from "@/lib/prisma";
 
-const products = () => {
+const getProducts = () => {
+  return prisma.product.findMany({});
+};
+
+const products = async () => {
+  const response = await getProducts();
   return (
     <>
-      <Products />
+      <Products products={response} />
     </>
   );
 };

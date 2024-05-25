@@ -42,7 +42,7 @@ body {
   @apply bg-transparent;
 } */
 
-::-webkit-scrollbar-track {
+/* ::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
   background-color: #f2e6e9;
 }
@@ -54,7 +54,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background-color: #800020;
-}
+} */
 
 body .rdt_TableCol {
   @apply text-base text-gray-500 font-semibold;

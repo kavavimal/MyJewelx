@@ -2,10 +2,9 @@ import React from "react";
 import Categories from "./components/Categories";
 import prisma from "@/lib/prisma";
 
-async function getCategories() {
-  const categories = await prisma.category.findMany();
-  return categories;
-}
+const getCategories = () => {
+  return prisma.category.findMany({});
+};
 
 const category = async () => {
   const categories = await getCategories();

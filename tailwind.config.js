@@ -20,15 +20,24 @@ export default withMT({
       },
       colors: {
         primary: {
-          50: "#078dee14",
-          100: "#078dee29",
-          200: "#078dee",
+          // 50: "#078dee14",
+          // 100: "#078dee29",
+          50: "#F0AE1114",
+          100: "#F0AE1129",
+          200: "#F0AE11",
+          // 200: "#078dee",
         },
         blueGray: {
           50: "#919eab1f",
           100: "#919eab14",
           200: "#637381",
         },
+        secondary: {
+          200: "#4D4D4D",
+        },
+      },
+      fontFamily: {
+        emirates: ["emirates"],
       },
     },
   },

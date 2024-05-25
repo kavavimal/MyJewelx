@@ -11,8 +11,13 @@ import Link from "next/link";
 import React from "react";
 import DataTable from "react-data-table-component";
 import DeleteRole from "./DeleteRole";
+import SessionLoader from "@/components/SessionLoader";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const Roles = ({ roles }) => {
+  const router = useRouter();
+  const { data: session, status } = useSession();
   const columns = [
     {
       name: "Id",
@@ -50,6 +55,13 @@ const Roles = ({ roles }) => {
       ),
     },
   ];
+
+  if (status === "loading") {
+    return <SessionLoader />;
+  } else if (!session.user.permissions.includes("roles_view")) {
+    router.push("/");
+  }
+
   return (
     <>
       <div className="flex justify-between items-center btn btn-primary mb-10">

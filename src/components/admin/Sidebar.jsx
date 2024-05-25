@@ -1,6 +1,6 @@
 "use client";
 import { checkPermission } from "@/utils/helper";
-import { ListItem, ListItemPrefix } from "@material-tailwind/react";
+import { ListItem, ListItemPrefix, Spinner } from "@material-tailwind/react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,9 +19,11 @@ const Sidebar = () => {
       <aside className="w-1/5">
         <SimpleBar
           style={{ height: "100vh", position: "sticky" }}
-          className="top-0 left-0 h-screen border-r border-dashed p-5 space-y-2 dark:bg-gray-50 dark:text-gray-800"
+          className="top-0 left-0 h-screen border-r border-dashed space-y-2 dark:bg-gray-50 dark:text-gray-800"
         >
-          <div className="flex justify-start mb-7">Loading...</div>
+          <div className="h-screen flex justify-center items-center">
+            <Spinner className="h-8 w-8" />
+          </div>
         </SimpleBar>
       </aside>
     );
@@ -98,8 +100,8 @@ const Sidebar = () => {
       ),
     },
     {
-      name: "Customers",
-      href: "/admin/customers",
+      name: "Users",
+      href: "/admin/users",
       permission: [
         "customers_view",
         "customer_create",
@@ -114,9 +116,7 @@ const Sidebar = () => {
           viewBox="0 0 24 24"
           fill="none"
           className={`fill-current ${
-            isActive("/admin/customers")
-              ? "text-primary-200"
-              : "text-blueGray-200"
+            isActive("/admin/users") ? "text-primary-200" : "text-blueGray-200"
           }`}
         >
           <path
@@ -420,22 +420,23 @@ const Sidebar = () => {
       >
         <div className="flex justify-start mb-7">
           <Link href="/" className="flex items-center gap-2">
-            <Image width={40} height={40} src="/logo.svg" alt="logo" />{" "}
-            <span>MyJewlex</span>
+            <Image width={150} height={150} src="/logo.svg" alt="logo" />{" "}
           </Link>
         </div>
         <div className="flex items-center py-5 px-6 space-x-4 bg-blueGray-50 rounded-xl mb-5">
-          <Link href="/">
+          <Link href="/admin/dashboard">
             <Image
               width={100}
               height={100}
-              src="/images/avatar.jpg"
+              src="/assets/images/avatar.jpg"
               alt=""
               className="w-10 h-10 rounded-full dark:bg-gray-500"
             />
           </Link>
           <div>
-            <h2 className="text-sm font-semibold">{session?.user?.firstName + session?.user?.lastName}</h2>
+            <h2 className="text-sm font-semibold uppercase font-emirates">
+              {session?.user?.firstName + session?.user?.lastName}
+            </h2>
           </div>
         </div>
         <div className="divide-y dark:divide-gray-300">
@@ -451,7 +452,7 @@ const Sidebar = () => {
                   >
                     <Link href={item.href}>
                       <ListItem
-                        className={`flex align-middle select-none transition-all items-center py-2.5 px-3 space-x-3 rounded-md ${
+                        className={`flex align-middle select-none transition-all items-center py-2.5 px-3 space-x-3 rounded-md font-emirates ${
                           isActive(item.href)
                             ? "bg-primary-50 hover:bg-primary-100 focus:bg-primary-50"
                             : "hover:bg-blueGray-100"
@@ -472,7 +473,7 @@ const Sidebar = () => {
                   </li>
                 );
               } else {
-                return "";
+                return null;
               }
             })}
           </ul>
