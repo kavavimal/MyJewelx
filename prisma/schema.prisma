@@ -76,8 +76,8 @@ model Product {
   user_id               String
   product_name          String
   isOnlineBuyable       Boolean                 @default(false)
-  country_id            Int
-  country               Country                 @relation(fields: [country_id], references: [country_id])
+  country_id            Int?
+  country               Country?                 @relation(fields: [country_id], references: [country_id])
   user                  User                    @relation(fields: [user_id], references: [id])
   attributes            ProductAttribute[]
   ProductAttributeValue ProductAttributeValue[]
@@ -294,6 +294,7 @@ model ProductGender {
 model ProductVariation {
   variation_id              Int                         @id @default(autoincrement())
   product_id                Int
+  variation_name            String
   description               String
   images                    String[]
   sku                       String                      @unique

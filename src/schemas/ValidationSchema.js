@@ -64,16 +64,18 @@ export const patternValidationSchema = Yup.object({
 });
 
 export const productValidationSchema = Yup.object().shape({
-  product_name: Yup.string().required('Product name is required'),
-  category: Yup.number().required('Category is required'),
-  subCategory: Yup.number().required('Sub category is required'),
-  tags: Yup.array().min(1, 'At least one tag is required').required('Tags are required'),
-  country_id: Yup.number().required('Country is required'),
-  isOnlineBuyable: Yup.boolean().required('Is online buyable is required'),
-  states: Yup.number().required('State is required'),
-  status: Yup.string().required('Status is required'),
-  collections: Yup.array().min(1, 'At least one collection is required').required('Collections are required'),
-  patterns: Yup.array().min(1, 'At least one pattern is required').required('Patterns are required'),
-  genders: Yup.array().min(1, 'At least one gender is required').required('Genders are required'),
-  attributes: Yup.array().min(1, 'At least one attribute is required').required('Attributes are required'),
+  product_name: Yup.string().required("Product name is required"),
+  category: Yup.number().required("Category is required"),
+  subCategory: Yup.number().required("Sub category is required"),
+  attributes: Yup.array()
+    .min(1, "At least one attribute is required")
+    .required("Attributes are required"),
+  tags: Yup.array().notRequired(),
+  country_id: Yup.number().notRequired(),
+  isOnlineBuyable: Yup.boolean().notRequired(),
+  states: Yup.number().notRequired(),
+  status: Yup.string().notRequired(),
+  collections: Yup.array().required("Collections are required").notRequired(),
+  patterns: Yup.array().notRequired(),
+  genders: Yup.array().notRequired(),
 });

@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 
 const productVariationSchema = z.object({
   product_id: z.number(),
-  // productAttributeValue_id: z.array(z.number()),
+  variation_name: z.string(),
   regular_price: z.number(),
   selling_price: z.number().optional(),
   description: z.string().min(1, "description required").max(200),
@@ -49,6 +49,7 @@ export async function PUT(request, { params }) {
       //   .split(",")
       //   .map((id) => parseInt(id)),
       sku: res.get("sku"),
+      variation_name: res.get("variation_name"),
       regular_price: Number(res.get("regular_price")),
       selling_price: Number(res.get("selling_price")),
       description: res.get("description"),
@@ -114,7 +115,7 @@ export async function PUT(request, { params }) {
     //     { status: 400 }
     //   );
     // }
-    if (files.length === 0 && variationData.oldImageChange.length === 0) {
+    if (files.length === 0 && variationData.oldImageChange.length !== 0) {
       return NextResponse.json(
         { error: "ProductVariation should have at least 1 image" },
         { status: 400 }
@@ -175,6 +176,7 @@ export async function PUT(request, { params }) {
       //   ],
       // },
       regular_price: parsedVariation.regular_price,
+      variation_name: parsedVariation.variation_name,
       selling_price: variationData.selling_price
         ? parsedVariation.selling_price
         : null,

@@ -199,6 +199,7 @@ const Variation = ({
             `/api/variation/${variation?.variation_id}`,
             {
               ...values,
+              variation_name: variation?.name,
               making_charges: JSON.stringify(makingCharges),
               other_charges: JSON.stringify(otherCharges),
               product_id: localStorage.getItem("product_id"),
@@ -250,6 +251,7 @@ const Variation = ({
         try {
           const response = await post("/api/variation", {
             ...values,
+            variation_name: variation?.name,
             making_charges: JSON.stringify(makingCharges),
             other_charges: JSON.stringify(otherCharges),
             product_id: localStorage.getItem("product_id"),
@@ -324,8 +326,6 @@ const Variation = ({
       }
     },
   });
-
-  console.log(productAttributeValues, "productAttributeValues");
 
   useEffect(() => {
     if (isVariation) {
@@ -443,7 +443,7 @@ const Variation = ({
         }
       >
         <AccordionHeader onClick={() => handleOpen(index + 1)}>
-          {isVariation ? index + 1 : variation?.name}
+          {isVariation ? variation?.variation_name : variation?.name}
         </AccordionHeader>
         <AccordionBody>
           <Formik initialValues={formik.initialValues}>

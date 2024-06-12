@@ -7,6 +7,7 @@ import prisma from "@/lib/prisma";
 const productVariationSchema = z.object({
   product_id: z.number(),
   productAttributeValue_id: z.array(z.number()),
+  variation_name: z.string(),
   regular_price: z.number(),
   selling_price: z.number().optional(),
   description: z.string().min(1, "description required").max(200),
@@ -37,6 +38,7 @@ export async function POST(request) {
         .split(",")
         .map((id) => parseInt(id)),
       sku: res.get("sku"),
+      variation_name: res.get("variation_name"),
       regular_price: Number(res.get("regular_price")),
       selling_price: Number(res.get("selling_price")),
       description: res.get("description"),
@@ -65,7 +67,6 @@ export async function POST(request) {
         },
       },
     });
-    console.log("existingvariations", existingVariations);
 
     // Extract existing combinations
     const existingCombinations = existingVariations.map((variation) =>
@@ -74,14 +75,12 @@ export async function POST(request) {
         .sort()
         .join(",")
     );
-    console.log("existingcombinations", existingCombinations);
 
     // Sort and join the new combination to compare with existing ones
     const newCombination = parsedVariation.productAttributeValue_id
       .sort()
       .join(",");
 
-    console.log("newconmbinations", newCombination);
     // Check if the new combination already exists
     if (existingCombinations.includes(newCombination)) {
       return NextResponse.json(
@@ -133,6 +132,7 @@ export async function POST(request) {
     const result = await prisma.productVariation.create({
       data: {
         product_id: parsedVariation.product_id,
+        variation_name: parsedVariation.variation_name,
         productAttributeValues: {
           create: [
             ...parsedVariation.productAttributeValue_id.map((id) => ({

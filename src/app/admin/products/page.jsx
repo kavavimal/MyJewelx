@@ -3,7 +3,9 @@ import Products from "./componets/Products";
 import prisma from "@/lib/prisma";
 
 const getProducts = () => {
-  return prisma.product.findMany({});
+  try {
+    return prisma.product.findMany();
+  } catch (error) {}
 };
 
 const products = async () => {
