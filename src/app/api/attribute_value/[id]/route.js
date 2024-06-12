@@ -20,18 +20,21 @@ export async function PUT(request, { params }) {
       attribute_id,
     });
 
-    const exists = await prisma.attributeValue.findFirst({
-      where: { name },
-    });
+    // const exists = await prisma.attributeValue.findFirst({
+    //   where: { name },
+    //   NOT: {
+    //     id: id,
+    //   },
+    // });
 
-    if (exists) {
-      return NextResponse.json(
-        {
-          error: `Attribute value with name ${attributeValueData.name} is already exists`,
-        },
-        { status: 400 }
-      );
-    }
+    // if (exists) {
+    //   return NextResponse.json(
+    //     {
+    //       error: `Attribute value with name ${attributeValueData.name} is already exists`,
+    //     },
+    //     { status: 400 }
+    //   );
+    // }
 
     const result = await prisma.attributeValue.update({
       where: { id },

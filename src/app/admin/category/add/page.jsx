@@ -1,5 +1,6 @@
 import React from "react";
 import CategoryForm from "../components/CategoryForm";
+import prisma from "@/lib/prisma";
 const getCategories = async () => {
   return await prisma.category.findMany({});
 };

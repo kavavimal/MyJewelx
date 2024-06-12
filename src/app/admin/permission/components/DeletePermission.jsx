@@ -6,7 +6,6 @@ import {
   DialogFooter,
   DialogHeader,
   IconButton,
-  MenuItem,
 } from "@material-tailwind/react";
 import { useRouter } from "next/navigation";
 import { enqueueSnackbar } from "notistack";
@@ -17,21 +16,6 @@ export default function DeletePermission({ permission_id }) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(!open);
   const router = useRouter();
-
-  // async function handleClick() {
-  //   // setLoading(true);
-  //   // try {
-  //   //   if (confirm("are you sure to delete permission?") == true) {
-  //   //     await fetch(`/api/permission/${permission_id}`, {
-  //   //       method: "DELETE",
-  //   //     });
-  //   //     router.refresh();
-  //   //   }
-  //   // } catch (e) {
-  //   //   console.error(e);
-  //   // }
-  //   // setLoading(false);
-  // }
 
   const del = async () => {
     setLoading(true);

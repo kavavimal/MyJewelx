@@ -1,19 +1,23 @@
 import prisma from "@/lib/prisma";
 import { NextResponse, userAgent } from "next/server";
 import { z } from "zod";
-import { join } from "path";
-import { writeFile } from "fs/promises";
 import { getServerSession } from "next-auth";
 
 const productSchema = z.object({
   product_name: z.string().min(1, "Product name required").max(50),
-  description: z.string().min(1, "Description of product required").max(100),
-  sku: z.string(),
   status: z.string().optional(),
   user_id: z.string(),
+  country_id: z.number(),
   tags: z.array(z.string()),
   attributes: z.array(z.string()),
-  category: z.array(z.string()),
+  // category: z.array(z.string()),
+  category: z.number(),
+  subCategory: z.number(),
+  isOnlineBuyable: z.boolean(),
+  collections: z.array(z.string()).optional(),
+  patterns: z.array(z.string()).optional(),
+  states: z.array(z.string()).optional(),
+  genders: z.array(z.string()).optional(),
 });
 
 const checkUserSession = async () => {
@@ -42,64 +46,48 @@ export async function POST(request) {
 
     const res = await request.formData();
 
-    const sku = res.get("sku");
-
-    const exists = await prisma.product.findFirst({
-      where: { sku },
-    });
-
-    if (exists) {
-      return NextResponse.json(
-        { error: `Product with similar ${sku} already exists` },
-        { status: 400 }
-      );
-    }
-
     const product_name = res.get("product_name");
-    const description = res.get("description");
     const status = res.get("status") ? res.get("status") : "DRAFT";
     const user_id = user.id;
+    const country_id = Number(res.get("country_id"));
     const tags = res.get("tags").split(",");
     const attributes = res.get("attributes").split(",");
-    const category = res.get("category").split(",");
+    const category = Number(res.get("category"));
+    const subCategory = Number(res.get("subCategory"));
+    const isOnlineBuyable =
+      res.get("isOnlineBuyable") === "true" ? true : false;
+    const collections = res.get("collections").split(",");
+    const patterns = res.get("patterns").split(",");
+    const states = res.get("states").split(",");
+    const genders = res.get("genders").split(",");
 
     const productData = productSchema.parse({
       product_name,
-      sku,
-      description,
       status,
       user_id,
+      country_id,
       tags,
       attributes,
       category,
+      subCategory,
+      isOnlineBuyable,
+      collections,
+      patterns,
+      states,
+      genders,
     });
-
-    const files = res.get("files");
-    let images = [];
-    if (files) {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        const path = join(process.cwd(), "/public/assets/uploads", file.name);
-        await writeFile(path, buffer);
-
-        images.push("/assets/uploads/" + Date.now() + file.name);
-      }
-    }
 
     const result = await prisma.product.create({
       data: {
         product_name: productData.product_name,
-        sku: productData.sku,
-        description: productData.description,
         status: status,
-        images: images,
         user: {
           connect: { id: user_id },
         },
+        country: {
+          connect: { country_id: country_id },
+        },
+        isOnlineBuyable: productData.isOnlineBuyable,
         tags: {
           create: [
             ...tags.map((tag_id) => {
@@ -126,14 +114,64 @@ export async function POST(request) {
             }),
           ],
         },
+        // category: {
+        //   create: [
+        //     ...category.map((category_id) => {
+        //       return {
+        //         category: {
+        //           connect: {
+        //             category_id: Number(category_id),
+        //           },
+        //         },
+        //       };
+        //     }),
+        //   ],
+        // },
         category: {
+          connect: { category_id: category },
+        },
+        subcategory: {
+          connect: { category_id: subCategory },
+        },
+        collections: {
           create: [
-            ...category.map((category_id) => {
+            ...productData.collections.map((collection_id) => {
               return {
-                category: {
-                  connect: {
-                    category_id: Number(category_id),
-                  },
+                collection: {
+                  connect: { collection_id: Number(collection_id) },
+                },
+              };
+            }),
+          ],
+        },
+        patterns: {
+          create: [
+            ...productData.patterns.map((pattern_id) => {
+              return {
+                pattern: {
+                  connect: { pattern_id: Number(pattern_id) },
+                },
+              };
+            }),
+          ],
+        },
+        states: {
+          create: [
+            ...productData.states.map((state_id) => {
+              return {
+                state: {
+                  connect: { state_id: Number(state_id) },
+                },
+              };
+            }),
+          ],
+        },
+        genders: {
+          create: [
+            ...productData.genders.map((gender_id) => {
+              return {
+                gender: {
+                  connect: { gender_id: Number(gender_id) },
                 },
               };
             }),

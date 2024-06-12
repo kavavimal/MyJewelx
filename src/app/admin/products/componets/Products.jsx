@@ -3,6 +3,7 @@ import React from "react";
 import { Button, Chip, IconButton } from "@material-tailwind/react";
 import Link from "next/link";
 import DataTable from "react-data-table-component";
+import DeleteProduct from "./DeleteProduct";
 const Products = ({ products }) => {
   const columns = [
     {
@@ -43,6 +44,7 @@ const Products = ({ products }) => {
               </svg>
             </IconButton>
           </Link>
+          <DeleteProduct product_id={row?.product_id} />
         </>
       ),
     },

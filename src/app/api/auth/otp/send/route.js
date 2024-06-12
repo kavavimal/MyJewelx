@@ -4,8 +4,11 @@ import * as z from "zod";
 import emailOtpSend from "../components/emailOtpSend";
 
 const userSchema = z.object({
-  email: z.string().optional(), // Email is optional, but if provided, it must be a valid email
-  phone_number: z.string().optional(), // Phone number is optional
+  email: z
+    .string()
+    .min(1, { message: "Email field has to be filled." })
+    .email("This is not a valid email."),
+  phone_number: z.string().optional(),
   mode: z.string().min(1, { message: "Mode is required" }),
 });
 
@@ -89,6 +92,12 @@ export async function POST(req) {
     }
   } catch (error) {
     console.log(error);
+    if (error.name === "ZodError") {
+      return Response.json(
+        { error: error.name, issues: error.errors },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
       { message: "Something went Wrong!" },
       { status: 500 }

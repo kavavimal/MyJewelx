@@ -13,21 +13,22 @@ export async function POST(request) {
 
     const name = res.get("name");
     const attribute_id = Number(res.get("attribute_id"));
-
+    
     const AttributeValueData = addAttributeValueSchema.parse({
       name,
       attribute_id,
     });
+    console.log("name and attribute_id", AttributeValueData);
 
-    const exists = await prisma.attributeValue.findFirst({
-      where: { name },
-    });
+    // const exists = await prisma.attributeValue.findFirst({
+    //   where: { name: name, attribute_id: attribute_id },
+    // });
 
-    if (exists) {
-      return NextResponse.json({
-        error: `Attribute value with name ${AttributeValueData.name} already exists.`,
-      });
-    }
+    // if (exists) {
+    //   return NextResponse.json({
+    //     error: `Attribute value with name ${AttributeValueData.name} already exists.`,
+    //   });
+    // }
 
     const result = await prisma.attributeValue.create({
       data: {

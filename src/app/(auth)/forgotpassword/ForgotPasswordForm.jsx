@@ -41,9 +41,11 @@ export default function ForgotPasswordForm() {
           // toast.success("Account created! Redirecting to login...");
           setIsOtpSent(true);
         } else {
-          const { error } = await res.json();
-          setOtpError("send Otp Failed");
-          console.error("send Otp Failed", error);
+          const { error, issues } = await res.json();
+          if (error === "ZodError") {
+            const ZodError = issues.map((issue) => issue.message);
+            setOtpError(ZodError);
+          } else setOtpError("send Otp Failed");
           // toast.error(error);
         }
       });
@@ -161,9 +163,14 @@ export default function ForgotPasswordForm() {
               <span className="text-blue-500">{updatedPassword}</span>
             </span>
           )}
-          {otpError && (
+          {otpError && typeof otpError === "string" && (
             <span className="text-sm text-red-400 leading-3">{otpError}</span>
           )}
+          {otpError &&
+            Array.isArray(otpError) &&
+            otpError.map((error, index) => (
+                <span key={index} className="text-sm text-red-400 leading-3">{error}</span>
+            ))}
           {isOtpSent ? (
             <div className="relative w-full min-w-[200px] h-11">
               <input

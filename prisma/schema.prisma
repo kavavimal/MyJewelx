@@ -41,6 +41,7 @@ model User {
   lastName     String
   products     Product[]
   role         Role       @relation(fields: [role_id], references: [role_id])
+  vendor       Vendor?
   accounts     Account[]
 }
 
@@ -70,56 +71,95 @@ model RolePermission {
 }
 
 model Product {
-  product_id   Int                @id @default(autoincrement())
-  product_name String
-  sku          String             @unique
-  description  String?
-  images       String[]
-  status       ProductStatus      @default(DRAFT)
-  user_id      String
-  tags         ProductTag[]
-  attributes   ProductAttribute[]
-  category     ProductCategory[]
-  // attributes		Attribute[]
-  user         User               @relation(fields: [user_id], references: [id])
+  product_id            Int                     @id @default(autoincrement())
+  status                ProductStatus           @default(DRAFT)
+  user_id               String
+  product_name          String
+  isOnlineBuyable       Boolean                 @default(false)
+  country_id            Int
+  country               Country                 @relation(fields: [country_id], references: [country_id])
+  user                  User                    @relation(fields: [user_id], references: [id])
+  attributes            ProductAttribute[]
+  ProductAttributeValue ProductAttributeValue[]
+  categoryId            Int
+  subCategoryId         Int
+
+  // Define relations to Category
+  category    Category @relation("CategoryProducts", fields: [categoryId], references: [category_id])
+  subcategory Category @relation("SubCategoryProducts", fields: [subCategoryId], references: [category_id])
+
+  collections ProductCollection[]
+  genders     ProductGender[]
+  patterns    ProductPatten[]
+  states      ProductState[]
+  tags        ProductTag[]
+  variations  ProductVariation[]
+}
+
+model Vendor {
+  id               Int       @id @default(autoincrement())
+  user_id          String    @unique
+  store_name       String
+  store_url        String?   @unique
+  license_number   String?   @unique
+  issued_at        String?
+  issued_date      DateTime?
+  licence_address  String?
+  licence_city     String?
+  licence_state    String?
+  licence_zip_code String?
+  licence_country  String?
+  account_name     String?
+  account_number   String?   @unique
+  bank_name        String?
+  bank_iban        String?
+  bank_swift_code  String?
+  bank_address     String?
+  bank_city        String?
+  bank_zip_code    String?
+  bank_country     String?
+  user             User      @relation(fields: [user_id], references: [id])
 }
 
 model Category {
-  category_id    Int               @id @default(autoincrement())
-  parent_id      Int?
-  name           String            @unique
+  category_id    Int      @id @default(autoincrement())
+  name           String   @unique
   description    String?
-  created_at     DateTime          @default(now())
-  updated_at     DateTime          @updatedAt
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
   category_image String?
-  products       ProductCategory[]
+  parent_id      Int?
+
+  products            Product[] @relation("CategoryProducts")
+  subCategoryProducts Product[] @relation("SubCategoryProducts")
 }
 
-model ProductCategory {
-  category_id Int
-  product_id  Int
-  category    Category @relation(fields: [category_id], references: [category_id])
-  product     Product  @relation(fields: [product_id], references: [product_id])
+// model ProductCategory {
+//   category_id Int
+//   product_id  Int
+//   category    Category @relation(fields: [category_id], references: [category_id])
+//   product     Product  @relation(fields: [product_id], references: [product_id])
 
-  @@id([category_id, product_id])
-}
+//   @@id([category_id, product_id])
+// }
 
 model Country {
-  country_id Int      @id @default(autoincrement())
-  name       String   @unique
+  country_id Int       @id @default(autoincrement())
+  name       String    @unique
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
   region     String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  // products    ProductCountry[]
+  Product    Product[]
+  states     State[]
 }
 
 model Tag {
   tag_id      Int          @id @default(autoincrement())
   name        String       @unique
   description String?
-  products    ProductTag[]
   created_at  DateTime     @default(now())
   updated_at  DateTime     @updatedAt
+  products    ProductTag[]
 }
 
 model ProductTag {
@@ -132,43 +172,201 @@ model ProductTag {
 }
 
 model Attribute {
-  attribute_id Int                @id @default(autoincrement())
-  name         String             @unique
-  isRequired   Boolean            @default(false)
-  isMultiple   Boolean            @default(false)
-  description  String?
-  created_at   DateTime           @default(now())
-  updated_at   DateTime           @updatedAt
-  values       AttributeValue[]
-  products     ProductAttribute[]
+  attribute_id                  Int                     @id @default(autoincrement())
+  name                          String                  @unique
+  isRequired                    Boolean                 @default(false)
+  isMultiple                    Boolean                 @default(false)
+  description                   String?
+  created_at                    DateTime                @default(now())
+  updated_at                    DateTime                @updatedAt
+  useForVariation               Boolean                 @default(false)
+  values                        AttributeValue[]
+  products                      ProductAttribute[]
+  productsProductAttributeValue ProductAttributeValue[]
+}
+
+model AttributeValue {
+  id                    Int                     @id @default(autoincrement())
+  name                  String
+  attribute_id          Int
+  created_at            DateTime                @default(now())
+  updated_at            DateTime                @updatedAt
+  attribute             Attribute               @relation(fields: [attribute_id], references: [attribute_id])
+  ProductAttributeValue ProductAttributeValue[]
+  attributeValuePricings	attributeValuePricing[]
 }
 
 model ProductAttribute {
   product_id   Int
   attribute_id Int
-  product      Product   @relation(fields: [product_id], references: [product_id])
   attribute    Attribute @relation(fields: [attribute_id], references: [attribute_id])
+  product      Product   @relation(fields: [product_id], references: [product_id])
 
   @@id([attribute_id, product_id])
 }
 
-model AttributeValue {
-  id           Int       @id @default(autoincrement())
-  name         String    @unique
-  attribute    Attribute @relation(fields: [attribute_id], references: [attribute_id])
-  attribute_id Int
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
+model ProductAttributeValue {
+  product_id               Int
+  attribute_id             Int
+  attributeValue_id        Int
+  productAttributeValue_id Int                         @id @default(autoincrement())
+  attributeValue           AttributeValue              @relation(fields: [attributeValue_id], references: [id])
+  attribute                Attribute                   @relation(fields: [attribute_id], references: [attribute_id])
+  product                  Product                     @relation(fields: [product_id], references: [product_id])
+  productvariations        ProductVariationAttribute[]
 }
 
-// model ProductCountry {
-//   country_id Int
-//   product_id Int
-//   country    Country @relation(fields: [country_id], references: [country_id])
-//   product    Product @relation(fields: [product_id], references: [product_id])
+model attributeValuePricing {
+	pricing_id			        Int		          @id @default(autoincrement())
+	name			              String		      @unique
+	attributeValue_id	      Int
+	attributeValue		      AttributeValue	@relation(fields: attributeValue_id, references:id)
+	price			              Float
+	base_q			            Float
+	unit			              String
+	purity			            String?
+}
 
-//   @@id([country_id, product_id])
-// }
+model Collection {
+  collection_id Int                 @id @default(autoincrement())
+  name          String              @unique
+  description   String?
+  products      ProductCollection[]
+}
+
+model ProductCollection {
+  collection_id Int
+  product_id    Int
+  collection    Collection @relation(fields: [collection_id], references: [collection_id])
+  product       Product    @relation(fields: [product_id], references: [product_id])
+
+  @@id([collection_id, product_id])
+}
+
+model Pattern {
+  pattern_id  Int             @id @default(autoincrement())
+  name        String          @unique
+  description String?
+  products    ProductPatten[]
+}
+
+model ProductPatten {
+  pattern_id Int
+  product_id Int
+  pattern    Pattern @relation(fields: [pattern_id], references: [pattern_id])
+  product    Product @relation(fields: [product_id], references: [product_id])
+
+  @@id([pattern_id, product_id])
+}
+
+model State {
+  state_id   Int            @id @default(autoincrement())
+  name       String         @unique
+  country_id Int
+  products   ProductState[]
+  country    Country        @relation(fields: [country_id], references: [country_id], onDelete: Cascade)
+}
+
+model ProductState {
+  state_id   Int
+  product_id Int
+  product    Product @relation(fields: [product_id], references: [product_id])
+  state      State   @relation(fields: [state_id], references: [state_id])
+
+  @@id([state_id, product_id])
+}
+
+model Gender {
+  gender_id Int             @id @default(autoincrement())
+  name      String          @unique
+  products  ProductGender[]
+}
+
+model ProductGender {
+  gender_id  Int
+  product_id Int
+  gender     Gender  @relation(fields: [gender_id], references: [gender_id])
+  product    Product @relation(fields: [product_id], references: [product_id])
+
+  @@id([gender_id, product_id])
+}
+
+model ProductVariation {
+  variation_id              Int                         @id @default(autoincrement())
+  product_id                Int
+  description               String
+  images                    String[]
+  sku                       String                      @unique
+  stock_management          Boolean                     @default(false)
+  stock_status              Boolean                     @default(false)
+  quantity                  Int?
+  length                    Float
+  height                    Float
+  width                     Float
+  thickness                 Float
+  weight_unit               String
+  net_weight                Float?
+  gross_weight              Float?
+  isPriceFixed              Boolean                     @default(false)
+  making_charges            String
+  other_charges             String?
+  regular_price             Float
+  selling_price             Float?
+  product                   Product                     @relation(fields: [product_id], references: [product_id], onDelete: Cascade)
+  productAttributeValues    ProductVariationAttribute[]
+  cartItems                 CartItem[]
+  gemstoneProductVariations GemstoneProductVariation[]
+}
+
+model Gemstone {
+  gemstone_id               Int                        @id @default(autoincrement())
+  name                      String                     @unique
+  description               String?
+  gemstoneProductVariations GemstoneProductVariation[]
+}
+
+model GemstoneProductVariation {
+  gemstone_id  Int
+  variation_id Int
+  gemstone     Gemstone         @relation(fields: [gemstone_id], references: [gemstone_id])
+  variation    ProductVariation @relation(fields: [variation_id], references: [variation_id])
+
+  @@id([gemstone_id, variation_id])
+}
+
+model ProductVariationAttribute {
+  productVariation_id      Int
+  productAttributeValue_id Int
+  productAttributeValue    ProductAttributeValue @relation(fields: [productAttributeValue_id], references: [productAttributeValue_id])
+  productvariation         ProductVariation      @relation(fields: [productVariation_id], references: [variation_id])
+
+  @@id([productVariation_id, productAttributeValue_id])
+}
+
+model Cart {
+  cart_id Int @id @default(autoincrement())
+
+  user_id    String @unique
+  cart_total Float
+
+  discount      Float
+  discount_type String
+
+  cartItems CartItem[]
+}
+
+model CartItem {
+  cartItem_id Int @id @default(autoincrement())
+
+  cart_id Int
+  cart    Cart @relation(fields: [cart_id], references: [cart_id], onDelete: Cascade)
+
+  variation_id     Int
+  productVariation ProductVariation @relation(fields: [variation_id], references: [variation_id], onDelete: Cascade)
+
+  price    Float
+  quantity Int
+}
 
 model OtpVerification {
   id           Int      @id @default(autoincrement())

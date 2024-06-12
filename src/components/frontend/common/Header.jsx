@@ -47,7 +47,7 @@ export default function FrontendHeader() {
           href="/"
           className="flex items-center space-x-3 rtl:space-x-reverse"
         >
-          <Image width={150} height={150} src="/logo.svg" alt="logo" />{" "}
+          <Image width={160} height={160} src="/logo.png" alt="logo" />
         </Link>
         <button
           data-collapse-toggle="navbar-default"
@@ -74,7 +74,7 @@ export default function FrontendHeader() {
           </svg>
         </button>
         <div className="hidden w-full md:block md:w-auto" id="navbar-default">
-          <ul className="font-medium flex items-center p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+          <ul className="font-medium flex items-center p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row gap- md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
             <ProfileMenu />
             {MenuLinks.map((link, i) => {
               return (

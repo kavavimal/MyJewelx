@@ -89,7 +89,7 @@ export default function ProfileMenu() {
               <Link href="/login" aria-current="page">
                 <Button
                   className="rounded text-primary-200 border-primary-200 font-emirates"
-                  variant="outlined"
+                  variant="text"
                 >
                   Login
                 </Button>

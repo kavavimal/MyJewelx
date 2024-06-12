@@ -15,8 +15,7 @@ export default withMT({
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
       boxShadow: {
-        "3xl":
-          "0 0 2px 0 rgba(145, 158, 171, 0.08), 0 12px 24px -4px rgba(145, 158, 171, 0.08)",
+        "3xl": "0px 0px 20px 1px #0000000D",
       },
       colors: {
         primary: {
