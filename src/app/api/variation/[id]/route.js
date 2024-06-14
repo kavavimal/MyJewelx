@@ -115,7 +115,7 @@ export async function PUT(request, { params }) {
     //     { status: 400 }
     //   );
     // }
-    if (files.length === 0 && variationData.oldImageChange.length !== 0) {
+    if (files.length === 0 && variationData.oldImageChange.length === 0) {
       return NextResponse.json(
         { error: "ProductVariation should have at least 1 image" },
         { status: 400 }

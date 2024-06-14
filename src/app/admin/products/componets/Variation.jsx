@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 import DeleteVariation from "./DeleteVariation";
 import { enqueueSnackbar } from "notistack";
 import * as Yup from "yup";
+import { attributeIDs } from "@/utils/constants";
 
 const Variation = ({
   index,
@@ -32,7 +33,16 @@ const Variation = ({
   productAttributeValues,
   variations,
   setVariations,
+  pricing,
 }) => {
+  const isMaterialGold = productAttributeValues.find(
+    (a) =>
+      a.attributeId === attributeIDs.MATERIAL &&
+      a.id === attributeIDs.MATERIAL_GOLD
+  );
+  const findGoldKarat = productAttributeValues.find(
+    (a) => a.attributeId === attributeIDs.GOLDKARAT
+  );
   const router = useRouter();
   const isVariation = Boolean(variation?.variation_id);
   const [isGemstone, setIsGemstone] = useState(false);
@@ -46,12 +56,14 @@ const Variation = ({
   const [additionalChargesType, setAdditionalChargesType] = useState("");
   const [additionalCharges, setAdditionalCharges] = useState([]);
   const [additionalCharge, setAdditionalCharge] = useState("");
-  const [taxValue, setTaxValue] = useState("");
+  const [taxValue, setTaxValue] = useState("5");
   const [makingCharge, setMakingCharge] = useState("Per Gram On Net Weight");
   const [files, setFiles] = useState([]);
   const [previewURLs, setPreviewURLs] = useState([]);
-  const [chargeValue, setChargeValue] = useState("");
+  const [chargeValue, setChargeValue] = useState(0);
   const [uploadedImages, setUploadedImages] = useState([]);
+  const [subtotal, setSubTotal] = useState(0);
+  const [total, setTotal] = useState(0);
 
   const handleFileChange = (e) => {
     setFiles((prev) => [...prev, ...e.target.files]);
@@ -63,6 +75,35 @@ const Variation = ({
   const removeImage = (index) => {
     setFiles(files.filter((_, i) => i !== index));
     setPreviewURLs(previewURLs.filter((_, i) => i !== index));
+  };
+
+  const getMetalPrice = () => {
+    const isMaterialGold = productAttributeValues.find(
+      (a) =>
+        a.attributeId === attributeIDs.MATERIAL &&
+        a.id === attributeIDs.MATERIAL_GOLD
+    );
+    const findGoldKarat = productAttributeValues.find(
+      (a) => a.attributeId === attributeIDs.GOLDKARAT
+    );
+
+    if (isMaterialGold && findGoldKarat) {
+      const attributeSelecte = findGoldKarat.attributeValueName;
+      const mapstring = attributeSelecte.replace(/\s/g, "").toLowerCase();
+      if (Object.keys(pricing).includes(mapstring)) {
+        let p = pricing[mapstring];
+
+        return p;
+
+        // if (formik.values?.net_weight) {
+        //   p =
+        //     parseFloat(pricing[mapstring]) *
+        //     parseFloat(formik.values?.net_weight);
+        // }
+      }
+    }
+
+    return "";
   };
 
   useEffect(() => {
@@ -97,7 +138,9 @@ const Variation = ({
       .min(1)
       .max(20),
     net_weight: Yup.number().required("Net weight is required"),
-    gross_weight: Yup.number().required("Gross weight is required"),
+    gross_weight: Yup.number()
+      .max(Yup.ref("net_weight"), "Gross weight should be less than net weight")
+      .required("Gross weight is required"),
     isPriceFixed: Yup.boolean().required("Is price fixed is required"),
     ...(!isVariation && {
       files: Yup.array()
@@ -136,11 +179,12 @@ const Variation = ({
           : "out_of_stock"
         : "",
       quantity: isVariation ? variation.quantity : "",
-      weight_unit: isVariation ? variation.weight_unit : "",
+      // weight_unit: isVariation ? variation.weight_unit : "",
+      weight_unit: "Grams",
       net_weight: isVariation ? variation.net_weight : "",
       gross_weight: isVariation ? variation.gross_weight : "",
       isPriceFixed: isVariation ? variation.isPriceFixed : false,
-      metal_amount: "",
+      metal_amount: getMetalPrice(),
       files: [],
     },
     validationSchema: variatonValidationSchema,
@@ -185,7 +229,7 @@ const Variation = ({
 
       let makingCharges = {};
 
-      if (values?.isPriceFixed) {
+      if (!values?.isPriceFixed) {
         makingCharges = {
           metalPrice: values?.metal_amount,
           charge_type: makingCharge,
@@ -199,13 +243,13 @@ const Variation = ({
             `/api/variation/${variation?.variation_id}`,
             {
               ...values,
-              variation_name: variation?.name,
+              variation_name: variation?.variation_name,
               making_charges: JSON.stringify(makingCharges),
               other_charges: JSON.stringify(otherCharges),
               product_id: localStorage.getItem("product_id"),
               stock_status: values.stock_status === "in_stock" ? true : false,
               old_img_change: uploadedImages.join(","),
-              selling_price: 10000,
+              selling_price: total,
             }
           );
           router.refresh();
@@ -259,7 +303,7 @@ const Variation = ({
               ?.map((item) => item.productAttributeValue_id)
               .join(","),
             stock_status: values.stock_status === "in_stock" ? true : false,
-            selling_price: 10000,
+            selling_price: total,
           });
 
           if (response.status === 201) {
@@ -326,6 +370,95 @@ const Variation = ({
       }
     },
   });
+
+  const calculateFinalPrice = () => {
+    let metalPrice = 0;
+    let price = 0;
+    let totalPrice = 0;
+
+    const gemstoneAmounts = gemstoneCharges.map((item) => {
+      return parseFloat(item.amount);
+    });
+
+    const additionalAmounts = additionalCharges.map((item) => {
+      return parseFloat(item.additionalCharge);
+    });
+
+    if (isMaterialGold && findGoldKarat) {
+      const attributeSelecte = findGoldKarat.attributeValueName;
+      const mapstring = attributeSelecte.replace(/\s/g, "").toLowerCase();
+      if (Object.keys(pricing).includes(mapstring)) {
+        metalPrice = pricing[mapstring];
+
+        if (formik.values?.net_weight) {
+          metalPrice =
+            parseFloat(pricing[mapstring]) *
+            parseFloat(formik.values?.net_weight);
+        }
+      }
+
+      if (formik.values?.isPriceFixed) {
+        const productPrice = formik.values.regular_price;
+        price = price + parseFloat(productPrice);
+      } else {
+        price = price + metalPrice;
+        if (makingCharge === "Per Gram On Net Weight") {
+          price =
+            price +
+            parseFloat(chargeValue) * parseFloat(formik.values.net_weight);
+        } else if (makingCharge === "Per Piece / Flat") {
+          price = price + parseFloat(chargeValue);
+        } else if (makingCharge === "Per(%) On Metal Rate On Karat") {
+          price = price + (metalPrice * parseFloat(chargeValue)) / 100;
+        }
+      }
+
+      if (gemstoneAmounts.length > 0) {
+        price = price + gemstoneAmounts.reduce((a, b) => a + b, 0);
+      }
+
+      if (additionalAmounts.length > 0) {
+        price = price + additionalAmounts.reduce((a, b) => a + b, 0);
+      }
+
+      if (isDiscount && discountType === "Per Gram On Net Weight") {
+        let appliedDiscout = formik.values.net_weight * discountValue;
+        price = price - appliedDiscout;
+      }
+
+      if (isDiscount && discountType === "Per Piece / Flat") {
+        price = price - discountValue;
+      }
+
+      if (isDiscount && discountType === "Per(%) On Metal Rate On Karat") {
+        price = price - (metalPrice * discountValue) / 100;
+      }
+
+      if (taxValue === "5") {
+        totalPrice = price + (price * 5) / 100;
+      }
+      setSubTotal(price);
+      setTotal(totalPrice);
+    }
+  };
+
+  useEffect(() => {
+    calculateFinalPrice();
+  }, [
+    pricing,
+    gemstoneCharges,
+    additionalCharges,
+    formik.values.regular_price,
+    isDiscount,
+    discountValue,
+    discountType,
+    formik.values.net_weight,
+    formik.values?.isPriceFixed,
+    taxValue,
+    makingCharge,
+    chargeValue,
+    formik.values.metal_amount,
+  ]);
 
   useEffect(() => {
     if (isVariation) {
@@ -458,6 +591,7 @@ const Variation = ({
                         size="lg"
                         value={formik.values?.sku ?? ""}
                         onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
                         error={formik.errors.sku && formik.touched.sku}
                       />
                     </div>
@@ -472,6 +606,7 @@ const Variation = ({
                               name="length"
                               value={formik.values?.length ?? ""}
                               onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
                               error={
                                 formik.errors.length && formik.touched.length
                               }
@@ -482,6 +617,7 @@ const Variation = ({
                               name="height"
                               value={formik.values?.height ?? ""}
                               onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
                               error={
                                 formik.errors.height && formik.touched.height
                               }
@@ -494,6 +630,7 @@ const Variation = ({
                               name="width"
                               value={formik.values?.width ?? ""}
                               onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
                               error={
                                 formik.errors.width && formik.touched.width
                               }
@@ -504,6 +641,7 @@ const Variation = ({
                               name="thickness"
                               value={formik.values?.thickness ?? ""}
                               onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
                               error={
                                 formik.errors.thickness &&
                                 formik.touched.thickness
@@ -585,9 +723,12 @@ const Variation = ({
                             label="Quantity"
                             size="lg"
                             name="quantity"
-                            error={formik.errors.quantity}
+                            error={
+                              formik.errors.quantity && formik.touched.quantity
+                            }
                             value={formik.values?.quantity ?? ""}
                             onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
                           />
                         )}
                       </div>
@@ -645,7 +786,7 @@ const Variation = ({
                     </div>
 
                     <div className="flex flex-col gap-5">
-                      <Select
+                      {/* <Select
                         label="Weight"
                         size="lg"
                         name="weight_unit"
@@ -660,7 +801,7 @@ const Variation = ({
                       >
                         <Option value="Ounces">Ounces</Option>
                         <Option value="Grams">Grams</Option>
-                      </Select>
+                      </Select> */}
 
                       {formik.values?.weight_unit === "Grams" && (
                         <div className="flex gap-5 items-center">
@@ -670,8 +811,17 @@ const Variation = ({
                             size="lg"
                             name="net_weight"
                             value={formik.values?.net_weight ?? ""}
-                            error={formik.errors.net_weight}
-                            onChange={formik.handleChange}
+                            error={
+                              formik.errors.net_weight &&
+                              formik.touched.net_weight
+                            }
+                            onChange={(e) => {
+                              formik.handleChange(e);
+                              formik.setFieldValue(
+                                "gross_weight",
+                                e.target.value
+                              );
+                            }}
                           />
                           <Input
                             type="number"
@@ -679,7 +829,10 @@ const Variation = ({
                             size="lg"
                             name="gross_weight"
                             value={formik.values?.gross_weight ?? ""}
-                            error={formik.errors.gross_weight}
+                            error={
+                              formik.errors.gross_weight &&
+                              formik.touched.gross_weight
+                            }
                             onChange={formik.handleChange}
                           />
                         </div>
@@ -714,24 +867,26 @@ const Variation = ({
                       />
                     </div>
 
-                    <div>
-                      <Input
-                        type="number"
-                        label="Regular Price"
-                        size="lg"
-                        name="regular_price"
-                        onChange={formik.handleChange}
-                        value={formik.values?.regular_price}
-                        error={
-                          formik.errors.regular_price &&
-                          formik.touched.regular_price
-                        }
-                      />
-                    </div>
-
                     {formik.values?.isPriceFixed && (
+                      <div>
+                        <Input
+                          type="number"
+                          label="Product Price"
+                          size="lg"
+                          name="regular_price"
+                          onChange={formik.handleChange}
+                          value={formik.values?.regular_price}
+                          error={
+                            formik.errors.regular_price &&
+                            formik.touched.regular_price
+                          }
+                        />
+                      </div>
+                    )}
+
+                    {!formik.values?.isPriceFixed && (
                       <>
-                        <div>
+                        {/* <div>
                           <Input
                             type="number"
                             label="Metal Amount"
@@ -740,8 +895,12 @@ const Variation = ({
                             value={formik.values?.metal_amount ?? ""}
                             error={formik.errors.metal_amount}
                             onChange={formik.handleChange}
+                            disabled
                           />
                         </div>
+                        <div>
+                          <b>Final Price:</b> {Number(finalPrice).toFixed(2)}
+                        </div> */}
                         <div className="w-full flex gap-5 items-center">
                           <div className="w-1/2">
                             <Select
@@ -1008,7 +1167,10 @@ const Variation = ({
                             <Option value="Per Piece / Flat">
                               Per Piece / Flat
                             </Option>
-                            <Option value="Per(%) On Metal Rate On Karat">
+                            <Option
+                              disabled={formik.values?.isPriceFixed}
+                              value="Per(%) On Metal Rate On Karat"
+                            >
                               Per(%) On Metal Rate On Karat
                             </Option>
                           </Select>
@@ -1025,12 +1187,40 @@ const Variation = ({
                       </div>
                     )}
                     <div className="mt-5">
-                      <Input
+                      {/* <Input
                         label="VAT/Taxes (%)"
                         size="lg"
                         type="number"
                         value={taxValue}
                         onChange={(e) => setTaxValue(e.target.value)}
+                      /> */}
+
+                      <Select
+                        label="VAT/Taxes Type"
+                        size="lg"
+                        onChange={(value) => setTaxValue(value)}
+                        value={taxValue ?? ""}
+                      >
+                        <Option value="None">None</Option>
+                        <Option value="5">5</Option>
+                      </Select>
+                    </div>
+
+                    <div className="mt-5 flex gap-5 items-center">
+                      <Input
+                        disabled
+                        label="Subtotal"
+                        size="lg"
+                        type="number"
+                        value={subtotal}
+                      />
+
+                      <Input
+                        disabled
+                        label="Total"
+                        size="lg"
+                        type="number"
+                        value={total}
                       />
                     </div>
                   </div>

@@ -7,6 +7,7 @@ import {
   Input,
   Option,
   Select,
+  Spinner,
   Step,
   Stepper,
   Typography,
@@ -57,7 +58,7 @@ const ProductForm = ({
   );
   const [selectedAttributes, setSelectedAttributes] = useState([]);
   const [selectedValues, setSelectedValues] = useState([]);
-  const [attributeValues, setAttributesValue] = useState([]);
+  // const [attributeValues, setAttributesValue] = useState([]);
   const [isGold, setIsGold] = useState(false);
   const [isAsian, setIsAsian] = useState(false);
   const [asianSizes, setAsianSizes] = useState([]);
@@ -65,16 +66,30 @@ const ProductForm = ({
   const [usSizes, setUsSizes] = useState([]);
   const [goldCarate, setGoldCarate] = useState([]);
   const [productData, setProductData] = useState(product ?? {});
+  const [pricing, setPricing] = useState({});
+
+  const getPricing = async () => {
+    const data = await get("/api/pricing_history/latest");
+    setPricing(data?.data?.latestPricing);
+  };
 
   const handleOpen = (value) => setOpen(open === value ? 0 : value);
   const handleValueChange = (attributeId, newValue, isMultiple) => {
     // check if attribute material has value gold
-    if (attributeId === 8 && newValue?.value === 6) {
+    if (
+      attributeId === attributeIDs.MATERIAL &&
+      newValue?.value === attributeIDs.MATERIAL_GOLD
+    ) {
       setIsGold(true);
-    } else if (attributeId === 8 && newValue?.value !== 6) {
+    } else if (
+      attributeId === attributeIDs.MATERIAL &&
+      newValue?.value !== attributeIDs.MATERIAL_GOLD
+    ) {
       setIsGold(false);
       setSelectedValues([
-        ...selectedValues.filter((a) => a.attribute_id !== 10),
+        ...selectedValues.filter(
+          (a) => a.attribute_id !== attributeIDs.GOLDKARAT
+        ),
       ]);
     }
 
@@ -120,6 +135,7 @@ const ProductForm = ({
             aValues: isMultiple
               ? newValue.map((option) => option.value)
               : [newValue?.value],
+            isMultiple,
           };
         }
         return value;
@@ -134,13 +150,26 @@ const ProductForm = ({
           aValues: isMultiple
             ? newValue.map((option) => option.value)
             : [newValue?.value],
+          isMultiple,
         });
       }
       // check if attribute material has value gold
-      if (attributeId === 8 && newValue?.value === 6) {
-        updatedValues.push({ attribute_id: 10, aValues: [] });
-      } else if (attributeId === 8 && newValue?.value !== 6) {
-        updatedValues = updatedValues.filter((a) => a.attribute_id !== 10);
+      if (
+        attributeId === attributeIDs.MATERIAL &&
+        newValue?.value === attributeIDs.MATERIAL_GOLD
+      ) {
+        updatedValues.push({
+          attribute_id: attributeIDs.GOLDKARAT,
+          aValues: [],
+          isMultiple: false,
+        });
+      } else if (
+        attributeId === attributeIDs.MATERIAL &&
+        newValue?.value !== attributeIDs.MATERIAL_GOLD
+      ) {
+        updatedValues = updatedValues.filter(
+          (a) => a.attribute_id !== attributeIDs.GOLDKARAT
+        );
       }
 
       // check if attribute size has value asian
@@ -151,6 +180,7 @@ const ProductForm = ({
         updatedValues.push({
           attribute_id: attributeIDs.SIZE_ASIAN,
           aValues: [],
+          isMultiple: false,
         });
       } else if (
         attributeId === attributeIDs.SIZE &&
@@ -166,7 +196,11 @@ const ProductForm = ({
         attributeId === attributeIDs.SIZE &&
         newValue?.value === attributeIDs.US
       ) {
-        updatedValues.push({ attribute_id: attributeIDs.SIZE_US, aValues: [] });
+        updatedValues.push({
+          attribute_id: attributeIDs.SIZE_US,
+          aValues: [],
+          isMultiple: false,
+        });
       } else if (
         attributeId === attributeIDs.SIZE &&
         newValue?.value !== attributeIDs.US
@@ -179,7 +213,6 @@ const ProductForm = ({
       updatedValues = updatedValues.filter((attr) => {
         return attributes.includes(attr.attribute_id);
       });
-
       return updatedValues;
     });
   };
@@ -188,6 +221,7 @@ const ProductForm = ({
     return selectedValues
       .map((attr) => ({
         id: attr.attribute_id,
+        isMultiple: attr.isMultiple,
         attribute: {
           name: productAttributes.find(
             (pa) => pa.attribute_id === attr.attribute_id
@@ -376,14 +410,16 @@ const ProductForm = ({
             if (
               goldCarate.length > 0 &&
               selectedattributesValues.find(
-                (a) => a.attribute_id === 8 && a.aValues.includes(6)
+                (a) =>
+                  a.attribute_id === attributeIDs.MATERIAL &&
+                  a.aValues.includes(attributeIDs.MATERIAL_GOLD)
               )
             ) {
               selectedattributesValues = [
                 ...selectedattributesValues?.filter(
-                  (a) => a.attribute_id !== 10
+                  (a) => a.attribute_id !== attributeIDs.GOLDKARAT
                 ),
-                { attribute_id: 10, aValues: goldCarate },
+                { attribute_id: attributeIDs.GOLDKARAT, aValues: goldCarate },
               ];
             }
 
@@ -426,7 +462,7 @@ const ProductForm = ({
 
             const productData = await get(`/api/product/${product.product_id}`);
             setProductData(productData.data?.product);
-            // router.refresh();
+            router.refresh();
             !isLastStep && setActiveStep((cur) => cur + 1);
           } catch (error) {
             console.log(error);
@@ -439,14 +475,6 @@ const ProductForm = ({
 
         if (activeStep === 3) {
           try {
-            console.log({
-              ...values,
-              attributes: values.attributes.join(","),
-              tags: values.tags.join(","),
-              collections: values.collections.join(","),
-              genders: values.genders.join(","),
-              patterns: values.patterns.join(","),
-            });
             const response = await update(
               `/api/product/${product.product_id}`,
               {
@@ -460,7 +488,7 @@ const ProductForm = ({
             );
             router.refresh();
             router.push(`/admin/products`);
-            !isLastStep && setActiveStep((cur) => cur + 1);
+            setActiveStep(0);
           } catch (error) {}
         }
       } else {
@@ -540,7 +568,7 @@ const ProductForm = ({
       );
       // check if gold caret is selected
       const goldCaretItem = newAttributeValues.find(
-        (a) => a.attribute_id === 10
+        (a) => a.attribute_id === attributeIDs.GOLDKARAT
       );
 
       if (goldCaretItem) {
@@ -610,10 +638,16 @@ const ProductForm = ({
       }
     }
     setLoading(false);
+
+    getPricing();
   }, []);
 
   if (loading) {
-    return null;
+    return (
+      <div className="w-full flex justify-center items-center">
+        <Spinner />
+      </div>
+    );
   }
 
   return (
@@ -948,7 +982,7 @@ const ProductForm = ({
                     {productAttributes
                       .filter((a) => {
                         return (
-                          a.attribute_id !== 10 &&
+                          a.attribute_id !== attributeIDs.GOLDKARAT &&
                           a.attribute_id !== attributeIDs.SIZE_ASIAN &&
                           a.attribute_id !== attributeIDs.SIZE_US
                         );
@@ -1085,8 +1119,11 @@ const ProductForm = ({
                           ...variations,
                           {
                             name: productAttributeValues
+                              .filter(Boolean)
                               ?.map((pa) => pa?.name)
                               .join(", "),
+                            productAttributeValues:
+                              productAttributeValues.filter(Boolean),
                           },
                         ]);
                       }
@@ -1225,7 +1262,9 @@ const ProductForm = ({
                   ) : (
                     ""
                   )} */}
-                  {selectedAttributes &&
+
+                  {product &&
+                    selectedAttributes &&
                     selectedAttributes.length > 0 &&
                     selectedAttributes.map(
                       (attribute, index) =>
@@ -1235,7 +1274,6 @@ const ProductForm = ({
                             <Select
                               label={attribute?.attribute?.name}
                               key={index}
-                              value={attributeValues[index]}
                               onChange={(value) => {
                                 let id = product?.ProductAttributeValue.find(
                                   (pa) => {
@@ -1250,27 +1288,21 @@ const ProductForm = ({
                                     let attributeValues = [...prev];
                                     attributeValues[index] = {
                                       productAttributeValue_id: id,
-                                      name: value?.name,
+                                      name: `${attribute?.attribute?.name} : ${value?.name}`,
                                       id: value?.id,
+                                      attributeId: attribute.id,
+                                      attributeValueName: value?.name,
                                     };
                                     return attributeValues;
                                   });
                                 }
-
-                                setAttributesValue((prev) => {
-                                  let attributeValues = [...prev];
-                                  attributeValues[index] = value;
-                                  return attributeValues;
-                                });
                               }}
                             >
-                              {attribute?.attribute?.values.map(
-                                (value, index) => (
-                                  <Option key={index} value={value ?? ""}>
-                                    {value?.name}
-                                  </Option>
-                                )
-                              )}
+                              {attribute?.attribute?.values.map((value, i) => (
+                                <Option key={i} value={value ?? ""}>
+                                  {value?.name}
+                                </Option>
+                              ))}
                             </Select>
                           </div>
                         )
@@ -1284,9 +1316,12 @@ const ProductForm = ({
                   open={open}
                   handleOpen={handleOpen}
                   variation={variation}
-                  productAttributeValues={productAttributeValues}
+                  productAttributeValues={productAttributeValues.filter(
+                    Boolean
+                  )}
                   variations={variations}
                   setVariations={setVariations}
+                  pricing={pricing}
                 />
               ))}
             </div>

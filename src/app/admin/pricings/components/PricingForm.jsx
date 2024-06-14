@@ -14,203 +14,213 @@ import React, { useState } from "react";
 import DataTable from "react-data-table-component";
 import { useRouter } from "next/navigation";
 import * as Yup from "yup";
+import Moment from "react-moment";
 
-const PricingForm = ({ attributes, pricings }) => {
+const PricingForm = ({ pricing, pricings }) => {
   const router = useRouter();
-  const [pricing, setPricing] = useState(false);
-
+  console.log("pricing", pricings);
   const columns = [
     {
-      name: "Name",
-      selector: (row) => row?.name,
+      name: "Date",
+      selector: (row) => row?.date,
     },
     {
-      name: "Price",
-      selector: (row) => row?.price,
+      name: "Time",
+      selector: (row) => <Moment format="hh:mm A">{row?.created_at}</Moment>,
     },
     {
-      name: "Quantity",
-      selector: (row) => row?.base_q,
+      name: "24 Karat",
+      selector: (row) => row?.karat24,
     },
     {
-      name: "Unit",
-      selector: (row) => row?.unit,
+      name: "22 Karat",
+      selector: (row) => row?.karat22,
     },
     {
-      name: "Action",
-      selector: (row) => (
-        <>
-          <IconButton
-            variant="text"
-            className="rounded-full"
-            onClick={() => setPricing(row)}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width={18}
-              height={18}
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="currentColor"
-                d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83l3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"
-              ></path>
-            </svg>
-          </IconButton>
-        </>
-      ),
+      name: "21 Karat",
+      selector: (row) => row?.karat21,
+    },
+    {
+      name: "18 Karat",
+      selector: (row) => row?.karat18,
+    },
+    {
+      name: "14 Karat",
+      selector: (row) => row?.karat14,
+    },
+    {
+      name: "9 Karat",
+      selector: (row) => row?.karat09,
+    },
+    {
+      name: "Silver",
+      selector: (row) => row?.silver,
+    },
+    {
+      name: "Platinum",
+      selector: (row) => row?.platinum,
+    },
+    {
+      name: "Palladium",
+      selector: (row) => row?.palladium,
     },
   ];
 
+  const validationSchema = Yup.object().shape({
+    karat24: Yup.number().min(0, "Must be greater than or equal to 0"),
+    karat22: Yup.number().min(0, "Must be greater than or equal to 0"),
+    karat21: Yup.number().min(0, "Must be greater than or equal to 0"),
+    karat18: Yup.number().min(0, "Must be greater than or equal to 0"),
+    karat14: Yup.number().min(0, "Must be greater than or equal to 0"),
+    karat09: Yup.number().min(0, "Must be greater than or equal to 0"),
+    silver: Yup.number().min(0, "Must be greater than or equal to 0"),
+    platinum: Yup.number().min(0, "Must be greater than or equal to 0"),
+    palladium: Yup.number().min(0, "Must be greater than or equal to 0"),
+  });
+
   const formik = useFormik({
     initialValues: {
-      name: pricing ? pricing.name : "",
-      attributeValue_id: pricing ? pricing.attributeValue_id : "",
-      price: pricing ? pricing.price : "",
-      base_q: pricing ? pricing.base_q : "",
-      unit: pricing ? pricing.unit : "",
-      purity: pricing ? pricing.purity : "",
+      karat24: pricing?.karat24 ?? "",
+      karat22: pricing?.karat22 ?? "",
+      karat21: pricing?.karat21 ?? "",
+      karat18: pricing?.karat18 ?? "",
+      karat14: pricing?.karat14 ?? "",
+      karat09: pricing?.karat09 ?? "",
+      silver: pricing?.silver ?? "",
+      platinum: pricing?.platinum ?? "",
+      palladium: pricing?.palladium ?? "",
     },
     enableReinitialize: true,
-    validationSchema: Yup.object().shape({
-      name: Yup.string().required("Name is required"),
-      attributeValue_id: Yup.string().required("Attribute is required"),
-      price: Yup.string().required("Price is required"),
-      base_q: Yup.string().required("Quantity is required"),
-      unit: Yup.string().required("Unit is required"),
-      purity: Yup.string().required("Purity is required"),
-    }),
+    validationSchema,
     onSubmit: async (values) => {
-      if (pricing) {
-        try {
-          const response = await update(
-            `/api/attribute_value_pricing/${pricing.pricing_id}`,
-            values
-          );
-          router.refresh();
-          enqueueSnackbar("Pricing Updated Successfully", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
-          setPricing(false);
-        } catch (error) {
-          console.log(error);
-          enqueueSnackbar(error?.message, {
-            variant: "error",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
-        }
-      } else {
-        try {
-          const response = await post("/api/attribute_value_pricing", values);
-          router.refresh();
-          formik.resetForm();
-          enqueueSnackbar("Pricing Created Successfully", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
-        } catch (error) {
-          console.log(error);
-          enqueueSnackbar(error?.response?.data?.message, {
-            variant: "error",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
-        }
+      try {
+        const response = await post("/api/pricing_history", values);
+        router.refresh();
+        formik.resetForm();
+        enqueueSnackbar("Pricing Created Successfully", {
+          variant: "success",
+          preventDuplicate: true,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
+          autoHideDuration: 3000,
+          style: {
+            background: "white",
+            color: "black",
+            borderRadius: ".5rem",
+            boxShadow:
+              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+            padding: "0 4px",
+          },
+        });
+      } catch (error) {
+        console.log(error);
+        enqueueSnackbar(error?.response?.data?.message, {
+          variant: "error",
+          preventDuplicate: true,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
+          autoHideDuration: 3000,
+          style: {
+            background: "white",
+            color: "black",
+            borderRadius: ".5rem",
+            boxShadow:
+              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+            padding: "0 4px",
+          },
+        });
       }
     },
   });
+
   return (
     <>
       <div className="flex items-center justify-between mb-10 intro-y">
-        <h2 className="text-2xl font-semibold">Pricing</h2>
-        <Button
-          size="md"
-          className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
-          onClick={() => setPricing(false)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={24}
-            height={24}
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentColor"
-              d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
-            ></path>
-          </svg>
-          Add Price
-        </Button>
+        <h2 className="text-2xl font-semibold">Today's Metal Rate</h2>
+
+        <div>
+          <p>
+            <Moment format="DD MMM YYYY" interval={1000} />
+          </p>
+          <p>
+            <Moment format="hh:mm:ss A" interval={1000} />
+          </p>
+        </div>
       </div>
 
       <div className="mt-10 rounded-2xl shadow-3xl bg-white">
         <Formik initialValues={formik.initialValues}>
           <form onSubmit={formik.handleSubmit} className=" rounded p-7 mb-4">
             <div className="flex flex-col gap-5">
-              <div className="grid items-start grid-cols-2 gap-5">
+              <div className="grid items-start grid-cols-3 gap-5">
+                <div class="col-span-3 flex items-center text-sm text-gray-800 after:flex-1 after:border-t after:border-gray-200 after:ms-6 dark:text-white dark:after:border-neutral-600">
+                  Metal
+                </div>
+
                 <div>
                   <Input
-                    label="Name"
-                    type="text"
-                    name="name"
-                    value={formik.values?.name || ""}
+                    label="Silver"
+                    type="number"
+                    name="silver"
+                    value={formik.values?.silver || ""}
                     onChange={formik.handleChange}
-                    error={formik.touched.name && formik.errors.name}
+                    error={formik.touched.silver && formik.errors.silver}
+                    containerProps={{
+                      className: "min-w-0",
+                    }}
                   />
                 </div>
+
                 <div>
+                  <Input
+                    label="Platinum"
+                    type="number"
+                    name="platinum"
+                    value={formik.values?.platinum || ""}
+                    onChange={formik.handleChange}
+                    error={formik.touched.platinum && formik.errors.platinum}
+                    containerProps={{
+                      className: "min-w-0",
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <Input
+                    label="Palladium"
+                    type="number"
+                    name="palladium"
+                    value={formik.values?.palladium || ""}
+                    onChange={formik.handleChange}
+                    error={formik.touched.palladium && formik.errors.palladium}
+                    containerProps={{
+                      className: "min-w-0",
+                    }}
+                  />
+                </div>
+
+                <div class="col-span-3 pt-1  flex items-center text-sm text-gray-800 after:flex-1 after:border-t after:border-gray-200 after:ms-6 dark:text-white dark:after:border-neutral-600">
+                  Gold
+                </div>
+
+                <div>
+                  <Input
+                    label="24 Karat"
+                    type="number"
+                    name="karat24"
+                    value={formik.values?.karat24 ?? ""}
+                    onChange={formik.handleChange}
+                    error={formik.touched.karat24 && formik.errors.karat24}
+                    containerProps={{
+                      className: "min-w-0",
+                    }}
+                  />
+                </div>
+                {/* <div>
                   {attributes && attributes?.length > 0 && (
                     <Select
                       label="Attribute"
@@ -225,52 +235,80 @@ const PricingForm = ({ attributes, pricings }) => {
                       }
                     >
                       {attributes?.map((attribute) => (
-                        <Option value={attribute?.id}>{attribute?.name}</Option>
+                        <Option key={attribute?.id} value={attribute?.id}>
+                          {attribute?.name}
+                        </Option>
                       ))}
                     </Select>
                   )}
-                </div>
+                </div> */}
                 <div>
                   <Input
-                    label="Price"
+                    label="22 Karat"
                     type="number"
-                    name="price"
-                    value={formik.values?.price || ""}
+                    name="karat22"
+                    value={formik.values?.karat22 || ""}
                     onChange={formik.handleChange}
-                    error={formik.touched.price && formik.errors.price}
+                    error={formik.touched.karat22 && formik.errors.karat22}
+                    containerProps={{
+                      className: "min-w-0",
+                    }}
                   />
                 </div>
 
                 <div>
                   <Input
-                    label="Quantity"
+                    label="21 Karat"
                     type="number"
-                    name="base_q"
-                    value={formik.values?.base_q || ""}
+                    name="karat21"
+                    value={formik.values?.karat21 || ""}
                     onChange={formik.handleChange}
-                    error={formik.touched.base_q && formik.errors.base_q}
+                    error={formik.touched.karat21 && formik.errors.karat21}
+                    containerProps={{
+                      className: "min-w-0",
+                    }}
                   />
                 </div>
 
                 <div>
                   <Input
-                    label="Unit"
-                    type="text"
-                    name="unit"
-                    value={formik.values?.unit || ""}
+                    label="18 Karat"
+                    type="number"
+                    name="karat18"
+                    value={formik.values?.karat18 || ""}
                     onChange={formik.handleChange}
-                    error={formik.touched.unit && formik.errors.unit}
+                    error={formik.touched.karat18 && formik.errors.karat18}
+                    containerProps={{
+                      className: "min-w-0",
+                    }}
                   />
                 </div>
 
                 <div>
                   <Input
-                    label="Purity"
-                    type="text"
-                    name="purity"
-                    value={formik.values?.purity || ""}
+                    label="14 Karat"
+                    type="number"
+                    name="karat14"
+                    value={formik.values?.karat14 || ""}
                     onChange={formik.handleChange}
-                    error={formik.touched.purity && formik.errors.purity}
+                    error={formik.touched.karat14 && formik.errors.karat14}
+                    containerProps={{
+                      className: "min-w-0",
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <Input
+                    label="9 Karat"
+                    type="number"
+                    name="karat09"
+                    value={formik.values?.karat09 || ""}
+                    onChange={formik.handleChange}
+                    error={formik.touched.karat09 && formik.errors.karat09}
+                    containerProps={{
+                      className: "min-w-0",
+                    }}
                   />
                 </div>
               </div>
@@ -282,7 +320,7 @@ const PricingForm = ({ attributes, pricings }) => {
                   className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
                   loading={formik.isSubmitting}
                 >
-                  {pricing ? "Update" : "Add"}
+                  Add
                 </Button>
               </div>
             </div>

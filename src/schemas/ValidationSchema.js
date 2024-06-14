@@ -55,6 +55,11 @@ export const productAttributeValidationSchema = Yup.object({
   name: Yup.string().required("Name is required"),
 });
 
+export const productValueValidationSchema = Yup.object({
+  name: Yup.string().required("Name is required"),
+  attribute_id: Yup.string().required("Attribute is required"),
+});
+
 export const genderValidationSchema = Yup.object({
   name: Yup.string().required("Name is required"),
 });

@@ -227,6 +227,23 @@ model attributeValuePricing {
 	purity			            String?
 }
 
+model PricingHistory {
+	pricingHistory_id		  Int		            @id @default(autoincrement())
+	date				          String	          @unique
+	karat24				        Float
+	karat22				        Float
+	karat21				        Float
+  karat18				        Float
+	karat14				        Float
+	karat09				        Float
+	silver				        Float
+	platinum			        Float
+	palladium			        Float
+
+	created_at            DateTime          @default(now())
+	updated_at            DateTime          @updatedAt
+}
+
 model Collection {
   collection_id Int                 @id @default(autoincrement())
   name          String              @unique
