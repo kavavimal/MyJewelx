@@ -9,26 +9,25 @@ const addAttributeValueSchema = z.object({
 
 export async function POST(request) {
   try {
-    const res = await request.formData();
+    const req = await request.formData();
 
-    const name = res.get("name");
-    const attribute_id = Number(res.get("attribute_id"));
-    
+    const name = req.get("name");
+    const attribute_id = Number(req.get("attribute_id"));
+
+    const exists = await prisma.attributeValue.findFirst({
+      where: { name: name, attribute_id: attribute_id },
+    });
+
+    if (exists) {
+      return NextResponse.json({
+        error: `${name} attributeValue name already exist with attribute_id ${attribute_id}`,
+      });
+    }
+
     const AttributeValueData = addAttributeValueSchema.parse({
       name,
       attribute_id,
     });
-    console.log("name and attribute_id", AttributeValueData);
-
-    // const exists = await prisma.attributeValue.findFirst({
-    //   where: { name: name, attribute_id: attribute_id },
-    // });
-
-    // if (exists) {
-    //   return NextResponse.json({
-    //     error: `Attribute value with name ${AttributeValueData.name} already exists.`,
-    //   });
-    // }
 
     const result = await prisma.attributeValue.create({
       data: {

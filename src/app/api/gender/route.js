@@ -13,6 +13,19 @@ export async function POST(request) {
 
     const genderData = genderSchema.parse({ name });
 
+    const exists = await prisma.gender.findFirst({
+      where: { name: genderData.name },
+    });
+
+    if (exists) {
+      return NextResponse.json(
+        {
+          error: `Gender with name ${genderData.name} already exists.`,
+        },
+        { status: 400 }
+      );
+    }
+
     const newGender = await prisma.gender.create({
       data: genderData,
     });

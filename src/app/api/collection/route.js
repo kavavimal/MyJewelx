@@ -9,9 +9,20 @@ const collectionSchema = z.object({
 
 export async function POST(request) {
   try {
-    const res = await request.formData();
-    const name = res.get("name");
-    const description = res.get("description");
+    const req = await request.formData();
+    const name = req.get("name");
+
+    const exists = await prisma.collection.findFirst({
+      where: { name: name },
+    });
+
+    if (exists) {
+      return NextResponse.json({
+        error: `${name} collection name already exist`,
+      });
+    }
+
+    const description = req.get("description");
 
     const collectionData = collectionSchema.parse({ name, description });
 

@@ -7,7 +7,7 @@ import prisma from "@/lib/prisma";
 const productVariationSchema = z.object({
   product_id: z.number(),
   productAttributeValue_id: z.array(z.number()),
-  variation_name: z.string(),
+  variation_name: z.string().min(1, "variation_name required").max(100),
   regular_price: z.number(),
   selling_price: z.number().optional(),
   description: z.string().min(1, "description required").max(200),
@@ -29,35 +29,48 @@ const productVariationSchema = z.object({
 
 export async function POST(request) {
   try {
-    const res = await request.formData();
+    const req = await request.formData();
 
     const variationData = {
-      product_id: Number(res.get("product_id")),
-      productAttributeValue_id: res
+      product_id: Number(req.get("product_id")),
+      productAttributeValue_id: req
         .get("productAttributeValue_id")
         .split(",")
         .map((id) => parseInt(id)),
-      sku: res.get("sku"),
-      variation_name: res.get("variation_name"),
-      regular_price: Number(res.get("regular_price")),
-      selling_price: Number(res.get("selling_price")),
-      description: res.get("description"),
-      stock_management: res.get("stock_management") === "true" ? true : false,
-      stock_status: res.get("stock_status") === "true" ? true : false,
-      quantity: Number(res.get("quantity")),
-      length: Number(res.get("length")),
-      height: Number(res.get("height")),
-      width: Number(res.get("width")),
-      thickness: Number(res.get("thickness")),
-      weight_unit: res.get("weight_unit"),
-      net_weight: Number(res.get("net_weight")),
-      gross_weight: Number(res.get("gross_weight")),
-      isPriceFixed: res.get("isPriceFixed") === "true" ? true : false,
-      other_charges: res.get("other_charges"),
-      making_charges: res.get("making_charges"),
+      sku: req.get("sku"),
+      variation_name: req.get("variation_name"),
+      regular_price: Number(req.get("regular_price")),
+      selling_price: Number(req.get("selling_price")),
+      description: req.get("description"),
+      stock_management: req.get("stock_management") === "true" ? true : false,
+      stock_status: req.get("stock_status") === "true" ? true : false,
+      quantity: Number(req.get("quantity")),
+      length: Number(req.get("length")),
+      height: Number(req.get("height")),
+      width: Number(req.get("width")),
+      thickness: Number(req.get("thickness")),
+      weight_unit: req.get("weight_unit"),
+      net_weight: Number(req.get("net_weight")),
+      gross_weight: Number(req.get("gross_weight")),
+      isPriceFixed: req.get("isPriceFixed") === "true" ? true : false,
+      other_charges: req.get("other_charges"),
+      making_charges: req.get("making_charges"),
     };
 
     const parsedVariation = productVariationSchema.parse(variationData);
+
+    const existsWithSKU = await prisma.productVariation.findFirst({
+      where: { sku: variationData.sku },
+    });
+
+    if (existsWithSKU) {
+      return NextResponse.json(
+        {
+          error: `A product variation with similar SKU ${parsedVariation.sku} is found.`,
+        },
+        { status: 400 }
+      );
+    }
 
     const existingVariations = await prisma.productVariation.findMany({
       where: { product_id: parsedVariation.product_id },
@@ -92,7 +105,40 @@ export async function POST(request) {
       );
     }
 
-    const files = await res.getAll("files[]");
+    const variationQuery = {
+      product_id: parsedVariation.product_id,
+      productAttributeValues: {
+        create: [
+          ...parsedVariation.productAttributeValue_id.map((id) => ({
+            productAttributeValue: {
+              connect: { productAttributeValue_id: parseInt(id) },
+            },
+          })),
+        ],
+      },
+      variation_name: parsedVariation.variation_name,
+      regular_price: parsedVariation.regular_price,
+      selling_price: variationData.selling_price
+        ? parsedVariation.selling_price
+        : null,
+      description: parsedVariation.description,
+      sku: parsedVariation.sku,
+      stock_management: parsedVariation.stock_management,
+      stock_status: parsedVariation.stock_status,
+      quantity: parsedVariation.quantity,
+      length: parsedVariation.length,
+      height: parsedVariation.height,
+      width: parsedVariation.width,
+      thickness: parsedVariation.thickness,
+      weight_unit: parsedVariation.weight_unit,
+      net_weight: parsedVariation.net_weight,
+      gross_weight: parsedVariation.gross_weight,
+      isPriceFixed: parsedVariation.isPriceFixed,
+      other_charges: parsedVariation.other_charges,
+      making_charges: parsedVariation.making_charges,
+    };
+
+    const files = await req.getAll("files[]");
     let images = [];
     if (files) {
       for (let i = 0; i < files.length; i++) {
@@ -100,74 +146,47 @@ export async function POST(request) {
 
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
+        const dateSuffix = Date.now();
 
         const path = join(
           process.cwd(),
           "/public/assets/uploads",
-          parsedVariation.product_id + variationData.sku + "_" + i + file.name
+          `${dateSuffix}_${i}_${file.name}`
         );
         await writeFile(path, buffer);
 
-        images.push(
-          "/assets/uploads/" +
-            parsedVariation.product_id +
-            variationData.sku +
-            "_" +
-            i +
-            file.name
-        );
+        images.push({
+          path: `/assets/uploads/${dateSuffix}_${i}_${file.name}`,
+          image_type: "variation",
+        });
       }
     } else
-      NextResponse.json(
+      return NextResponse.json(
         {
           error: "Product-Variation should have at lease 1 Image",
         },
         { status: 400 }
       );
 
+    if (images.length > 0) {
+      variationQuery.image = {
+        createMany: {
+          data: images,
+        },
+      };
+    }
+
     const mainProduct = await prisma.product.findUnique({
       where: { product_id: parsedVariation.product_id },
     });
 
     const result = await prisma.productVariation.create({
-      data: {
-        product_id: parsedVariation.product_id,
-        variation_name: parsedVariation.variation_name,
-        productAttributeValues: {
-          create: [
-            ...parsedVariation.productAttributeValue_id.map((id) => ({
-              productAttributeValue: {
-                connect: { productAttributeValue_id: parseInt(id) },
-              },
-            })),
-          ],
-        },
-        regular_price: parsedVariation.regular_price,
-        selling_price: variationData.selling_price
-          ? parsedVariation.selling_price
-          : null,
-        description: parsedVariation.description,
-        sku: parsedVariation.sku,
-        stock_management: parsedVariation.stock_management,
-        stock_status: parsedVariation.stock_status,
-        quantity: parsedVariation.quantity,
-        length: parsedVariation.length,
-        height: parsedVariation.height,
-        width: parsedVariation.width,
-        thickness: parsedVariation.thickness,
-        weight_unit: parsedVariation.weight_unit,
-        net_weight: parsedVariation.net_weight,
-        gross_weight: parsedVariation.gross_weight,
-        isPriceFixed: parsedVariation.isPriceFixed,
-        other_charges: parsedVariation.other_charges,
-        making_charges: parsedVariation.making_charges,
-        images: images,
-      },
+      data: variationQuery,
     });
 
     return NextResponse.json(
       {
-        message: `A variation of product ${mainProduct.name} is added`,
+        message: `A variation of product ${mainProduct.product_name} is added`,
         result,
       },
       { status: 201 }

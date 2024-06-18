@@ -19,8 +19,8 @@ import { get, post, update } from "@/utils/api";
 import { Form, Formik, useFormik } from "formik";
 import { useRouter } from "next/navigation";
 import { productValidationSchema } from "@/schemas/ValidationSchema";
-import * as Yup from "yup";
 import { attributeIDs } from "@/utils/constants";
+import ProductAttributeItem from "./ProductAttributeItem";
 
 const ProductForm = ({
   product,
@@ -58,7 +58,6 @@ const ProductForm = ({
   );
   const [selectedAttributes, setSelectedAttributes] = useState([]);
   const [selectedValues, setSelectedValues] = useState([]);
-  // const [attributeValues, setAttributesValue] = useState([]);
   const [isGold, setIsGold] = useState(false);
   const [isAsian, setIsAsian] = useState(false);
   const [asianSizes, setAsianSizes] = useState([]);
@@ -334,30 +333,87 @@ const ProductForm = ({
     label: size.name,
   }));
 
+  const brandsOptions = [
+    {
+      value: "jimmy_choo",
+      label: "Jimmy Choo",
+    },
+    {
+      value: "manolo",
+      label: "Manolo",
+    },
+    {
+      value: "Prada",
+      label: "Prada",
+    },
+    {
+      value: "galiano",
+      label: "Galiano",
+    },
+    {
+      value: "louis vuitton",
+      label: "Louis Vuitton",
+    },
+    {
+      value: "stella_mccartney",
+      label: "Stella McCartney",
+    },
+    {
+      value: "donatella_versace",
+      label: "Donatella Versace",
+    },
+    {
+      value: "gucci",
+      label: "Gucci",
+    },
+  ];
+
+  const stylesOptions = [
+    {
+      value: "classic",
+      label: "Classic",
+    },
+    {
+      value: "modern",
+      label: "Modern",
+    },
+    {
+      value: "vintage",
+      label: "Vintage",
+    },
+  ];
+
+  const themeOptions = [
+    {
+      value: "nature_inspired",
+      label: "Nature Inspired",
+    },
+    {
+      value: "Floral",
+      label: "Floral",
+    },
+    {
+      value: "Celestial",
+      label: "Celestial",
+    },
+  ];
+
+  const trendsOptions = [
+    {
+      value: "color",
+      label: "Color",
+    },
+    {
+      value: "material",
+      label: "Material",
+    },
+    {
+      value: "size",
+      label: "Size",
+    },
+  ];
+
   const handlePrev = () => !isFirstStep && setActiveStep((cur) => cur - 1);
-
-  // const generateSchema = (productAttributes) => {
-  //   let schema = {};
-
-  //   productAttributes.forEach((productAttribute) => {
-  //     const attributeSchema = productAttribute.isMultiple
-  //       ? Yup.array().of(Yup.number()).required(`${productAttribute.name} is required`)
-  //       : Yup.number().required(`${productAttribute.name} is required`);
-
-  //     schema[productAttribute?.name] = attributeSchema;
-  //   });
-
-  //   return Yup.object().shape(schema);
-  // };
-
-  // console.log(generateSchema(productAttributes));
-
-  const attributeValidationSchema = Yup.object().shape({
-    attributes: Yup.array()
-      .of(Yup.number().required("Attribute is required"))
-      .min(1, "At least one attribute must be selected"),
-  });
-
   const formik = useFormik({
     initialValues: {
       product_name: product ? product?.product_name : "",
@@ -537,6 +593,7 @@ const ProductForm = ({
   useEffect(() => {
     if (Object.keys(productData).length > 0) {
       let attributes = [];
+      let variations = [];
 
       productData.ProductAttributeValue.forEach((item) => {
         if (!attributes.includes(item.attribute_id)) {
@@ -596,15 +653,16 @@ const ProductForm = ({
 
       setSelectedValues(newAttributeValues);
 
-      setVariations((prev) => {
-        const variations = productData.variations.filter(
-          (variation) =>
-            !prev.some((item) => item.variation_id === variation.variation_id)
-        );
-        return [...prev, ...variations];
-      });
+      variations = productData.variations;
+      setVariations(variations);
+    } else {
+      if (product) {
+        let variation = [];
+        variation = product.variations;
+        setVariations(variation);
+      }
     }
-  }, [productData]);
+  }, [productData, product]);
 
   useEffect(() => {
     if (product) {
@@ -677,7 +735,7 @@ const ProductForm = ({
               <div className="grid items-start grid-cols-2 gap-5 p-7 shadow-3xl rounded-2xl bg-white">
                 <div className="col-span-2">
                   <h3 className="text-xl font-medium tracking-wide">
-                    Product Information
+                    Basic Details
                   </h3>
                 </div>
 
@@ -765,161 +823,6 @@ const ProductForm = ({
                     <p className="text-red-500">{formik.errors.attributes}</p>
                   )}
                 </div>
-
-                {/* <div>
-                  <ReactSelect
-                    isMulti
-                    onChange={(options) =>
-                      formik.setFieldValue(
-                        "tags",
-                        options.map((option) => option.value)
-                      )
-                    }
-                    options={tagsOptions}
-                    name="tags"
-                    value={
-                      tagsOptions.filter((option) =>
-                        formik.values.tags.includes(option.value)
-                      ) ?? []
-                    }
-                    styles={style}
-                    placeholder="Tags"
-                  />
-
-                  {formik.errors.tags && formik.touched.tags && (
-                    <p className="text-red-500">{formik.errors.tags}</p>
-                  )}
-                </div>
-
-                <div className="col-span-2">
-                  <Checkbox
-                    label="Online Buyable"
-                    name="isOnlineBuyable"
-                    checked={formik.values.isOnlineBuyable ?? false}
-                    onChange={formik.handleChange}
-                    color={formik.errors.isOnlineBuyable ? "red" : "black"}
-                  />
-                </div>
-
-                <div>
-                  <ReactSelect
-                    isMulti
-                    options={featuredCollectionOptions}
-                    styles={style}
-                    value={
-                      featuredCollectionOptions.filter((option) =>
-                        formik.values.collections.includes(option.value)
-                      ) ?? []
-                    }
-                    name="collections"
-                    onChange={(options) =>
-                      formik.setFieldValue(
-                        "collections",
-                        options.map((option) => option.value)
-                      )
-                    }
-                    placeholder="Featured Collections"
-                  />
-                  {formik.errors.collections && formik.touched.collections && (
-                    <p className="text-red-500">{formik.errors.collections}</p>
-                  )}
-                </div>
-
-                <div>
-                  <ReactSelect
-                    isMulti
-                    options={patternOptions}
-                    value={
-                      patternOptions.filter((option) =>
-                        formik.values.patterns.includes(option.value)
-                      ) ?? []
-                    }
-                    onChange={(options) =>
-                      formik.setFieldValue(
-                        "patterns",
-                        options.map((option) => option.value)
-                      )
-                    }
-                    styles={style}
-                    placeholder="Pattern"
-                  />
-
-                  {formik.errors.patterns && formik.touched.patterns && (
-                    <p className="text-red-500">{formik.errors.patterns}</p>
-                  )}
-                </div>
-
-                <div>
-                  {countries?.length > 0 && (
-                    <Select
-                      label="Made in Country"
-                      size="lg"
-                      name="country_id"
-                      error={
-                        formik.errors.country_id && formik.touched.country_id
-                      }
-                      value={formik.values.country_id ?? ""}
-                      onChange={(value) => {
-                        formik.setFieldValue("country_id", value);
-                      }}
-                    >
-                      {countries.map((country) => (
-                        <Option
-                          key={country.country_id}
-                          value={country.country_id}
-                        >
-                          {country.name}
-                        </Option>
-                      ))}
-                    </Select>
-                  )}
-                </div>
-
-                <div>
-                  {statesOptions && statesOptions.length > 0 && (
-                    <Select
-                      label="State"
-                      size="lg"
-                      name="states"
-                      error={formik.errors.states && formik.touched.states}
-                      value={formik.values.states ?? ""}
-                      onChange={(value) =>
-                        formik.setFieldValue("states", value)
-                      }
-                    >
-                      {statesOptions.map((state) => (
-                        <Option key={state.state_id} value={state.state_id}>
-                          {state.name}
-                        </Option>
-                      ))}
-                    </Select>
-                  )}
-                </div>
-
-                <div className="col-span-2">
-                  <ReactSelect
-                    isMulti
-                    placeholder="Gender"
-                    name="genders"
-                    options={gendersOptions}
-                    value={
-                      gendersOptions.filter((option) =>
-                        formik.values.genders.includes(option.value)
-                      ) ?? []
-                    }
-                    onChange={(options) =>
-                      formik.setFieldValue(
-                        "genders",
-                        options.map((option) => option.value)
-                      )
-                    }
-                    styles={style}
-                    className="col-span-3"
-                  />
-                  {formik.errors.genders && formik.touched.genders && (
-                    <p className="text-red-500">{formik.errors.genders}</p>
-                  )}
-                </div> */}
               </div>
             </Form>
           </Formik>
@@ -962,7 +865,7 @@ const ProductForm = ({
                   </h3>
 
                   <div className="flex flex-col gap-1">
-                    <Typography>Add Existing</Typography>
+                    <Typography>Attributes</Typography>
                     <ReactSelect
                       isMulti
                       name="attributes"
@@ -973,6 +876,13 @@ const ProductForm = ({
                       )}
                       onChange={(e) => {
                         setAttributes(e.map((a) => a.value));
+                        setSelectedValues((prev) => {
+                          return prev.filter((p) => {
+                            return e
+                              .map((a) => a.value)
+                              .includes(p.attribute_id);
+                          });
+                        });
                       }}
                     />
                   </div>
@@ -1002,97 +912,29 @@ const ProductForm = ({
                           )?.aValues ?? [];
 
                         return (
-                          attributes.includes(
-                            productAttribute.attribute_id
-                          ) && (
-                            <div key={index}>
-                              <div className="flex justify-between items-center mb-px">
-                                <Typography className="">
-                                  {productAttribute?.name}
-                                </Typography>
-                              </div>
-                              <div>
-                                <ReactSelect
-                                  isMulti={productAttribute?.isMultiple}
-                                  options={options}
-                                  styles={style}
-                                  name={productAttribute?.name}
-                                  placeholder={productAttribute?.name}
-                                  value={
-                                    productAttribute?.isMultiple
-                                      ? options.filter((option) => {
-                                          return (
-                                            Array.isArray(values) &&
-                                            values.includes(option.value)
-                                          );
-                                        })
-                                      : options.find(
-                                          (option) => option.value === values[0]
-                                        )
-                                  }
-                                  onChange={(newValue) => {
-                                    handleValueChange(
-                                      productAttribute.attribute_id,
-                                      newValue,
-                                      productAttribute?.isMultiple
-                                    );
-                                  }}
-                                />
-                                {formik.errors.productAttribute?.name && (
-                                  <p>{formik.errors.productAttribute?.name}</p>
-                                )}
-                              </div>
-                            </div>
-                          )
+                          <ProductAttributeItem
+                            attributes={attributes}
+                            productAttribute={productAttribute}
+                            options={options}
+                            style={style}
+                            values={values}
+                            handleValueChange={handleValueChange}
+                            formik={formik}
+                            isGold={isGold}
+                            karatOptions={karatOptions}
+                            goldCarate={goldCarate}
+                            setGoldCarate={setGoldCarate}
+                            asianSizeOptions={asianSizeOptions}
+                            asianSizes={asianSizes}
+                            setAsianSizes={setAsianSizes}
+                            USSizeOptions={USSizeOptions}
+                            usSizes={usSizes}
+                            setUsSizes={setUsSizes}
+                            isAsian={isAsian}
+                            isUS={isUS}
+                          />
                         );
                       })}
-
-                    {isGold && (
-                      <div>
-                        <Typography className="">Karats</Typography>
-                        <ReactSelect
-                          options={karatOptions}
-                          isMulti
-                          name="karats"
-                          value={karatOptions.filter((gc) =>
-                            goldCarate.includes(gc.value)
-                          )}
-                          styles={style}
-                          onChange={(newVal) =>
-                            setGoldCarate(newVal.map((a) => a.value))
-                          }
-                        />
-                      </div>
-                    )}
-                    {isAsian && (
-                      <div>
-                        <Typography className="">Asian Size</Typography>
-                        <ReactSelect
-                          isMulti
-                          options={asianSizeOptions}
-                          styles={style}
-                          value={asianSizeOptions.filter((a) =>
-                            asianSizes.includes(a.value)
-                          )}
-                          onChange={(e) => setAsianSizes(e.map((a) => a.value))}
-                        />
-                      </div>
-                    )}
-
-                    {isUS && (
-                      <div>
-                        <Typography className="">US Size</Typography>
-                        <ReactSelect
-                          isMulti
-                          options={USSizeOptions}
-                          styles={style}
-                          value={USSizeOptions.filter((a) =>
-                            usSizes.includes(a.value)
-                          )}
-                          onChange={(e) => setUsSizes(e.map((a) => a.value))}
-                        />
-                      </div>
-                    )}
                   </div>
                 </div>
               </Form>
@@ -1133,147 +975,15 @@ const ProductForm = ({
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-5">
-                  {/* {usSizes &&
-                    usSizes.length > 0 &&
-                    selectedAttributes.find(
-                      (a) =>
-                        a.attribute_id === attributeIDs.SIZE &&
-                        a.aValues.includes(attributeIDs.SIZE_US)
-                    ) && (
-                      <Select
-                        label={"US Size"}
-                        value={attributeValues["us"] ?? ""}
-                        onChange={(value) => {
-                          let id = product?.ProductAttributeValue.find((pa) => {
-                            return (
-                              pa?.attribute_id === attributeIDs.SIZE &&
-                              pa.attributeValue_id === value?.id
-                            );
-                          })?.productAttributeValue_id;
-                          if (id) {
-                            setProductAttributeValues((prev) => {
-                              let attributeValues = [...prev];
-                              attributeValues["us"] = {
-                                productAttributeValue_id: id,
-                                name: value?.name,
-                                id: value?.id,
-                              };
-                              return attributeValues;
-                            });
-                          }
-                          setAttributesValue((prev) => {
-                            let attributeValues = [...prev];
-                            attributeValues["us"] = value;
-                            return attributeValues;
-                          });
-                        }}
-                      >
-                        {usSizes.map((option) => (
-                          <Option key={option} value={option}>
-                            {option}
-                          </Option>
-                        ))}
-                      </Select>
-                    )}
-
-                  {asianSizes &&
-                    asianSizes.length > 0 &&
-                    selectedAttributes.find(
-                      (a) =>
-                        a.attribute_id === attributeIDs.SIZE &&
-                        a.aValues.includes(attributeIDs.SIZE_ASIAN)
-                    ) && (
-                      <Select
-                        label={"Asian Size"}
-                        value={attributeValues["asian"] ?? ""}
-                        onChange={(value) => {
-                          let id = product?.ProductAttributeValue.find((pa) => {
-                            return (
-                              pa?.attribute_id === attributeIDs.SIZE &&
-                              pa.attributeValue_id === value?.id
-                            );
-                          })?.productAttributeValue_id;
-                          if (id) {
-                            setProductAttributeValues((prev) => {
-                              let attributeValues = [...prev];
-                              attributeValues["asian"] = {
-                                productAttributeValue_id: id,
-                                name: value?.name,
-                                id: value?.id,
-                              };
-                              return attributeValues;
-                            });
-                          }
-                          setAttributesValue((prev) => {
-                            let attributeValues = [...prev];
-                            attributeValues["asian"] = value;
-                            return attributeValues;
-                          });
-                        }}
-                      >
-                        {asianSizes.map((option) => (
-                          <Option key={option} value={option}>
-                            {option}
-                          </Option>
-                        ))}
-                      </Select>
-                    )}
-                  {goldCarate &&
-                  goldCarate.length > 0 &&
-                  selectedAttributes.find(
-                    (a) => a.attribute_id === 8 && a.aValues.includes(6)
-                  ) ? (
-                    <>
-                      <Select
-                        label={"Gold Karet"}
-                        value={attributeValues["goldkaret"] ?? ""}
-                        onChange={(value) => {
-                          let id = product?.ProductAttributeValue.find((pa) => {
-                            return (
-                              pa?.attribute_id === 10 &&
-                              pa.attributeValue_id === value?.id
-                            );
-                          })?.productAttributeValue_id;
-                          if (id) {
-                            setProductAttributeValues((prev) => {
-                              let attributeValues = [...prev];
-                              attributeValues["goldkaret"] = {
-                                productAttributeValue_id: id,
-                                name: value?.name,
-                                id: value?.id,
-                              };
-                              return attributeValues;
-                            });
-                          }
-                          setAttributesValue((prev) => {
-                            let attributeValues = [...prev];
-                            attributeValues["goldkaret"] = value;
-                            return attributeValues;
-                          });
-                        }}
-                      >
-                        {goldCarate?.map((value, index) => (
-                          <Option key={index} value={value ?? ""}>
-                            {value}
-                          </Option>
-                        ))}
-                      </Select>
-                    </>
-                  ) : (
-                    ""
-                  )} */}
-
-                  {product &&
-                    selectedAttributes &&
+                  {selectedAttributes &&
                     selectedAttributes.length > 0 &&
                     selectedAttributes.map(
                       (attribute, index) =>
                         attribute?.attribute?.values &&
                         attribute?.attribute?.values.length > 0 && (
-                          <div className="w-[32%]">
+                          <div className="w-[32%]" key={index}>
                             <Select
                               label={attribute?.attribute?.name}
-                              key={index}
                               onChange={(value) => {
                                 let id = product?.ProductAttributeValue.find(
                                   (pa) => {
@@ -1335,35 +1045,10 @@ const ProductForm = ({
                 <div className="grid items-start grid-cols-2 gap-5 p-7 shadow-3xl rounded-2xl bg-white">
                   <div className="col-span-2">
                     <h3 className="text-xl font-medium tracking-wide">
-                      Product Information
+                      Additional Attributes & Tags
                     </h3>
                   </div>
-                  <div>
-                    <ReactSelect
-                      isMulti
-                      onChange={(options) =>
-                        formik.setFieldValue(
-                          "tags",
-                          options.map((option) => option.value)
-                        )
-                      }
-                      options={tagsOptions}
-                      name="tags"
-                      value={
-                        tagsOptions.filter((option) =>
-                          formik.values.tags.includes(option.value)
-                        ) ?? []
-                      }
-                      styles={style}
-                      placeholder="Tags"
-                    />
-
-                    {formik.errors.tags && formik.touched.tags && (
-                      <p className="text-red-500">{formik.errors.tags}</p>
-                    )}
-                  </div>
-
-                  <div>
+                  <div className="col-span-2">
                     <Checkbox
                       label="Online Buyable"
                       name="isOnlineBuyable"
@@ -1371,57 +1056,6 @@ const ProductForm = ({
                       onChange={formik.handleChange}
                       color={formik.errors.isOnlineBuyable ? "red" : "black"}
                     />
-                  </div>
-
-                  <div>
-                    <ReactSelect
-                      isMulti
-                      options={featuredCollectionOptions}
-                      styles={style}
-                      value={
-                        featuredCollectionOptions.filter((option) =>
-                          formik.values.collections.includes(option.value)
-                        ) ?? []
-                      }
-                      name="collections"
-                      onChange={(options) =>
-                        formik.setFieldValue(
-                          "collections",
-                          options.map((option) => option.value)
-                        )
-                      }
-                      placeholder="Featured Collections"
-                    />
-                    {formik.errors.collections &&
-                      formik.touched.collections && (
-                        <p className="text-red-500">
-                          {formik.errors.collections}
-                        </p>
-                      )}
-                  </div>
-
-                  <div>
-                    <ReactSelect
-                      isMulti
-                      options={patternOptions}
-                      value={
-                        patternOptions.filter((option) =>
-                          formik.values.patterns.includes(option.value)
-                        ) ?? []
-                      }
-                      onChange={(options) =>
-                        formik.setFieldValue(
-                          "patterns",
-                          options.map((option) => option.value)
-                        )
-                      }
-                      styles={style}
-                      placeholder="Pattern"
-                    />
-
-                    {formik.errors.patterns && formik.touched.patterns && (
-                      <p className="text-red-500">{formik.errors.patterns}</p>
-                    )}
                   </div>
 
                   <div>
@@ -1451,27 +1085,105 @@ const ProductForm = ({
                   </div>
 
                   <div>
-                    {statesOptions && statesOptions.length > 0 && (
-                      <Select
-                        label="State"
-                        size="lg"
-                        name="states"
-                        error={formik.errors.states && formik.touched.states}
-                        value={formik.values.states ?? ""}
-                        onChange={(value) =>
-                          formik.setFieldValue("states", value)
-                        }
-                      >
-                        {statesOptions.map((state) => (
+                    <Select
+                      label="State"
+                      size="lg"
+                      name="states"
+                      error={formik.errors.states && formik.touched.states}
+                      value={formik.values.states}
+                      onChange={(value) => {
+                        formik.setFieldValue("states", value);
+                      }}
+                    >
+                      {statesOptions && statesOptions.length > 0 ? (
+                        statesOptions.map((state) => (
                           <Option key={state.state_id} value={state.state_id}>
                             {state.name}
                           </Option>
-                        ))}
-                      </Select>
+                        ))
+                      ) : (
+                        <Option disabled>No states</Option>
+                      )}
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Typography>Tags</Typography>
+                    <ReactSelect
+                      isMulti
+                      onChange={(options) =>
+                        formik.setFieldValue(
+                          "tags",
+                          options.map((option) => option.value)
+                        )
+                      }
+                      options={tagsOptions}
+                      name="tags"
+                      value={
+                        tagsOptions.filter((option) =>
+                          formik.values.tags.includes(option.value)
+                        ) ?? []
+                      }
+                      styles={style}
+                      placeholder="Tags"
+                    />
+                  </div>
+
+                  <div>
+                    <Typography>Featured Collections</Typography>
+                    <ReactSelect
+                      isMulti
+                      options={featuredCollectionOptions}
+                      styles={style}
+                      value={
+                        featuredCollectionOptions.filter((option) =>
+                          formik.values.collections.includes(option.value)
+                        ) ?? []
+                      }
+                      name="collections"
+                      onChange={(options) =>
+                        formik.setFieldValue(
+                          "collections",
+                          options.map((option) => option.value)
+                        )
+                      }
+                      placeholder="Featured Collections"
+                    />
+                    {formik.errors.collections &&
+                      formik.touched.collections && (
+                        <p className="text-red-500">
+                          {formik.errors.collections}
+                        </p>
+                      )}
+                  </div>
+
+                  <div>
+                    <Typography>Pattern</Typography>
+                    <ReactSelect
+                      isMulti
+                      options={patternOptions}
+                      value={
+                        patternOptions.filter((option) =>
+                          formik.values.patterns.includes(option.value)
+                        ) ?? []
+                      }
+                      onChange={(options) =>
+                        formik.setFieldValue(
+                          "patterns",
+                          options.map((option) => option.value)
+                        )
+                      }
+                      styles={style}
+                      placeholder="Pattern"
+                    />
+
+                    {formik.errors.patterns && formik.touched.patterns && (
+                      <p className="text-red-500">{formik.errors.patterns}</p>
                     )}
                   </div>
 
-                  <div className="col-span-2">
+                  <div>
+                    <Typography>Gender</Typography>
                     <ReactSelect
                       isMulti
                       placeholder="Gender"
@@ -1489,11 +1201,51 @@ const ProductForm = ({
                         )
                       }
                       styles={style}
-                      className="col-span-3"
                     />
-                    {formik.errors.genders && formik.touched.genders && (
-                      <p className="text-red-500">{formik.errors.genders}</p>
-                    )}
+                  </div>
+
+                  <div>
+                    <Typography>Brand</Typography>
+                    <ReactSelect
+                      isMulti
+                      placeholder="Brand"
+                      name="brand"
+                      options={brandsOptions}
+                      styles={style}
+                    />
+                  </div>
+
+                  <div>
+                    <Typography>Style</Typography>
+                    <ReactSelect
+                      isMulti
+                      placeholder="Style"
+                      name="style"
+                      options={stylesOptions}
+                      styles={style}
+                    />
+                  </div>
+
+                  <div>
+                    <Typography>Theme</Typography>
+                    <ReactSelect
+                      isMulti
+                      placeholder="Theme"
+                      name="theme"
+                      options={themeOptions}
+                      styles={style}
+                    />
+                  </div>
+
+                  <div>
+                    <Typography>Trends</Typography>
+                    <ReactSelect
+                      isMulti
+                      placeholder="Trends"
+                      name="trends"
+                      options={trendsOptions}
+                      styles={style}
+                    />
                   </div>
                 </div>
               </Form>

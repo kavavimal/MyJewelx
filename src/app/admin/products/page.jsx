@@ -4,7 +4,11 @@ import prisma from "@/lib/prisma";
 
 const getProducts = () => {
   try {
-    return prisma.product.findMany();
+    return prisma.product.findMany({
+      include: {
+        user: true,
+      },
+    });
   } catch (error) {}
 };
 

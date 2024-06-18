@@ -18,7 +18,6 @@ import Moment from "react-moment";
 
 const PricingForm = ({ pricing, pricings }) => {
   const router = useRouter();
-  console.log("pricing", pricings);
   const columns = [
     {
       name: "Date",
@@ -144,10 +143,18 @@ const PricingForm = ({ pricing, pricings }) => {
 
         <div>
           <p>
-            <Moment format="DD MMM YYYY" interval={1000} />
+            <Moment
+              format="DD MMM YYYY"
+              interval={1000}
+              suppressHydrationWarning
+            />
           </p>
           <p>
-            <Moment format="hh:mm:ss A" interval={1000} />
+            <Moment
+              format="hh:mm:ss A"
+              interval={1000}
+              suppressHydrationWarning
+            />
           </p>
         </div>
       </div>

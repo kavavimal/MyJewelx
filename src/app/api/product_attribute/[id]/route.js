@@ -12,22 +12,40 @@ const updateAttributeSchema = z.object({
 export async function PUT(request, { params }) {
   try {
     const attribute_id = Number(params.id);
-    const res = await request.formData();
+    const req = await request.formData();
 
-    const name = res.get("name");
+    const attribute = await prisma.attribute.findFirst({
+      where: { attribute_id },
+      include: {
+        values: true,
+        products: true,
+        productsProductAttributeValue: true,
+      },
+    });
+
+    if (!attribute) {
+      return NextResponse.json(
+        {
+          error: `Can't find the attribute with attribute_id ${attribute_id}.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    const name = req.get("name");
     const isRequired =
-      res.get("isRequired") === "true"
+      req.get("isRequired") === "true"
         ? true
-        : res.get("isRequired") === "false"
+        : req.get("isRequired") === "false"
         ? false
         : undefined;
     const isMultiple =
-      res.get("isMultiple") === "true"
+      req.get("isMultiple") === "true"
         ? true
-        : res.get("isMultiple") === "false"
+        : req.get("isMultiple") === "false"
         ? false
         : undefined;
-    const description = res.get("description");
+    const description = req.get("description");
 
     const attributeData = updateAttributeSchema.parse({
       name,
@@ -49,6 +67,19 @@ export async function PUT(request, { params }) {
       return NextResponse.json(
         {
           error: `Attribute with name ${attributeData.name} is already exists`,
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      attribute.values.length > 0 ||
+      attribute.products.length > 0 ||
+      attribute.productsProductAttributeValue.length > 0
+    ) {
+      return NextResponse.json(
+        {
+          error: `Cannot update attribute, ${attribute.name} attribute is in use.`,
         },
         { status: 400 }
       );
@@ -83,11 +114,31 @@ export async function DELETE(request, { params }) {
 
     const attribute = await prisma.attribute.findFirst({
       where: { attribute_id },
+      include: {
+        values: true,
+        products: true,
+        productsProductAttributeValue: true,
+      },
     });
 
     if (!attribute) {
       return NextResponse.json(
-        { error: "Something went wrong" },
+        {
+          error: `Can't find the attribute with attribute_id ${attribute_id}.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      attribute.values.length > 0 ||
+      attribute.products.length > 0 ||
+      attribute.productsProductAttributeValue.length > 0
+    ) {
+      return NextResponse.json(
+        {
+          error: `Cannot delete attribute, ${attribute.name} attribute is in use.`,
+        },
         { status: 400 }
       );
     }

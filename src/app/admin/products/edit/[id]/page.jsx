@@ -58,7 +58,21 @@ const getProduct = (id) => {
     include: {
       ProductAttributeValue: true,
       attributes: true,
-      variations: true,
+      variations: {
+        include: {
+          productAttributeValues: {
+            include: {
+              productAttributeValue: {
+                include: {
+                  attributeValue: true,
+                  attribute: true,
+                },
+              },
+            },
+          },
+          image: true,
+        },
+      },
       genders: true,
       category: true,
       tags: true,

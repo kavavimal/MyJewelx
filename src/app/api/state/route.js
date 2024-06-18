@@ -9,9 +9,18 @@ const stateSchema = z.object({
 
 export async function POST(request) {
   try {
-    const res = await request.formData();
-    const name = res.get("name");
-    const country_id = Number(res.get("country_id"));
+    const req = await request.formData();
+    const name = req.get("name");
+
+    const state = await prisma.state.findFirst({ where: { name: name } });
+
+    if (state) {
+      return NextResponse.json({
+        error: `This state/city name ${name} is already taken`,
+      });
+    }
+
+    const country_id = Number(req.get("country_id"));
 
     const stateData = stateSchema.parse({ name, country_id });
 

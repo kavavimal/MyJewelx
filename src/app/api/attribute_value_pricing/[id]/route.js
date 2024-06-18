@@ -21,6 +21,7 @@ export async function PUT(request, { params }) {
     const attributeValuePricing = await prisma.attributeValuePricing.findUnique(
       {
         where: { pricing_id },
+        include: { products: true },
       }
     );
 
@@ -68,6 +69,12 @@ export async function PUT(request, { params }) {
       purity,
     });
 
+    if (attributeValuePricing.products.length > 0) {
+      return NextResponse.json({
+        error: `${attributeValuePricing.name} attributeValuePricing is in use, can't update it.`,
+      });
+    }
+
     const pricing = await prisma.attributeValuePricing.update({
       where: { pricing_id: pricing_id },
       data: pricingData,
@@ -102,6 +109,7 @@ export async function DELETE(request, { params }) {
     const attributeValuePricing = await prisma.attributeValuePricing.findUnique(
       {
         where: { pricing_id },
+        include: { products: true },
       }
     );
 
@@ -112,6 +120,12 @@ export async function DELETE(request, { params }) {
         },
         { status: 400 }
       );
+    }
+
+    if (attributeValuePricing.products.length > 0) {
+      return NextResponse.json({
+        error: `${attributeValuePricing.name} attributeValuePricing is in use, can't delete it.`,
+      });
     }
 
     const deletedPricing = await prisma.attributeValuePricing.delete({

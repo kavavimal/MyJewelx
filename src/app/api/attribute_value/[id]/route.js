@@ -10,6 +10,18 @@ const updateAttributeValueSchema = z.object({
 export async function PUT(request, { params }) {
   try {
     const id = Number(params.id);
+
+    const attributeValue = await prisma.attributeValue.findFirst({
+      where: { id },
+      include: { attributeValuePricings: true, ProductAttributeValue: true },
+    });
+
+    if (attributeValue) {
+      return NextResponse.json(
+        { error: " Can't find the AttributeValue with given id." },
+        { status: 400 }
+      );
+    }
     const res = await request.formData();
 
     const name = res.get("name");
@@ -20,21 +32,30 @@ export async function PUT(request, { params }) {
       attribute_id,
     });
 
-    // const exists = await prisma.attributeValue.findFirst({
-    //   where: { name },
-    //   NOT: {
-    //     id: id,
-    //   },
-    // });
+    const exists = await prisma.attributeValue.findFirst({
+      where: { name: name, attribute_id: attribute_id },
+      NOT: {
+        id: id,
+      },
+    });
 
-    // if (exists) {
-    //   return NextResponse.json(
-    //     {
-    //       error: `Attribute value with name ${attributeValueData.name} is already exists`,
-    //     },
-    //     { status: 400 }
-    //   );
-    // }
+    if (exists) {
+      return NextResponse.json(
+        {
+          error: `Attribute value with name ${attributeValueData.name} is already exists`,
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      attributeValue.ProductAttributeValue.length > 0 ||
+      attributeValue.attributeValuePricings.length > 0
+    ) {
+      return NextResponse.json({
+        error: `${attributeValue.name} attributeValue is in use, can't update it.`,
+      });
+    }
 
     const result = await prisma.attributeValue.update({
       where: { id },
@@ -68,13 +89,23 @@ export async function DELETE(request, { params }) {
 
     const attributeValue = await prisma.attributeValue.findFirst({
       where: { id },
+      include: { attributeValuePricings: true, ProductAttributeValue: true },
     });
 
     if (!attributeValue) {
       return NextResponse.json(
-        { error: "Something went wrong" },
+        { error: "Can't find the AttributeValue with given id" },
         { status: 400 }
       );
+    }
+
+    if (
+      attributeValue.ProductAttributeValue.length > 0 ||
+      attributeValue.attributeValuePricings.length > 0
+    ) {
+      return NextResponse.json({
+        error: `${attributeValue.name} attributeValue is in use, can't delete it.`,
+      });
     }
 
     const result = await prisma.attributeValue.delete({

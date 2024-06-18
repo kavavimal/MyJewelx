@@ -14,3 +14,27 @@
 #notistack-snackbar {
   @apply py-[4px] pr-2 gap-2 text-black font-medium;
 }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+a,
+label,
+span,
+input,
+textarea,
+select,
+option,
+button,
+ul,
+li,
+table,
+th,
+td,
+div {
+  @apply font-emirates;
+}

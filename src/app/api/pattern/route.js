@@ -9,9 +9,18 @@ const patternSchema = z.object({
 
 export async function POST(request) {
   try {
-    const res = await request.formData();
-    const name = res.get("name");
-    const description = res.get("description");
+    const req = await request.formData();
+    const name = req.get("name");
+
+    const exists = await prisma.pattern.findFirst({
+      where: { name: name },
+    });
+
+    if (exists) {
+      return NextResponse.json({ error: `${name} pattern already exist` });
+    }
+
+    const description = req.get("description");
 
     const patternData = patternSchema.parse({ name, description });
 

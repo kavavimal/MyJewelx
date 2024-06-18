@@ -7,13 +7,14 @@ const gemstoneSchema = z.object({
   description: z.string().min(1, "Describe the gemstone."),
 });
 
-export async function PUT(request, {params}) {
+export async function PUT(request, { params }) {
   try {
     const gemstone_id = Number(params.id);
     const res = await request.formData();
 
     const gemstone = await prisma.gemstone.findUnique({
-      where: { gemstone_id : gemstone_id },
+      where: { gemstone_id: gemstone_id },
+      include: { gemstoneProductVariations: true },
     });
 
     if (!gemstone) {
@@ -26,7 +27,7 @@ export async function PUT(request, {params}) {
     }
 
     const name = res.get("name");
-    
+
     const exists = await prisma.gemstone.findFirst({
       where: {
         name,
@@ -47,7 +48,14 @@ export async function PUT(request, {params}) {
     const description = res.get("description");
 
     const gemstoneData = gemstoneSchema.parse({ name, description });
-    
+
+    if (gemstone.gemstoneProductVariations.length > 0) {
+      return NextResponse.json(
+        { error: `${gemstone.name} gemstone is in use, can't be updated` },
+        { status: 400 }
+      );
+    }
+
     const updateGemstone = await prisma.gemstone.update({
       where: { gemstone_id },
       data: gemstoneData,
@@ -74,6 +82,7 @@ export async function DELETE(request, { params }) {
 
     const gemstone = await prisma.gemstone.findFirst({
       where: { gemstone_id },
+      include: { gemstoneProductVariations: true },
     });
 
     if (!gemstone) {
@@ -82,6 +91,14 @@ export async function DELETE(request, { params }) {
         { status: 400 }
       );
     }
+
+    if (gemstone.gemstoneProductVariations.length > 0) {
+      return NextResponse.json(
+        { error: `${gemstone.name} gemstone is in use, can't be deleted` },
+        { status: 400 }
+      );
+    }
+
     const deletedGemstone = await prisma.gemstone.delete({
       where: { gemstone_id },
     });

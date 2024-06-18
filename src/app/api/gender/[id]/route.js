@@ -12,6 +12,7 @@ export async function PUT(request, { params }) {
 
     const gender = await prisma.gender.findUnique({
       where: { gender_id },
+      include:{products :true}
     });
     if (!gender) {
       return NextResponse.json(
@@ -21,8 +22,16 @@ export async function PUT(request, { params }) {
         { status: 400 }
       );
     }
-    const res = await request.formData();
-    const name = res.get("name");
+    const req = await request.formData();
+    const name = req.get("name");
+
+    const exists = await prisma.gender.findFirst({
+      where: { name: name, NOT: { gender_id: gender_id } },
+    });
+
+    if (exists) {
+      return NextResponse.json({ error: `${name} gender name already exist` });
+    }
 
     const genderData = genderSchema.parse({ name });
 
@@ -30,6 +39,13 @@ export async function PUT(request, { params }) {
       where: { gender_id },
       data: genderData,
     });
+
+    if (gender.products.length > 0) {
+      return NextResponse.json(
+        { error: `${gender.name} gender is in use, can't update it` },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       { message: "Gender updated successfully", result },
@@ -55,6 +71,7 @@ export async function DELETE(request, { params }) {
 
     const gender = await prisma.gender.findUnique({
       where: { gender_id },
+      include:{products :true}
     });
     if (!gender) {
       return NextResponse.json(
@@ -62,6 +79,13 @@ export async function DELETE(request, { params }) {
           error: `Couldn't find Gender with gender_id ${gender_id}`,
         },
         { status: 400 }
+      );
+    }
+
+    if (gender.products.length > 0) {
+      return NextResponse.json(
+        { error: `${gender.name} gender is in use, can't delete it` },
+        { status: 500 }
       );
     }
 

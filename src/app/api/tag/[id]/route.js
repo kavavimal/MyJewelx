@@ -10,11 +10,27 @@ const updateTagSchema = z.object({
 export async function PUT(request, { params }) {
   try {
     const tag_id = Number(params.id);
-    const res = await request.formData();
-    const name = res.get("name");
-    const description = res.get("description");
+    const req = await request.formData();
+    const name = req.get("name");
+    const description = req.get("description");
 
     const parsedData = updateTagSchema.parse({ name, description });
+
+    const tag = await prisma.tag.findFirst({
+      where: { tag_id: tag_id },
+      include: { products: true },
+    });
+
+    if (!tag) {
+      return NextResponse.json({
+        error: `Can't find Tag with tag_id ${tag_id}`,
+      });
+    } else if (tag.products.length > 0) {
+      return NextResponse.json(
+        { error: "Tag is in use and can't be updated" },
+        { status: 405 }
+      );
+    }
 
     const exists = await prisma.tag.findFirst({
       where: {
@@ -28,7 +44,7 @@ export async function PUT(request, { params }) {
     if (exists) {
       return NextResponse.json(
         { error: `Tag with name ${parsedData.name} already exists.` },
-        { status: 405 }
+        { status: 400 }
       );
     }
 
@@ -65,7 +81,10 @@ export async function DELETE(request, { params }) {
   try {
     const tag_id = Number(params.id);
 
-    const tag = await prisma.tag.findUnique({ where: { tag_id } });
+    const tag = await prisma.tag.findUnique({
+      where: { tag_id },
+      include: { products: true },
+    });
 
     if (!tag) {
       return NextResponse.json(
@@ -73,6 +92,11 @@ export async function DELETE(request, { params }) {
           error: `There is no Tag found associated with the tag_id ${tag_id}.`,
         },
         { status: 400 }
+      );
+    } else if (tag.products.length > 0) {
+      return NextResponse.json(
+        { error: "Tag is in use and can't be deleted" },
+        { status: 405 }
       );
     }
 

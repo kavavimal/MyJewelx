@@ -7,13 +7,11 @@ import { AcountType } from "@prisma/client";
 
 export async function POST(request) {
   try {
-    const res = await request.formData();
+    const req = await request.formData();
 
-    // const first_name = res.get("first_name");
-    // const last_name = res.get("last_name");
-    const firstName = res.get("firstName");
-    const lastName = res.get("lastName");
-    const email = res.get("email");
+    const firstName = req.get("firstName");
+    const lastName = req.get("lastName");
+    const email = req.get("email");
 
     const existingEmail = await prisma.user.findUnique({
       where: { email: String(email) },
@@ -26,18 +24,32 @@ export async function POST(request) {
       );
     }
 
-    // const phone_number = res.get("phone_number");
-    const password = res.get("password");
-    const confirmPassword = res.get("confirm_password");
-    // const account_type = res.get("account_type");
-    const role = res.get("role");
+    // const phone_number = req.get("phone_number");
+    const password = req.get("password");
+    const confirmPassword = req.get("confirm_password");
+    // const account_type = req.get("account_type");
+    const role = req.get("role");
     const account_type =
       role == 2
         ? AcountType.ADMIN
         : role == 6
         ? AcountType.VENDOR
         : AcountType.CUSTOMER;
-    const file = res.get("file");
+
+    const userCreateQuery = {
+      firstName: firstName ? String(firstName) : "",
+      lastName: lastName ? String(lastName) : "",
+      email: email ? String(email) : "",
+      password: password ? await hash(password, 10) : "",
+      account_type: account_type,
+      role: {
+        connect: {
+          role_id: Number(role),
+        },
+      },
+    };
+
+    const file = req.get("file");
     let profileImage = "";
 
     if (
@@ -63,6 +75,15 @@ export async function POST(request) {
       );
     }
 
+    if (profileImage) {
+      userCreateQuery.image = {
+        create: {
+          path: profileImage,
+          image_type: "user",
+        },
+      };
+    }
+
     if (password !== confirmPassword) {
       return NextResponse.json(
         { error: "Password and confirm Password must be same" },
@@ -71,23 +92,7 @@ export async function POST(request) {
     }
 
     const result = await prisma.user.create({
-      data: {
-        // first_name: first_name ? String(first_name) : "",
-        // last_name: last_name ? String(last_name) : "",
-        firstName: firstName ? String(firstName) : "",
-        lastName: lastName ? String(lastName) : "",
-        email: email ? String(email) : "",
-        // phone_number: phone_number ? String(phone_number) : "",
-        password: password ? await hash(password, 10) : "",
-        // account_type: account_type ? account_type : AcountType.CUSTOMER,
-        account_type: account_type,
-        image: profileImage,
-        role: {
-          connect: {
-            role_id: Number(role),
-          },
-        },
-      },
+      data: userCreateQuery,
     });
 
     return NextResponse.json({ result });

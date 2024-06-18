@@ -94,7 +94,7 @@ export async function PUT(request, { params }) {
       { status: 201 }
     );
   } catch (error) {
-    if (error.name === "ZodEror") {
+    if (error.name === "ZodError") {
       return NextResponse.json(
         { error: "Validation Error", issues: error.errors },
         { status: 400 }

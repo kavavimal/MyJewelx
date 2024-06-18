@@ -3,10 +3,22 @@ import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
-    const res = await request.formData();
+    const req = await request.formData();
 
-    const name = res.get("permission_name");
-    const description = res.get("description");
+    const name = req.get("permission_name");
+
+    const exists = await prisma.permission.findFirst({
+      where: { permission_name: permission_name },
+    });
+
+    if (exists) {
+      return NextResponse.json(
+        { error: `${permission_name} permission is already created` },
+        { status: 400 }
+      );
+    }
+
+    const description = req.get("description");
 
     const result = await prisma.permission.create({
       data: {

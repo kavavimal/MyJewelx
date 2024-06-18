@@ -12,26 +12,24 @@ export async function PUT(request, { params }) {
     const country_id = Number(params.id);
     const country = await prisma.country.findUnique({
       where: { country_id },
+      include: { product: true },
     });
 
     if (!country) {
       return NextResponse.json(
-        { error: "Something went wrong" },
+        { error: "Can't find the country with given country_id" },
         { status: 405 }
       );
     }
-    const res = await request.formData();
+    const req = await request.formData();
 
-    const name = res.get("name");
-    const region = res.get("region");
-
-    const parseCountryData = countryUpdateSchema.parse({ name, region });
+    const name = req.get("name");
 
     const exists = await prisma.country.findFirst({
-      where: { name: parseCountryData.name },
+      where: { name: parseCountryData.name, NOT: { country_id: country_id } },
     });
 
-    if (exists && exists.country_id !== country_id) {
+    if (exists) {
       return NextResponse.json(
         {
           error: `Country with name ${parseCountryData.name} already exists.`,
@@ -40,6 +38,16 @@ export async function PUT(request, { params }) {
       );
     }
 
+    const region = req.get("region");
+
+    const parseCountryData = countryUpdateSchema.parse({ name, region });
+
+    if (country.product.length > 0) {
+      return NextResponse.json(
+        { error: `${country.name} country is in use, can't be updated` },
+        { status: 400 }
+      );
+    }
     const result = await prisma.country.update({
       where: { country_id },
       data: {
@@ -72,6 +80,7 @@ export async function DELETE(request, { params }) {
     const country_id = Number(params.id);
     const country = await prisma.country.findUnique({
       where: { country_id },
+      include: { product: true },
     });
 
     if (!country) {
@@ -80,6 +89,14 @@ export async function DELETE(request, { params }) {
         { status: 405 }
       );
     }
+
+    if (country.product.length > 0) {
+      return NextResponse.json(
+        { error: `${country.name} country is in use, can't be deleted` },
+        { status: 400 }
+      );
+    }
+
     await prisma.country.delete({
       where: { country_id },
     });
@@ -91,7 +108,7 @@ export async function DELETE(request, { params }) {
     );
   } catch (error) {
     return NextResponse.json(
-      { error: "Error while Deleting country", error: error },
+      { error: "Error while deleting country", error: error },
       { status: 500 }
     );
   }

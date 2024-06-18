@@ -1,4 +1,6 @@
 import prisma from "@/lib/prisma";
+import { join } from "path";
+import { writeFile } from "fs/promises";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -11,7 +13,6 @@ const addCategorySchema = z.object({
 
 export const GET = async (request, { params }) => {
   try {
-    
     const category_id = Number(params.id);
 
     // Check if a category with the same name already exists (excluding the current category)
@@ -52,10 +53,10 @@ export const GET = async (request, { params }) => {
 export async function POST(request) {
   try {
     // Extract form data
-    const res = await request.formData();
-    const name = res.get("name");
-    const description = res.get("description");
-    const parent_id = res.get("parent_id");
+    const req = await request.formData();
+    const name = req.get("name");
+    const description = req.get("description");
+    const parent_id = req.get("parent_id");
 
     // Parse and validate the data
     const parsedData = addCategorySchema.parse({
@@ -77,17 +78,46 @@ export async function POST(request) {
         {
           error: `Category with name ${parsedData.name} already exists.`,
         },
-        { status: 405 }
+        { status: 400 }
       );
+    }
+
+    const categoryQuery = {
+      name: parsedData.name,
+      description: parsedData.description,
+      parent_id: parsedData.parent_id,
+    };
+
+    const file = await req.get("file");
+    let category_image;
+    let path;
+    if (file) {
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      path = join(
+        process.cwd(),
+        "/public/assets/uploads",
+        parsedData.name + "_" + file.name
+      );
+      await writeFile(path, buffer);
+
+      category_image = "/assets/uploads/" + parsedData.name + "_" + file.name;
+    }
+
+    if (category_image && path) {
+      // categoryQuery.category_image = category_image;
+      categoryQuery.image = {
+        create: {
+          path: category_image,
+          image_type: "category",
+        },
+      };
     }
 
     // Create a new category
     const result = await prisma.category.create({
-      data: {
-        name: parsedData.name,
-        description: parsedData.description,
-        parent_id: parsedData.parent_id,
-      },
+      data: categoryQuery,
     });
 
     // Return the created result

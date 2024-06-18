@@ -4,25 +4,63 @@ import { NextResponse } from "next/server";
 export async function PUT(request, { params }) {
   try {
     const permission_id = Number(params.id);
-    if (!permission_id) {
+
+    const permission = await prisma.permission.findUnique({
+      where: permission_id,
+    });
+
+    if (!permission) {
       return NextResponse.json(
-        { error: "Permission id missing" },
+        { error: "Can't find the permission with given permission_id" },
         { status: 400 }
       );
     }
-    const res = await request.formData();
+
+    const req = await request.formData();
     let updateData = {};
     if (
-      typeof res.get("permission_name") === "string" &&
-      res.get("permission_name") !== ""
+      typeof req.get("permission_name") === "string" &&
+      req.get("permission_name") !== ""
     ) {
-      updateData.permission_name = res.get("permission_name");
+      updateData.permission_name = req.get("permission_name");
+
+      const exists = await prisma.permission.findFirst({
+        where: {
+          permission_name: updateData.permission_name,
+          NOT: {
+            permission_id: permission_id,
+          },
+        },
+      });
+
+      if (exists) {
+        return NextResponse.json(
+          {
+            error: `${updateData.permission_name} permission is already created`,
+          },
+          { status: 400 }
+        );
+      }
     }
+
     if (
-      typeof res.get("description") === "string" &&
-      res.get("description") !== ""
+      typeof req.get("description") === "string" &&
+      req.get("description") !== ""
     ) {
-      updateData.description = res.get("description");
+      updateData.description = req.get("description");
+    }
+
+    const criticalPermissions = await prisma.rolePermission.findMany({
+      where: {
+        permission_id: permission_id,
+      },
+    });
+
+    if (criticalPermissions.length > 0) {
+      return NextResponse.json(
+        { error: "Can't update permission with associated rolePermission/s" },
+        { status: 400 }
+      );
     }
 
     const result = await prisma.permission.update({
@@ -45,9 +83,13 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     const permission_id = Number(params.id);
-    if (!permission_id) {
+
+    const permission = await prisma.permission.findFirst({
+      where: { permission_id: permission_id },
+    });
+    if (!permission) {
       return NextResponse.json(
-        { error: "Permission id missing" },
+        { error: "Can't find permission with given permission_id" },
         { status: 400 }
       );
     }
@@ -61,7 +103,7 @@ export async function DELETE(request, { params }) {
 
     if (criticalPermissions.length > 0) {
       return NextResponse.json(
-        { error: "Can't delete Role with associated rolePermission/s" },
+        { error: "Can't delete permission with associated rolePermission/s" },
         { status: 400 }
       );
     }

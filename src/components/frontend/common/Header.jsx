@@ -22,6 +22,10 @@ const MenuLinks = [
     link: "/",
   },
   {
+    label: "Shop",
+    link: "/shop",
+  },
+  {
     label: (
       <svg
         width="22"

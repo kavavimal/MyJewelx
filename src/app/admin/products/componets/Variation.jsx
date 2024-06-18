@@ -16,7 +16,7 @@ import {
   Button,
 } from "@material-tailwind/react";
 import Image from "next/image";
-import { Form, Formik, useFormik } from "formik";
+import { Formik, useFormik } from "formik";
 import { Editor } from "@tinymce/tinymce-react";
 import { post, update } from "@/utils/api";
 import { useRouter } from "next/navigation";
@@ -35,14 +35,73 @@ const Variation = ({
   setVariations,
   pricing,
 }) => {
-  const isMaterialGold = productAttributeValues.find(
-    (a) =>
-      a.attributeId === attributeIDs.MATERIAL &&
-      a.id === attributeIDs.MATERIAL_GOLD
-  );
-  const findGoldKarat = productAttributeValues.find(
-    (a) => a.attributeId === attributeIDs.GOLDKARAT
-  );
+  let isMaterialGold = false,
+    findGoldKarat = false,
+    materialSilver = false,
+    materialPlatinum = false,
+    materialPalladium = false;
+  if (variation.variation_id && variation?.productAttributeValues?.length > 0) {
+    let pav = variation.productAttributeValues.map((a) => {
+      return {
+        attributeId: a.productAttributeValue.attribute_id,
+        attributeValueName: a.productAttributeValue.attributeValue.name,
+        id: a.productAttributeValue.attributeValue_id,
+        name: `${a.productAttributeValue.attribute.name}: ${a.productAttributeValue.attributeValue.name}`,
+        productAttributeValue_id: a.productAttributeValue_id,
+      };
+    });
+    isMaterialGold = pav.find(
+      (a) =>
+        a.attributeId === attributeIDs.MATERIAL &&
+        a.id === attributeIDs.MATERIAL_GOLD
+    );
+    findGoldKarat = pav.find((a) => a.attributeId === attributeIDs.GOLDKARAT);
+
+    materialSilver = pav.find(
+      (a) =>
+        a.attributeId === attributeIDs.MATERIAL &&
+        a.id === attributeIDs.MATERIAL_SILVER
+    );
+
+    materialPlatinum = pav.find(
+      (a) =>
+        a.attributeId === attributeIDs.MATERIAL &&
+        a.id === attributeIDs.MATERIAL_PLATINUM
+    );
+
+    materialPalladium = pav.find(
+      (a) =>
+        a.attributeId === attributeIDs.MATERIAL &&
+        a.id === attributeIDs.MATERIAL_PALLADIUM
+    );
+  } else {
+    isMaterialGold = productAttributeValues.find(
+      (a) =>
+        a.attributeId === attributeIDs.MATERIAL &&
+        a.id === attributeIDs.MATERIAL_GOLD
+    );
+    findGoldKarat = productAttributeValues.find(
+      (a) => a.attributeId === attributeIDs.GOLDKARAT
+    );
+
+    materialSilver = productAttributeValues.find(
+      (a) =>
+        a.attributeId === attributeIDs.MATERIAL &&
+        a.id === attributeIDs.MATERIAL_SILVER
+    );
+
+    materialPlatinum = productAttributeValues.find(
+      (a) =>
+        a.attributeId === attributeIDs.MATERIAL &&
+        a.id === attributeIDs.MATERIAL_PLATINUM
+    );
+
+    materialPalladium = productAttributeValues.find(
+      (a) =>
+        a.attributeId === attributeIDs.MATERIAL &&
+        a.id === attributeIDs.MATERIAL_PALLADIUM
+    );
+  }
   const router = useRouter();
   const isVariation = Boolean(variation?.variation_id);
   const [isGemstone, setIsGemstone] = useState(false);
@@ -61,7 +120,12 @@ const Variation = ({
   const [files, setFiles] = useState([]);
   const [previewURLs, setPreviewURLs] = useState([]);
   const [chargeValue, setChargeValue] = useState(0);
+  const [gemstoneRemark, setGemstoneRemark] = useState("");
+  const [chargeRemark, setChargeRemark] = useState("");
   const [uploadedImages, setUploadedImages] = useState([]);
+  const [totalAdditionalCharge, setTotalAdditionalCharge] = useState(0);
+  const [totalOtherCharge, setTotalOtherCharge] = useState(0);
+  const [appliedDiscout, setAppliedDiscout] = useState(0);
   const [subtotal, setSubTotal] = useState(0);
   const [total, setTotal] = useState(0);
 
@@ -78,28 +142,26 @@ const Variation = ({
   };
 
   const getMetalPrice = () => {
-    const isMaterialGold = productAttributeValues.find(
-      (a) =>
-        a.attributeId === attributeIDs.MATERIAL &&
-        a.id === attributeIDs.MATERIAL_GOLD
-    );
-    const findGoldKarat = productAttributeValues.find(
-      (a) => a.attributeId === attributeIDs.GOLDKARAT
-    );
-
-    if (isMaterialGold && findGoldKarat) {
-      const attributeSelecte = findGoldKarat.attributeValueName;
-      const mapstring = attributeSelecte.replace(/\s/g, "").toLowerCase();
+    if (
+      (isMaterialGold && findGoldKarat) ||
+      materialSilver ||
+      materialPlatinum ||
+      materialPalladium
+    ) {
+      let attributeSelected = "";
+      if (isMaterialGold && findGoldKarat) {
+        attributeSelected = findGoldKarat.attributeValueName;
+      } else if (materialSilver) {
+        attributeSelected = materialSilver.attributeValueName;
+      } else if (materialPlatinum) {
+        attributeSelected = materialPlatinum.attributeValueName;
+      } else if (materialPalladium) {
+        attributeSelected = materialPalladium.attributeValueName;
+      }
+      const mapstring = attributeSelected.replace(/\s/g, "").toLowerCase();
       if (Object.keys(pricing).includes(mapstring)) {
         let p = pricing[mapstring];
-
         return p;
-
-        // if (formik.values?.net_weight) {
-        //   p =
-        //     parseFloat(pricing[mapstring]) *
-        //     parseFloat(formik.values?.net_weight);
-        // }
       }
     }
 
@@ -119,7 +181,7 @@ const Variation = ({
   const FILE_SIZE = 5 * 1024 * 1024; // 5M
 
   const variatonValidationSchema = Yup.object().shape({
-    regular_price: Yup.number().required("Regular price is required"),
+    // regular_price: Yup.number().required("Regular price is required"),
     description: Yup.string()
       .required("Description is required")
       .min(1)
@@ -139,7 +201,7 @@ const Variation = ({
       .max(20),
     net_weight: Yup.number().required("Net weight is required"),
     gross_weight: Yup.number()
-      .max(Yup.ref("net_weight"), "Gross weight should be less than net weight")
+      .min(Yup.ref("net_weight"), "Gross weight should be less than net weight")
       .required("Gross weight is required"),
     isPriceFixed: Yup.boolean().required("Is price fixed is required"),
     ...(!isVariation && {
@@ -197,6 +259,7 @@ const Variation = ({
             charge_type: "gemstone",
             name: item.gemstone,
             value: item.amount,
+            remark: item.remark,
           });
         });
       }
@@ -207,6 +270,7 @@ const Variation = ({
             charge_type: "additional",
             name: item.additionalChargesType,
             value: item.additionalCharge,
+            remark: item.remark,
           });
         });
       }
@@ -384,9 +448,23 @@ const Variation = ({
       return parseFloat(item.additionalCharge);
     });
 
-    if (isMaterialGold && findGoldKarat) {
-      const attributeSelecte = findGoldKarat.attributeValueName;
-      const mapstring = attributeSelecte.replace(/\s/g, "").toLowerCase();
+    if (
+      (isMaterialGold && findGoldKarat) ||
+      materialSilver ||
+      materialPlatinum ||
+      materialPalladium
+    ) {
+      let attributeSelected = "";
+      if (isMaterialGold && findGoldKarat) {
+        attributeSelected = findGoldKarat.attributeValueName;
+      } else if (materialSilver) {
+        attributeSelected = materialSilver.attributeValueName;
+      } else if (materialPlatinum) {
+        attributeSelected = materialPlatinum.attributeValueName;
+      } else if (materialPalladium) {
+        attributeSelected = materialPalladium.attributeValueName;
+      }
+      const mapstring = attributeSelected.replace(/\s/g, "").toLowerCase();
       if (Object.keys(pricing).includes(mapstring)) {
         metalPrice = pricing[mapstring];
 
@@ -414,24 +492,31 @@ const Variation = ({
       }
 
       if (gemstoneAmounts.length > 0) {
-        price = price + gemstoneAmounts.reduce((a, b) => a + b, 0);
+        let gemstoneAmount = gemstoneAmounts.reduce((a, b) => a + b, 0);
+        price = price + gemstoneAmount;
+        setTotalOtherCharge(gemstoneAmount);
       }
 
       if (additionalAmounts.length > 0) {
-        price = price + additionalAmounts.reduce((a, b) => a + b, 0);
+        let additionalAmount = additionalAmounts.reduce((a, b) => a + b, 0);
+        price = price + additionalAmount;
+        setTotalAdditionalCharge(additionalAmount);
       }
 
       if (isDiscount && discountType === "Per Gram On Net Weight") {
         let appliedDiscout = formik.values.net_weight * discountValue;
         price = price - appliedDiscout;
+        setAppliedDiscout(appliedDiscout);
       }
 
       if (isDiscount && discountType === "Per Piece / Flat") {
         price = price - discountValue;
+        setAppliedDiscout(discountValue);
       }
 
       if (isDiscount && discountType === "Per(%) On Metal Rate On Karat") {
         price = price - (metalPrice * discountValue) / 100;
+        setAppliedDiscout((metalPrice * discountValue) / 100);
       }
 
       if (taxValue === "5") {
@@ -491,6 +576,7 @@ const Variation = ({
               newGemstoneCharges.push({
                 gemstone: item.name,
                 amount: item.value,
+                remark: item.remark,
               });
             }
 
@@ -499,6 +585,7 @@ const Variation = ({
               newAdditionalCharges.push({
                 additionalChargesType: item.name,
                 additionalCharge: item.value,
+                remark: item.remark,
               });
             }
 
@@ -535,13 +622,10 @@ const Variation = ({
           setDiscountValue((prev) =>
             prev !== discountValue ? discountValue : prev
           );
-          // setIsTax((prev) =>
-          //   prev !== Boolean(taxValue) ? Boolean(taxValue) : prev
-          // );
           setTaxValue((prev) => (prev !== taxValue ? taxValue : prev));
         }
 
-        setUploadedImages(variation.images.map((image) => image));
+        setUploadedImages(variation?.image.map((image) => image?.path));
       } catch (error) {
         console.log(error);
       }
@@ -886,8 +970,8 @@ const Variation = ({
 
                     {!formik.values?.isPriceFixed && (
                       <>
-                        {/* <div>
-                          <Input
+                        <div>
+                          {/* <Input
                             type="number"
                             label="Metal Amount"
                             name="metal_amount"
@@ -896,11 +980,9 @@ const Variation = ({
                             error={formik.errors.metal_amount}
                             onChange={formik.handleChange}
                             disabled
-                          />
+                          /> */}
                         </div>
-                        <div>
-                          <b>Final Price:</b> {Number(finalPrice).toFixed(2)}
-                        </div> */}
+
                         <div className="w-full flex gap-5 items-center">
                           <div className="w-1/2">
                             <Select
@@ -943,12 +1025,15 @@ const Variation = ({
                     {isGemstone && (
                       <div>
                         <div className="flex gap-5 items-center">
-                          <div className="flex-1 grid grid-cols-2 items-center gap-5">
+                          <div className="flex-1 grid grid-cols-3 items-center gap-5">
                             <Select
                               label="Gemstone"
                               size="lg"
                               value={gemstone}
                               onChange={(value) => setGemstone(value)}
+                              containerProps={{
+                                className: "!min-w-[100px]",
+                              }}
                             >
                               {[
                                 "Ruby",
@@ -976,6 +1061,22 @@ const Variation = ({
                               onChange={(e) =>
                                 setGemstoneAmount(e.target.value)
                               }
+                              containerProps={{
+                                className: "!min-w-[100px]",
+                              }}
+                            />
+
+                            <Input
+                              label="Remarks"
+                              size="lg"
+                              type="text"
+                              value={gemstoneRemark}
+                              onChange={(e) =>
+                                setGemstoneRemark(e.target.value)
+                              }
+                              containerProps={{
+                                className: "!min-w-[100px]",
+                              }}
                             />
                           </div>
 
@@ -992,10 +1093,12 @@ const Variation = ({
                                   {
                                     gemstone: gemstone,
                                     amount: gemstoneAmount,
+                                    remark: gemstoneRemark,
                                   },
                                 ]);
                                 setGemstone("");
                                 setGemstoneAmount("");
+                                setGemstoneRemark("");
                               }
                             }}
                           >
@@ -1011,7 +1114,10 @@ const Variation = ({
                                   ripple={false}
                                   className="py-1 pr-1 pl-4"
                                 >
-                                  {item.gemstone} - ₹{item.amount}
+                                  {`${item.gemstone} ${
+                                    item.remark ? `(${item.remark})` : ""
+                                  }`}{" "}
+                                  -₹{item.amount}
                                   <ListItemSuffix>
                                     <IconButton
                                       type="button"
@@ -1057,7 +1163,7 @@ const Variation = ({
                     {isAddtionalCharges && (
                       <div>
                         <div className="flex gap-5 items-center">
-                          <div className="flex-1 grid grid-cols-2 items-center gap-5">
+                          <div className="flex-1 grid grid-cols-3 items-center gap-5">
                             <Input
                               label="Additional Charges Type"
                               size="lg"
@@ -1065,6 +1171,9 @@ const Variation = ({
                               onChange={(e) =>
                                 setAdditionalChargesType(e.target.value)
                               }
+                              containerProps={{
+                                className: "!min-w-[100px]",
+                              }}
                             />
                             <Input
                               label={additionalChargesType}
@@ -1074,6 +1183,19 @@ const Variation = ({
                               onChange={(e) =>
                                 setAdditionalCharge(e.target.value)
                               }
+                              containerProps={{
+                                className: "!min-w-[100px]",
+                              }}
+                            />
+
+                            <Input
+                              label="Remarks"
+                              size="lg"
+                              containerProps={{
+                                className: "!min-w-[100px]",
+                              }}
+                              value={chargeRemark}
+                              onChange={(e) => setChargeRemark(e.target.value)}
                             />
                           </div>
                           <Button
@@ -1090,10 +1212,12 @@ const Variation = ({
                                     additionalChargesType:
                                       additionalChargesType,
                                     additionalCharge: additionalCharge,
+                                    remark: chargeRemark,
                                   },
                                 ]);
                                 setAdditionalChargesType("");
                                 setAdditionalCharge("");
+                                setChargeRemark("");
                               }
                             }}
                           >
@@ -1110,7 +1234,10 @@ const Variation = ({
                                   ripple={false}
                                   className="py-1 pr-1 pl-4"
                                 >
-                                  {item.additionalChargesType} -₹
+                                  {`${item.additionalChargesType} ${
+                                    item.remark ? `(${item.remark})` : ""
+                                  }`}{" "}
+                                  -₹
                                   {item.additionalCharge}
                                   <ListItemSuffix>
                                     <IconButton
@@ -1187,14 +1314,6 @@ const Variation = ({
                       </div>
                     )}
                     <div className="mt-5">
-                      {/* <Input
-                        label="VAT/Taxes (%)"
-                        size="lg"
-                        type="number"
-                        value={taxValue}
-                        onChange={(e) => setTaxValue(e.target.value)}
-                      /> */}
-
                       <Select
                         label="VAT/Taxes Type"
                         size="lg"
@@ -1371,6 +1490,101 @@ const Variation = ({
                         </div>
                       </div>
                     )}
+                  </div>
+
+                  <div className="bg-white border rounded-lg shadow-3xl px-6 py-8 max-w-md mx-auto mt-8">
+                    <div className="flex justify-between mb-6">
+                      <h1 className="text-lg font-bold">Total</h1>
+                    </div>
+                    <table className="w-full mb-8">
+                      <thead>
+                        <tr>
+                          <th className="text-left font-bold text-gray-700">
+                            Description
+                          </th>
+                          <th className="text-right font-bold text-gray-700">
+                            Amount
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {!formik.values?.isPriceFixed ? (
+                          <>
+                            <tr>
+                              <td className="text-left text-gray-700">
+                                Metal Amount
+                              </td>
+                              <td className="text-right text-gray-700">
+                                {formik?.values?.metal_amount}
+                              </td>
+                            </tr>
+                          </>
+                        ) : (
+                          <>
+                            <tr>
+                              <td className="text-left text-gray-700">
+                                Fixed Price
+                              </td>
+                              <td className="text-right text-gray-700">
+                                {formik?.values?.regular_price}
+                              </td>
+                            </tr>
+                          </>
+                        )}
+
+                        {!formik.values?.isPriceFixed && (
+                          <>
+                            <tr>
+                              <td className="text-left text-gray-700">
+                                Making Charge
+                              </td>
+                              <td className="text-right text-gray-700">
+                                {parseFloat(formik?.values?.net_weight) *
+                                  parseFloat(formik?.values?.metal_amount) || 0}
+                              </td>
+                            </tr>
+                          </>
+                        )}
+                        <tr>
+                          <td className="text-left text-gray-700">
+                            Additional Charge
+                          </td>
+                          <td className="text-right text-gray-700">
+                            {totalAdditionalCharge}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="text-left text-gray-700">
+                            Other Charge
+                          </td>
+                          <td className="text-right text-gray-700">
+                            {totalOtherCharge}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="text-left text-gray-700">Discount</td>
+                          <td className="text-right text-gray-700">
+                            {appliedDiscout}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="text-left text-gray-700">Sub Total</td>
+                          <td className="text-right text-gray-700">
+                            {subtotal}
+                          </td>
+                        </tr>
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td className="text-left font-bold text-gray-700">
+                            Total
+                          </td>
+                          <td className="text-right font-bold text-gray-700">
+                            {total}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
                   </div>
                 </div>
               </div>

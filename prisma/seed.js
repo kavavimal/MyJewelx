@@ -1,9 +1,11 @@
 // Import Prisma client
-const { PrismaClient, AcountType } = require("@prisma/client");
+const { PrismaClient } = require("@prisma/client");
+const { hash } = require("bcrypt");
 
 const users = require("./data/users");
 const roles = require("./data/roles");
-const { hash } = require("bcrypt");
+const attributes = require("./data/attributes");
+const categories = require("./data/categories");
 
 // Instantiate Prisma client
 const prisma = new PrismaClient();
@@ -57,6 +59,50 @@ async function seedRolesAndPermissions() {
     }
   }
 }
+
+async function seedAttributes() {
+  for (const attribute of attributes) {
+    const createdAttribute = await prisma.attribute.upsert({
+      create: {
+        name: attribute.name,
+        description: attribute.description,
+      },
+      update: {},
+      where: {
+        name: attribute.name,
+      },
+    });
+
+    // Get new attribute ID
+    const attributeId = createdAttribute.attribute_id;
+    // remove all attribute values for this attribute
+    await prisma.attributeValue.deleteMany({
+      where: {
+        attribute_id: attributeId,
+      },
+    });
+
+    // Seed attribute values for each attribute
+    for (const v of attribute.values) {
+      const createdAValue = await prisma.attributeValue.upsert({
+        create: {
+          name: v.name,
+          description: v.description,
+          attribute_id: attributeId,
+        },
+        update: {
+          name: v.name,
+          description: v.description,
+          attribute_id: attributeId,
+        },
+        where: {
+          name: v.name,
+          attribute_id: attributeId,
+        },
+      });
+    }
+  }
+}
 // Seed users with roles
 async function seedUsers() {
   for (const user of users) {
@@ -68,6 +114,48 @@ async function seedUsers() {
         email: user.email,
       },
     });
+  }
+}
+async function seedCollection() {
+  const Collections = [
+    { name: "New Arrival", description: "New Arrival" },
+    { name: "Best Seller", description: "Best Seller" },
+  ];
+  for (const collection of Collections) {
+    await prisma.collection.upsert({
+      create: { name: collection.name, description: collection.description },
+      update: { name: collection.name, description: collection.description },
+      where: {
+        name: collection.name,
+      },
+    });
+  }
+}
+
+async function addCat(category, parent_id = null) {
+  // add recursive category
+  let cat = {
+    name: category.name,
+    description: category.description,
+    category_image: category.category_image,
+  }
+  if(parent_id !== null) cat.parent_id = parent_id;
+  const createdCat = await prisma.category.upsert({
+    create: cat,
+    update: cat,
+    where: {
+      name: cat.name,
+    },
+  });
+  // check recursinve
+  if (category.children && category.children.length > 0) {
+    addCat(cat, createdCat.category_id)
+  }
+}
+
+async function seedCategory() {
+  for (const category of categories) {
+    addCat(category);
   }
 }
 
@@ -92,6 +180,8 @@ async function seed() {
   }
   await seedRolesAndPermissions();
   await seedUsers();
+  await seedAttributes();
+  await seedCategory();
 }
 
 // Run the seeding function

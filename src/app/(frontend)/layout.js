@@ -33,8 +33,6 @@ export default async function RootLayout({ children }) {
   const user = await checkUserSession();
 
   return (
-    <html lang="en">
-      <body className={inter.className}>
         <Suspense
           fallback={
             <div className="fixed h-full w-full flex item-center justify-center bg-gray-400/[.5]  top-0 left-0 z-40">
@@ -47,7 +45,5 @@ export default async function RootLayout({ children }) {
           {children}
           {/* <Footer /> */}
         </Suspense>
-      </body>
-    </html>
   );
 }

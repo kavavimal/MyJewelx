@@ -1,8 +1,9 @@
 import React from "react";
 import AttributeForm from "./components/AttributeForm";
+import prisma from "@/lib/prisma";
 
 const getAttriubutes = () => {
- return  prisma.attribute.findMany()
+  return prisma.attribute.findMany();
 };
 
 const attributes = async () => {

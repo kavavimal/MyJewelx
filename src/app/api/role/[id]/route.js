@@ -1,42 +1,77 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function PUT(request, {params}) {
+export async function PUT(request, { params }) {
   try {
-    const res = await request.formData();
-    let updateData = {};
-    if (typeof res.get("name") === "string" && res.get("name") !== "") {
-      updateData.role_name = res.get("name");
+    const role_id = Number(params.id);
+
+    const exists = await prisma.role.findFirst({
+      where: { role_id },
+      include: { users: true },
+    });
+
+    if (!exists) {
+      return NextResponse.json(
+        { error: `Can't find the role with role_id ${role_id}` },
+        { status: 400 }
+      );
+    } else if (exists.users.length > 0) {
+      return NextResponse.json(
+        { error: `Can't update Role that is associated with User` },
+        { status: 400 }
+      );
     }
-    if (
-      typeof res.get("description") === "string" &&
-      res.get("description") !== ""
-      ) {
-        updateData.description = res.get("description");
-      }
+
+    const req = await request.formData();
+    let updateData = {};
+    if (typeof req.get("name") === "string" && req.get("name") !== "") {
+      updateData.role_name = req.get("name");
+    }
+
+    const existsWithName = await prisma.role.findFirst({
+      where: { role_name: role_name },
+    });
+
+    if (existsWithName) {
+      return NextResponse.json(
+        {
+          error: `This role with role_name ${updateData.role_name} already exists`,
+        },
+        { status: 400 }
+      );
+    }
 
     if (
-      typeof res.get("permissions") === "string" &&
-      res.get("permissions") !== ""
+      typeof req.get("description") === "string" &&
+      req.get("description") !== ""
     ) {
-      const permissions = res.get("permissions");
+      updateData.description = req.get("description");
+    }
+
+    if (
+      typeof req.get("permissions") === "string" &&
+      req.get("permissions") !== ""
+    ) {
+      const permissions = req.get("permissions");
       const permissionArray = permissions.split(",");
-      updateData.permissions= {
+      updateData.permissions = {
         create: [
-          ...permissionArray.map(permissionId => ({ permission: {connect: {permission_id: parseInt(permissionId)}}})),
+          ...permissionArray.map((permissionId) => ({
+            permission: { connect: { permission_id: parseInt(permissionId) } },
+          })),
         ],
-      }
+      };
     }
 
     await prisma.rolePermission.deleteMany({
       where: {
-        role_id: Number(params.id),
+        role_id: role_id,
       },
     });
 
     const result = await prisma.role.update({
       where: {
-        role_id: Number(params.id),
+        role_id: role_id,
       },
       data: { ...updateData },
     });
@@ -53,29 +88,34 @@ export async function PUT(request, {params}) {
 
 export async function DELETE(request, { params }) {
   try {
-    const roleId = Number(params.id);
+    const role_id = Number(params.id);
 
     //check if there are users associated with the role
 
-    const userWithRole = await prisma.user.findMany({
-        where : { role_id: roleId}
+    const role = await prisma.role.findUnique({
+      where: { role_id: role_id },
+      include: { users: true },
     });
 
-    if(userWithRole.length > 0 ) {
-        return NextResponse.json(
-            {error: "Can't delete Role with associated User"},
-            {status: 400}
-        )
+    if (!role) {
+      return NextResponse.json(
+        { error: `Can't find the role with role_id ${role_id}` },
+        { status: 400 }
+      );
+    } else if (role.users.length > 0) {
+      return NextResponse.json(
+        { error: `Can't update Role that is associated with User` },
+        { status: 400 }
+      );
     }
-    
+
     await prisma.rolePermission.deleteMany({
-      where: { role_id: roleId },
+      where: { role_id: role_id },
     });
 
     const deletedRole = await prisma.role.delete({
-      where: { role_id: roleId },
+      where: { role_id: role_id },
     });
-
 
     return NextResponse.json(deletedRole);
   } catch (error) {

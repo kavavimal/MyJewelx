@@ -1,6 +1,8 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { join } from "path";
+import { writeFile, unlink } from "fs/promises";
 
 // Define the schema for updating a category
 const updateCategorySchema = z.object({
@@ -12,11 +14,39 @@ const updateCategorySchema = z.object({
 export const PUT = async (request, { params }) => {
   try {
     const category_id = Number(params.id);
-    const res = await request.formData();
+    const req = await request.formData();
 
-    const name = res.get("name");
-    const description = res.get("description");
-    const parent_id = res.get("parent_id");
+    const category = await prisma.category.findFirst({
+      where: {
+        category_id,
+      },
+      include: { image: true },
+    });
+
+    if (!category) {
+      return NextResponse.json({
+        error: `Couldn't find category with category id ${category_id}`,
+      });
+    }
+
+    // Check if the category is in use
+    const isCategoryInUse = await prisma.product.findFirst({
+      where: {
+        OR: [{ categoryId: category_id }, { subCategoryId: category_id }],
+      },
+    });
+
+    const name = req.get("name");
+
+    if (isCategoryInUse && name !== category.name) {
+      return NextResponse.json(
+        { error: "Category is in use and cannot be updated." },
+        { status: 405 }
+      );
+    }
+
+    const description = req.get("description");
+    const parent_id = req.get("parent_id");
 
     // Parse and validate the incoming data
     const parsedData = updateCategorySchema.parse({
@@ -46,16 +76,61 @@ export const PUT = async (request, { params }) => {
       );
     }
 
+    const categoryQuery = {
+      name: parsedData.name,
+      description: parsedData.description,
+      parent_id: parsedData.parent_id,
+    };
+
+    const file = await req.get("file");
+    let category_image;
+
+    if (file) {
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      const path = join(
+        process.cwd(),
+        "/public/assets/uploads",
+        `${parsedData.name}_${file.name}`
+      );
+      await writeFile(path, buffer);
+
+      category_image = `/assets/uploads/${parsedData.name}_${file.name}`;
+
+      if (category.image?.path) {
+        const oldFilePath = join(process.cwd(), "public", category.image.path);
+        try {
+          await unlink(oldFilePath);
+          console.log(`Successfully deleted ${oldFilePath}`);
+        } catch (error) {
+          console.error(`Error deleting file ${oldFilePath}:`, error);
+        }
+      }
+
+      if (category.image) {
+        categoryQuery.image = {
+          update: {
+            path: category_image,
+            image_type: "category",
+          },
+        };
+      } else {
+        categoryQuery.image = {
+          create: {
+            path: category_image,
+            image_type: "category",
+          },
+        };
+      }
+    }
+
     // Update the category
     const result = await prisma.category.update({
       where: {
         category_id: category_id,
       },
-      data: {
-        name: parsedData.name,
-        description: parsedData.description,
-        parent_id: parsedData.parent_id,
-      },
+      data: categoryQuery,
     });
 
     return NextResponse.json(
@@ -87,6 +162,7 @@ export const DELETE = async (request, { params }) => {
     // Check if the category exists
     const category = await prisma.category.findUnique({
       where: { category_id },
+      include: { image: true },
     });
 
     if (!category) {
@@ -98,6 +174,39 @@ export const DELETE = async (request, { params }) => {
         { status: 404 }
       );
     }
+    // Check if the category is in use
+    const isCategoryInUse = await prisma.product.findFirst({
+      where: {
+        OR: [{ categoryId: category_id }, { subCategoryId: category_id }],
+      },
+    });
+
+    if (isCategoryInUse) {
+      return NextResponse.json(
+        { error: "Category is in use and cannot be deleted." },
+        { status: 405 }
+      );
+    }
+
+    const category_image_path = category.image.path;
+    if (category_image_path) {
+      const filePath = join(process.cwd(), "public", category_image_path);
+      try {
+        await unlink(filePath);
+        console.log(`Successfully deleted ${filePath}`);
+      } catch (error) {
+        console.error(`Error deleting file ${filePath}:`, error);
+      }
+    } else {
+      NextResponse.json(
+        { error: `${category_image_path} image can't be deleted` },
+        { status: 400 }
+      );
+    }
+
+    // await prisma.image.delete({                     //check if Cascade do the same
+    //   where: { image_id: userImage.image_id },
+    // });
 
     // Delete the category
     const result = await prisma.category.delete({

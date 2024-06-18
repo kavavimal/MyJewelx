@@ -13,6 +13,7 @@ export async function PUT(request, { params }) {
 
     const pattern = await prisma.pattern.findUnique({
       where: { pattern_id },
+      include: { products: true },
     });
     if (!pattern) {
       return NextResponse.json(
@@ -22,11 +23,29 @@ export async function PUT(request, { params }) {
         { status: 400 }
       );
     }
-    const res = await request.formData();
-    const name = res.get("name");
-    const description = res.get("description");
+    const req = await request.formData();
+    const name = req.get("name");
+
+    const exists = await prisma.pattern.findFirst({
+      where: { name: name, NOT: { pattern_id: pattern_id } },
+    });
+
+    if (exists) {
+      return NextResponse.json({ error: `${name} pattern already exist` });
+    }
+
+    const description = req.get("description");
 
     const patternData = patternSchema.parse({ name, description });
+
+    if (pattern.products.length > 0) {
+      return NextResponse.json(
+        {
+          error: `${pattern.name} pattern is in use, can't update it.`,
+        },
+        { status: 400 }
+      );
+    }
 
     const result = await prisma.pattern.update({
       where: { pattern_id },
@@ -57,6 +76,7 @@ export async function DELETE(request, { params }) {
 
     const pattern = await prisma.pattern.findUnique({
       where: { pattern_id },
+      include: { products: true },
     });
     if (!pattern) {
       return NextResponse.json(
@@ -67,6 +87,11 @@ export async function DELETE(request, { params }) {
       );
     }
 
+    if (pattern.products.length > 0) {
+      return NextResponse.json({
+        error: `${pattern.name} pattern is in use, can't delete it.`,
+      });
+    }
     const result = await prisma.pattern.delete({
       where: { pattern_id },
     });

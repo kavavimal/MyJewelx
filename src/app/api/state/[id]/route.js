@@ -13,6 +13,7 @@ export async function PUT(request, { params }) {
 
     const state = await prisma.state.findUnique({
       where: { state_id },
+      include: { products: true },
     });
     if (!state) {
       return NextResponse.json(
@@ -21,10 +22,24 @@ export async function PUT(request, { params }) {
         },
         { status: 400 }
       );
+    } else if (state.products.length > 0) {
+      return NextResponse.json(
+        { error: "State is in use and can't be deleted" },
+        { status: 405 }
+      );
     }
-    const res = await request.formData();
-    const name = res.get("name");
-    const country_id = Number(res.get("country_id"));
+    const req = await request.formData();
+    const name = req.get("name");
+
+    const stateWithName = await prisma.state.findFirst({ where: { name: name } });
+
+    if (stateWithName) {
+      return NextResponse.json({
+        error: `This state/city name ${name} is already taken`,
+      });
+    }
+
+    const country_id = Number(req.get("country_id"));
 
     const stateData = stateSchema.parse({ name, country_id });
 
@@ -57,6 +72,7 @@ export async function DELETE(request, { params }) {
 
     const state = await prisma.state.findUnique({
       where: { state_id },
+      include: { products: true },
     });
     if (!state) {
       return NextResponse.json(
@@ -64,6 +80,11 @@ export async function DELETE(request, { params }) {
           error: `Couldn't find State with state_id ${state_id}`,
         },
         { status: 400 }
+      );
+    } else if (state.products.length > 0) {
+      return NextResponse.json(
+        { error: "State is in use and can't be deleted" },
+        { status: 405 }
       );
     }
 

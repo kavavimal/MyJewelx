@@ -4,7 +4,11 @@ import { Button, Chip, IconButton } from "@material-tailwind/react";
 import Link from "next/link";
 import DataTable from "react-data-table-component";
 import DeleteProduct from "./DeleteProduct";
+import { ADMIN_ID, CUSTOMER_ID, VENDOR_ID } from "@/utils/constants";
 const Products = ({ products }) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("activeStep", 0);
+  }
   const columns = [
     {
       name: "Product Name",
@@ -13,6 +17,18 @@ const Products = ({ products }) => {
     {
       name: "SKU",
       selector: (row) => row.sku,
+    },
+    {
+      name: "Created By",
+      selector: (row) => {
+        if (row?.user?.role_id === VENDOR_ID) {
+          return "Vendor";
+        } else if (row?.user?.role_id === ADMIN_ID) {
+          return "Admin";
+        } else if (row?.user?.role_id == CUSTOMER_ID) {
+          return "Customer";
+        }
+      },
     },
     {
       name: "Status",
@@ -49,6 +65,8 @@ const Products = ({ products }) => {
       ),
     },
   ];
+
+  console.log(products);
   return (
     <>
       <div className="flex justify-between items-center btn btn-primary mb-10">

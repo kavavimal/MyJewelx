@@ -13,9 +13,8 @@ export async function GET() {
       return NextResponse.json(
         {
           message: "No pricing history found",
-          latestPricing,
         },
-        { status: 200 }
+        { status: 404 }
       );
     } else
       return NextResponse.json(

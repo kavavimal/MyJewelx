@@ -32,7 +32,7 @@ model User {
   password     String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-  image        String?
+  // image        String?
   account_type AcountType @default(CUSTOMER)
   role_id      Int
   phone_number String?
@@ -43,6 +43,7 @@ model User {
   role         Role       @relation(fields: [role_id], references: [role_id])
   vendor       Vendor?
   accounts     Account[]
+  image		      Image?
 }
 
 model Role {
@@ -82,11 +83,11 @@ model Product {
   attributes            ProductAttribute[]
   ProductAttributeValue ProductAttributeValue[]
   categoryId            Int
-  subCategoryId         Int
+  subCategoryId         Int?
 
   // Define relations to Category
   category    Category @relation("CategoryProducts", fields: [categoryId], references: [category_id])
-  subcategory Category @relation("SubCategoryProducts", fields: [subCategoryId], references: [category_id])
+  subcategory Category? @relation("SubCategoryProducts", fields: [subCategoryId], references: [category_id])
 
   collections ProductCollection[]
   genders     ProductGender[]
@@ -132,6 +133,7 @@ model Category {
 
   products            Product[] @relation("CategoryProducts")
   subCategoryProducts Product[] @relation("SubCategoryProducts")
+  image		      Image?
 }
 
 // model ProductCategory {
@@ -313,7 +315,7 @@ model ProductVariation {
   product_id                Int
   variation_name            String
   description               String
-  images                    String[]
+  // images                    String[]
   sku                       String                      @unique
   stock_management          Boolean                     @default(false)
   stock_status              Boolean                     @default(false)
@@ -334,8 +336,21 @@ model ProductVariation {
   productAttributeValues    ProductVariationAttribute[]
   cartItems                 CartItem[]
   gemstoneProductVariations GemstoneProductVariation[]
+  image                     Image[]
+
 }
 
+model Image {
+	image_id		      Int			          @id @default(autoincrement())
+	path			        String			
+	image_type		    String
+	variation_id		  Int?
+	user_id			      String?           @unique
+	category_id		    Int?              @unique
+	productvariation	ProductVariation?	@relation(fields: [variation_id], references: [variation_id], onDelete: Cascade)
+	category		      Category?		      @relation(fields: [category_id], references: [category_id], onDelete: Cascade)
+	user			        User?			      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
 model Gemstone {
   gemstone_id               Int                        @id @default(autoincrement())
   name                      String                     @unique

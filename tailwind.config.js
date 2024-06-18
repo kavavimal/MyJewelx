@@ -32,6 +32,7 @@ export default withMT({
           200: "#637381",
         },
         secondary: {
+          100: "#676767",
           200: "#4D4D4D",
         },
       },

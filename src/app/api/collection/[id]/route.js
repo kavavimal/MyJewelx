@@ -13,6 +13,7 @@ export async function PUT(request, { params }) {
 
     const collection = await prisma.collection.findUnique({
       where: { collection_id },
+      include: { products: true },
     });
     if (!collection) {
       return NextResponse.json(
@@ -22,13 +23,29 @@ export async function PUT(request, { params }) {
         { status: 400 }
       );
     }
-    const res = await request.formData();
-    console.log("response", res)
-    const name = res.get("name");
-    const description = res.get("description");
-    console.log("description", description, name)
+    const req = await request.formData();
+    console.log("response", req);
+    const name = req.get("name");
+
+    const exists = await prisma.collection.findFirst({
+      where: { name: name, NOT: { collection_id: collection_id } },
+    });
+
+    if (exists) {
+      return NextResponse.json({
+        error: `${name} collection name already exist`,
+      });
+    }
+    const description = req.get("description");
+    console.log("description", description, name);
 
     const collectionData = collectionSchema.parse({ name, description });
+
+    if (collection.products.length > 0) {
+      return NextResponse.json({
+        error: `${collection.name} collection is in use, can't update it.`,
+      });
+    }
 
     const result = await prisma.collection.update({
       where: { collection_id },
@@ -40,7 +57,7 @@ export async function PUT(request, { params }) {
       { status: 201 }
     );
   } catch (error) {
-      console.log("error", error)
+    console.log("error", error);
     if (error === "ZodError") {
       return NextResponse.json(
         { error: "Validation error", issues: error.errors },
@@ -60,6 +77,7 @@ export async function DELETE(request, { params }) {
 
     const collection = await prisma.collection.findUnique({
       where: { collection_id },
+      include: { products: true },
     });
     if (!collection) {
       return NextResponse.json(
@@ -68,6 +86,12 @@ export async function DELETE(request, { params }) {
         },
         { status: 400 }
       );
+    }
+
+    if (collection.products.length > 0) {
+      return NextResponse.json({
+        error: `${collection.name} collection is in use, can't delete it.`,
+      });
     }
 
     const result = await prisma.collection.delete({

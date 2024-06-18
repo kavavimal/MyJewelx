@@ -10,7 +10,7 @@ const productSchema = z.object({
   tags: z.array(z.string()).optional().nullable(),
   attributes: z.array(z.string()),
   category: z.number(),
-  subCategory: z.number(),
+  subCategory: z.number().optional().nullable(),
   isOnlineBuyable: z.boolean().optional(),
   collections: z.array(z.string()).optional().nullable(),
   patterns: z.array(z.string()).optional().nullable(),
@@ -47,7 +47,20 @@ export async function GET(request, { params }) {
       include: {
         ProductAttributeValue: true,
         attributes: true,
-        variations: true,
+        variations: {
+          include: {
+            productAttributeValues: {
+              include: {
+                productAttributeValue: {
+                  include: {
+                    attributeValue: true,
+                    attribute: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         genders: true,
         category: true,
         tags: true,
@@ -81,26 +94,39 @@ export async function PUT(request, { params }) {
   try {
     const user = await checkUserSession();
     const product_id = Number(params.id);
-    const res = await request.formData();
+    const req = await request.formData();
 
-    const product_name = res.get("product_name");
-    const status = res.get("status") ? res.get("status") : "DRAFT";
-    const country_id = res.get("country_id")
-      ? Number(res.get("country_id"))
+    const product = await prisma.product.findUnique({
+      where: { product_id: product_id },
+    });
+
+    if (!product) {
+      return NextResponse.json(
+        { error: "Can't find the product with given product_id" },
+        { status: 400 }
+      );
+    }
+
+    const product_name = req.get("product_name");
+    const status = req.get("status") ? req.get("status") : "DRAFT";
+    const country_id = req.get("country_id")
+      ? Number(req.get("country_id"))
       : null;
-    const tags = res.get("tags") !== "" ? res.get("tags").split(",") : null;
-    const attributes = res.get("attributes").split(",");
-    const category = Number(res.get("category"));
-    const subCategory = Number(res.get("subCategory"));
-    const isOnlineBuyable = res.get("isOnlineBuyable") === "true";
+    const tags = req.get("tags") !== "" ? req.get("tags").split(",") : null;
+    const attributes = req.get("attributes").split(",");
+    const category = Number(req.get("category"));
+    const subCategory = req.get("subCategory")
+      ? Number(req.get("subCategory"))
+      : null;
+    const isOnlineBuyable = req.get("isOnlineBuyable") === "true";
     const collections =
-      res.get("collections") !== "" ? res.get("collections").split(",") : null;
+      req.get("collections") !== "" ? req.get("collections").split(",") : null;
     const patterns =
-      res.get("patterns") !== "" ? res.get("patterns").split(",") : null;
+      req.get("patterns") !== "" ? req.get("patterns").split(",") : null;
     const states =
-      res.get("states") !== "" ? res.get("states").split(",") : null;
+      req.get("states") !== "" ? req.get("states").split(",") : null;
     const genders =
-      res.get("genders") !== "" ? res.get("genders").split(",") : null;
+      req.get("genders") !== "" ? req.get("genders").split(",") : null;
 
     const productData = productSchema.parse({
       product_name,
@@ -140,9 +166,14 @@ export async function PUT(request, { params }) {
         category: {
           connect: { category_id: category },
         },
-        subcategory: {
-          connect: { category_id: subCategory },
-        },
+        // subcategory: {
+        //   connect: { category_id: subCategory },
+        // },
+        ...(productData.subCategory && {
+          subcategory: {
+            connect: { category_id: productData.subCategory },
+          },
+        }),
         ...(productData.country_id && {
           country: {
             connect: { country_id: productData.country_id },
