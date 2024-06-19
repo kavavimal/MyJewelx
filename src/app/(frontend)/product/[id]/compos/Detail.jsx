@@ -2,13 +2,53 @@
 import StarRatings from "@/components/frontend/StarRatings";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+// import "slick-carousel/slick/slick-theme.css";
 
 const Detail = ({ product }) => {
   const [variation, setVariation] = useState(product.variations[0]);
   const [mainImage, setMainImage] = useState(variation.image[0].path);
   const [makingC, setMakingC] = useState();
   console.log("product", product);
+  const sizes = [];
+  product.ProductAttributeValue.forEach((pav) => {
+    if (pav.attribute.name === "Size") {
+      sizes.push(pav.attributeValue.name);
+    }
+  });
 
+  const attribute_and_value_change = (attribute_id, attributeValue_id) => {
+    let productAttributeValue_ids = [];
+    product.ProductAttributeValue.map((record) => {
+      if (
+        record.attribute_id === attribute_id &&
+        record.attributeValue_id === attributeValue_id
+      ) {
+        productAttributeValue_ids.push(record.productAttributeValue_id);
+      }
+    });
+    productAttributeValue_ids.every((id) =>
+      product.variation.ProductAttributeValues.some(
+        (pav) => pav.productAttributeValue_id === id
+      )
+    );
+  };
+
+  const settings = {
+    // dots: true,
+    infinite: false,
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    vertical: true,
+    verticalSwiping: true,
+    beforeChange: function (currentSlide, nextSlide) {
+      console.log("before change", currentSlide, nextSlide);
+    },
+    afterChange: function (currentSlide) {
+      console.log("after change", currentSlide);
+    },
+  };
   const making_charges = JSON.parse(variation.making_charges);
   const other_charges = JSON.parse(variation.other_charges);
   let other_charges_total = 0;
@@ -43,14 +83,83 @@ const Detail = ({ product }) => {
   return (
     <>
       <section class="text-gray-600 body-font overflow-hidden">
-        <div class="container px-5 py-24 mx-auto">
-          <div class="lg:w-4/5 mx-auto flex flex-wrap">
-            <img
-              alt="ecommerce"
-              class="lg:w-1/2 w-full lg:h-auto h-64 object-cover object-center rounded"
-              src="https://dummyimage.com/400x400"
-            />
-            <div class="lg:w-1/2 w-full lg:pl-10 lg:py-6 mt-6 lg:mt-0">
+        <div class="container py-24 mx-auto max-w-screen-xl">
+          <div class="mx-auto flex flex-wrap">
+            <div className="lg:w-1/2 flex gap-1">
+              <div className="w-1/4 slider-container">
+                <Slider {...settings}>
+                  {variation.image.map((image, index) => {
+                    return (
+                      <Image
+                        className="border-1 shadow"
+                        key={index}
+                        src={image.path}
+                        onClick={() => setMainImage(image.path)}
+                        alt="Gallery Image"
+                        width="125"
+                        height="125"
+                      />
+                    );
+                  })}
+                  {variation.image.map((image, index) => {
+                    return (
+                      <Image
+                        key={index}
+                        src={image.path}
+                        onClick={() => setMainImage(image.path)}
+                        alt="Gallery Image"
+                        width="125"
+                        height="125"
+                      />
+                    );
+                  })}
+                </Slider>
+                {/* {variation.image.map((image, index) => {
+                  return (
+                    <>
+                      <Image
+                        key={index}
+                        src={image.path}
+                        onClick={() => setMainImage(image.path)}
+                        alt="Gallery Image"
+                        width="125"
+                        height="125"
+                      />{" "}
+                      <Image
+                        key={index}
+                        src={image.path}
+                        onClick={() => setMainImage(image.path)}
+                        alt="Gallery Image"
+                        width="125"
+                        height="125"
+                      />{" "}
+                      <Image
+                        key={index}
+                        src={image.path}
+                        onClick={() => setMainImage(image.path)}
+                        alt="Gallery Image"
+                        width="125"
+                        height="125"
+                      />{" "}
+                      <Image
+                        key={index}
+                        src={image.path}
+                        onClick={() => setMainImage(image.path)}
+                        alt="Gallery Image"
+                        width="125"
+                        height="125"
+                      />{" "}
+                    </>
+                  );
+                })} */}
+              </div>
+              <img
+                alt="ecommerce"
+                class="lg:w-2/3 w-full lg:h-96 h-64 object-cover object-center rounded border-1 shadow"
+                src={mainImage}
+              />
+            </div>
+            <div class="lg:w-1/2 w-full px-5 py-6 mt-6 lg:mt-0 border-1 shadow">
               {/* <h2 class="text-sm title-font text-gray-500 tracking-widest">BRAND NAME</h2> */}
               <h1 class="text-gray-900 text-3xl title-font font-medium mb-1">
                 The Catcher in the Rye
@@ -110,16 +219,22 @@ const Detail = ({ product }) => {
                   ? variation.selling_price
                   : variation.regular_price}
               </p>
-              <p class="leading-relaxed border-b-1 border-gray-100 pb-3">
+              <p class="leading-relaxed border-b-2 border-gray-100 pb-3">
                 {variation.description}
               </p>
-              <div class="leading-relaxed border-b-1 border-gray-100 pb-3">
-                <p class="leading-relaxed pb-3">Making Charges :{makingC}</p>
-                <p class="leading-relaxed pb-3">Other Charges :{}</p>
+              <div class="leading-relaxed border-b-2 border-gray-100 py-3">
+                <p class="leading-relaxed pb-3">
+                  Making Charges :<span> AED </span>
+                  {makingC}
+                </p>
+                <p class="leading-relaxed pb-3">
+                  Other Charges :<span> AED </span>
+                  {other_charges_total}
+                </p>
                 <p class="leading-relaxed pb-3">
                   Value Added Tax :{variation.vat ? variation.vat : 0}
                 </p>
-                <p class="leading-relaxed pb-3">Total Amount :{}</p>
+                <p class="leading-relaxed">Total Amount :{}</p>
               </div>
               <div class="flex mt-6 items-center pb-3 border-b-1 border-gray-100 mb-5">
                 <div class="flex">
@@ -128,49 +243,38 @@ const Detail = ({ product }) => {
                   <button class="border-2 border-gray-300 ml-1 bg-gray-700 rounded-full w-6 h-6 focus:outline-none"></button>
                   <button class="border-2 border-gray-300 ml-1 bg-yellow-500 rounded-full w-6 h-6 focus:outline-none"></button>
                 </div>
-                <div class="flex ml-6 items-center">
-                  <span class="mr-3">Size</span>
-                  <div class="relative">
-                    <select class="rounded border appearance-none border-gray-300 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:border-yellow-500 text-base pl-3 pr-10">
-                      <option>SM</option>
-                      <option>M</option>
-                      <option>L</option>
-                      <option>XL</option>
-                    </select>
-                    <span class="absolute right-0 top-0 h-full w-10 text-center text-gray-600 pointer-events-none flex items-center justify-center">
-                      <svg
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        class="w-4 h-4"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M6 9l6 6 6-6"></path>
-                      </svg>
-                    </span>
+                {sizes.length > 0 && (
+                  <div class="flex ml-6 items-center">
+                    <span class="mr-3">Size</span>
+                    <div class="relative">
+                      <select class="rounded border appearance-none border-gray-300 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:border-yellow-500 text-base pl-3 pr-10">
+                        {sizes.map((size, index) => (
+                          <option key={index}>{size}</option>
+                        ))}
+                      </select>
+                      <span class="absolute right-0 top-0 h-full w-10 text-center text-gray-600 pointer-events-none flex items-center justify-center">
+                        <svg
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          class="w-4 h-4"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M6 9l6 6 6-6"></path>
+                        </svg>
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
-              <div class="flex">
-                <span class="title-font font-medium text-2xl text-gray-900">
-                  $58.00
-                </span>
-                <button class="flex ml-auto text-white bg-yellow-500 border-0 py-2 px-6 focus:outline-none hover:bg-yellow-600 rounded">
-                  Button
+              <div class="flex justify-between text-xs">
+                <button class="text-black weight-700 bg-[#F0AE11] border-0 py-2 flex-1 px-3 mr-2 focus:outline-none hover:bg-yellow-600 rounded">
+                  Add to Cart
                 </button>
-                <button class="rounded-full w-10 h-10 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4">
-                  <svg
-                    fill="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    class="w-5 h-5"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path>
-                  </svg>
+                <button class="text-[#F0AE11] bg-white border py-2 px-4 border-[#F0AE11] focus:outline-none hover:bg-yellow-600 rounded">
+                  Add to Whish list
                 </button>
               </div>
             </div>

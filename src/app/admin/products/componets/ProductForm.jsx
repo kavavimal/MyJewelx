@@ -3,13 +3,13 @@ import {
   Alert,
   Button,
   Checkbox,
-  IconButton,
   Input,
   Option,
   Select,
   Spinner,
   Step,
   Stepper,
+  Textarea,
   Typography,
 } from "@material-tailwind/react";
 import React, { useEffect, useState } from "react";
@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { productValidationSchema } from "@/schemas/ValidationSchema";
 import { attributeIDs } from "@/utils/constants";
 import ProductAttributeItem from "./ProductAttributeItem";
+import { Router } from "next/router";
 
 const ProductForm = ({
   product,
@@ -550,6 +551,7 @@ const ProductForm = ({
       } else {
         if (activeStep === 0) {
           try {
+            setLoading(true);
             const response = await post("/api/product", {
               ...values,
               attributes: values.attributes.join(","),
@@ -570,7 +572,10 @@ const ProductForm = ({
               `/admin/products/edit/${response.data?.result?.product_id}`
             );
             !isLastStep && setActiveStep((cur) => cur + 1);
-          } catch (error) {}
+          } catch (error) {
+          } finally {
+            setLoading(false);
+          }
         }
       }
     },
@@ -716,16 +721,136 @@ const ProductForm = ({
         </h2>
       </div>
       <div className="flex flex-col gap-5">
-        <div>
+        <div className="mb-20">
           <Stepper
             activeStep={activeStep}
             isLastStep={(value) => setIsLastStep(value)}
             isFirstStep={(value) => setIsFirstStep(value)}
           >
-            <Step className="h-4 w-4" onClick={() => setActiveStep(0)} />
-            <Step className="h-4 w-4" onClick={() => setActiveStep(1)} />
-            <Step className="h-4 w-4" onClick={() => setActiveStep(2)} />
-            <Step className="h-4 w-4" onClick={() => setActiveStep(3)} />
+            <Step onClick={() => setActiveStep(0)}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"
+                />
+              </svg>
+
+              <div className="absolute -bottom-[4.5rem] left-0 w-max text-start">
+                <Typography
+                  variant="h6"
+                  color={activeStep === 0 ? "blue-gray" : "gray"}
+                >
+                  Step 1
+                </Typography>
+                <Typography
+                  color={activeStep === 0 ? "blue-gray" : "gray"}
+                  className="font-normal"
+                >
+                  Basic Details
+                </Typography>
+              </div>
+            </Step>
+            <Step onClick={() => setActiveStep(1)}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                />
+              </svg>
+
+              <div className="absolute -bottom-[4.5rem] w-max text-center">
+                <Typography
+                  variant="h6"
+                  color={activeStep === 1 ? "blue-gray" : "gray"}
+                >
+                  Step 2
+                </Typography>
+                <Typography
+                  color={activeStep === 1 ? "blue-gray" : "gray"}
+                  className="font-normal"
+                >
+                  Attributes
+                </Typography>
+              </div>
+            </Step>
+            <Step onClick={() => setActiveStep(2)}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 9m18 0V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v3"
+                />
+              </svg>
+
+              <div className="absolute -bottom-[4.5rem] w-max text-center">
+                <Typography
+                  variant="h6"
+                  color={activeStep === 2 ? "blue-gray" : "gray"}
+                >
+                  Step 3
+                </Typography>
+                <Typography
+                  color={activeStep === 2 ? "blue-gray" : "gray"}
+                  className="font-normal"
+                >
+                  Product Details
+                </Typography>
+              </div>
+            </Step>
+            <Step onClick={() => setActiveStep(3)}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+                />
+              </svg>
+
+              <div className="absolute right-0 -bottom-[4.5rem] w-max text-end">
+                <Typography
+                  variant="h6"
+                  color={activeStep === 3 ? "blue-gray" : "gray"}
+                >
+                  Step 4
+                </Typography>
+                <Typography
+                  color={activeStep === 3 ? "blue-gray" : "gray"}
+                  className="font-normal"
+                >
+                  Additional Tags & Attributes
+                </Typography>
+              </div>
+            </Step>
           </Stepper>
         </div>
 
@@ -945,35 +1070,35 @@ const ProductForm = ({
         {activeStep === 2 && (
           <>
             <div className="p-7 shadow-3xl rounded-2xl bg-white">
-              <h3 className="text-xl mb-6 font-medium tracking-wide">
-                Product Details : {product?.product_name ?? ""}
-              </h3>
+              <div className="mb-6 flex justify-between items-center">
+                <h3 className="text-xl font-medium tracking-wide">
+                  Product Details : {product?.product_name ?? ""}
+                </h3>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (
+                      productAttributeValues &&
+                      productAttributeValues.length > 0
+                    ) {
+                      setVariations([
+                        ...variations,
+                        {
+                          name: productAttributeValues
+                            .filter(Boolean)
+                            ?.map((pa) => pa?.name)
+                            .join(", "),
+                          productAttributeValues:
+                            productAttributeValues.filter(Boolean),
+                        },
+                      ]);
+                    }
+                  }}
+                >
+                  Add
+                </Button>
+              </div>
               <div className="w-full flex flex-col gap-5">
-                <div className="w-auto flex justify-end">
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      if (
-                        productAttributeValues &&
-                        productAttributeValues.length > 0
-                      ) {
-                        setVariations([
-                          ...variations,
-                          {
-                            name: productAttributeValues
-                              .filter(Boolean)
-                              ?.map((pa) => pa?.name)
-                              .join(", "),
-                            productAttributeValues:
-                              productAttributeValues.filter(Boolean),
-                          },
-                        ]);
-                      }
-                    }}
-                  >
-                    Add
-                  </Button>
-                </div>
                 <div className="flex flex-wrap gap-5">
                   {selectedAttributes &&
                     selectedAttributes.length > 0 &&
@@ -1058,6 +1183,16 @@ const ProductForm = ({
                     />
                   </div>
 
+                  {!formik.values.isOnlineBuyable && (
+                    <div className="col-span-2">
+                      <Textarea
+                        label="Remarks"
+                        name="remarks"
+                        className="min-h-[50px]"
+                      />
+                    </div>
+                  )}
+
                   <div>
                     {countries?.length > 0 && (
                       <Select
@@ -1085,26 +1220,28 @@ const ProductForm = ({
                   </div>
 
                   <div>
-                    <Select
-                      label="State"
-                      size="lg"
-                      name="states"
-                      error={formik.errors.states && formik.touched.states}
-                      value={formik.values.states}
-                      onChange={(value) => {
-                        formik.setFieldValue("states", value);
-                      }}
-                    >
-                      {statesOptions && statesOptions.length > 0 ? (
-                        statesOptions.map((state) => (
+                    {statesOptions && statesOptions.length > 0 ? (
+                      <Select
+                        label="State"
+                        size="lg"
+                        name="states"
+                        error={formik.errors.states && formik.touched.states}
+                        onChange={(value) => {
+                          formik.setFieldValue("states", value);
+                        }}
+                        value={formik.values.states || ""}
+                      >
+                        {statesOptions.map((state) => (
                           <Option key={state.state_id} value={state.state_id}>
                             {state.name}
                           </Option>
-                        ))
-                      ) : (
-                        <Option disabled>No states</Option>
-                      )}
-                    </Select>
+                        ))}
+                      </Select>
+                    ) : (
+                      <Select label="State" size="lg">
+                        <Option disabled>No States</Option>
+                      </Select>
+                    )}
                   </div>
 
                   <div>
@@ -1247,6 +1384,24 @@ const ProductForm = ({
                       styles={style}
                     />
                   </div>
+
+                  <div className="col-span-2">
+                    <Textarea label="Delivery Includes" name="delivery" />
+                  </div>
+                  <div className="col-span-2">
+                    <Textarea
+                      label="Return Policy"
+                      name="return_policy"
+                      className="min-h-[50px]"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <Textarea
+                      label="Purchase Notes"
+                      name="purchase_notes"
+                      className="min-h-[50px]"
+                    />
+                  </div>
                 </div>
               </Form>
             </Formik>
@@ -1262,7 +1417,7 @@ const ProductForm = ({
             loading={formik.isSubmitting}
             type="button"
           >
-            Next
+            {activeStep === 3 ? "Finish" : "Next"}
           </Button>
         </div>
       </div>

@@ -6,7 +6,7 @@ async function get_productBy_id(id) {
     where: { product_id: Number(id) },
     include: {
       variations: {
-        include: { image: true },
+        include: { image: true, productAttributeValues: true },
       },
       user: true,
       ProductAttributeValue: {

@@ -126,6 +126,7 @@ const Variation = ({
   const [totalAdditionalCharge, setTotalAdditionalCharge] = useState(0);
   const [totalOtherCharge, setTotalOtherCharge] = useState(0);
   const [appliedDiscout, setAppliedDiscout] = useState(0);
+  const [totalMakingCharge, setTotalMakingCharge] = useState(0);
   const [subtotal, setSubTotal] = useState(0);
   const [total, setTotal] = useState(0);
 
@@ -363,7 +364,7 @@ const Variation = ({
             making_charges: JSON.stringify(makingCharges),
             other_charges: JSON.stringify(otherCharges),
             product_id: localStorage.getItem("product_id"),
-            productAttributeValue_id: productAttributeValues
+            productAttributeValue_id: variation.productAttributeValues
               ?.map((item) => item.productAttributeValue_id)
               .join(","),
             stock_status: values.stock_status === "in_stock" ? true : false,
@@ -441,11 +442,13 @@ const Variation = ({
     let totalPrice = 0;
 
     const gemstoneAmounts = gemstoneCharges.map((item) => {
-      return parseFloat(item.amount);
+      const amount = parseFloat(item.amount);
+      return isNaN(amount) ? 0 : amount;
     });
 
     const additionalAmounts = additionalCharges.map((item) => {
-      return parseFloat(item.additionalCharge);
+      const amount = parseFloat(item.additionalCharge);
+      return isNaN(amount) ? 0 : amount;
     });
 
     if (
@@ -466,28 +469,36 @@ const Variation = ({
       }
       const mapstring = attributeSelected.replace(/\s/g, "").toLowerCase();
       if (Object.keys(pricing).includes(mapstring)) {
-        metalPrice = pricing[mapstring];
+        metalPrice = parseFloat(pricing[mapstring]);
 
         if (formik.values?.net_weight) {
-          metalPrice =
-            parseFloat(pricing[mapstring]) *
-            parseFloat(formik.values?.net_weight);
+          metalPrice = metalPrice * parseFloat(formik.values?.net_weight || 0);
         }
       }
 
       if (formik.values?.isPriceFixed) {
         const productPrice = formik.values.regular_price;
-        price = price + parseFloat(productPrice);
+        price = price + parseFloat(productPrice || 0);
       } else {
         price = price + metalPrice;
         if (makingCharge === "Per Gram On Net Weight") {
           price =
             price +
-            parseFloat(chargeValue) * parseFloat(formik.values.net_weight);
+              parseFloat(chargeValue) *
+                parseFloat(formik.values?.net_weight || 0) || 0;
+          setTotalMakingCharge(
+            parseFloat(chargeValue) *
+              parseFloat(formik.values?.net_weight || 0) || 0
+          );
         } else if (makingCharge === "Per Piece / Flat") {
-          price = price + parseFloat(chargeValue);
+          price = price + (parseFloat(chargeValue) || 0);
+          setTotalMakingCharge(parseFloat(chargeValue || 0));
         } else if (makingCharge === "Per(%) On Metal Rate On Karat") {
-          price = price + (metalPrice * parseFloat(chargeValue)) / 100;
+          price =
+            price + (metalPrice * (parseFloat(chargeValue) || 0)) / 100 || 0;
+          setTotalMakingCharge(
+            (metalPrice * (parseFloat(chargeValue) || 0)) / 100 || 0
+          );
         }
       }
 
@@ -504,29 +515,33 @@ const Variation = ({
       }
 
       if (isDiscount && discountType === "Per Gram On Net Weight") {
-        let appliedDiscout = formik.values.net_weight * discountValue;
+        let appliedDiscout =
+          parseFloat(formik.values?.net_weight || 0) *
+            parseFloat(discountValue || 0) || 0;
         price = price - appliedDiscout;
         setAppliedDiscout(appliedDiscout);
       }
 
       if (isDiscount && discountType === "Per Piece / Flat") {
-        price = price - discountValue;
-        setAppliedDiscout(discountValue);
+        price = price - (parseFloat(discountValue) || 0);
+        setAppliedDiscout(discountValue || 0);
       }
 
       if (isDiscount && discountType === "Per(%) On Metal Rate On Karat") {
-        price = price - (metalPrice * discountValue) / 100;
-        setAppliedDiscout((metalPrice * discountValue) / 100);
+        price =
+          price - (metalPrice * (parseFloat(discountValue) || 0)) / 100 || 0;
+        setAppliedDiscout(
+          (metalPrice * (parseFloat(discountValue) || 0)) / 100 || 0
+        );
       }
 
       if (taxValue === "5") {
-        totalPrice = price + (price * 5) / 100;
+        totalPrice = price + (price * 5) / 100 || 0;
       }
       setSubTotal(price);
       setTotal(totalPrice);
     }
   };
-
   useEffect(() => {
     calculateFinalPrice();
   }, [
@@ -680,6 +695,42 @@ const Variation = ({
                       />
                     </div>
 
+                    <div>
+                      <Editor
+                        apiKey="exrtc5unpz0rnnqzlce7w4eh4pww5sj8woyuvnwgy1e9w2l5"
+                        init={{
+                          height: 400,
+                          menubar: true,
+                          plugins: [
+                            "advlist autolink lists link image charmap print preview anchor",
+                            "searchreplace visualblocks code fullscreen",
+                            "insertdatetime media table paste code help wordcount",
+                            "table",
+                            "image",
+                            "bbcode",
+                            "link",
+                            "image paste",
+                          ],
+                          toolbar:
+                            "undo redo | formatselect | bold italic backcolor | \
+                      alignleft aligncenter alignright alignjustify | \
+                      bullist numlist outdent indent | removeformat | help | \
+                      table | image media | link",
+                        }}
+                        value={formik.values?.description ?? ""}
+                        onEditorChange={(content) => {
+                          formik.setFieldValue("description", content);
+                        }}
+                      />
+
+                      {formik.errors.description &&
+                        formik.touched.description && (
+                          <p className="text-red-500">
+                            {formik.errors.description}
+                          </p>
+                        )}
+                    </div>
+
                     <div className="flex flex-col gap-5">
                       <div>
                         <div className="flex flex-col gap-5">
@@ -755,117 +806,86 @@ const Variation = ({
                       </div>
                     </div>
 
-                    <div>
-                      <Editor
-                        apiKey="exrtc5unpz0rnnqzlce7w4eh4pww5sj8woyuvnwgy1e9w2l5"
-                        init={{
-                          height: 400,
-                          menubar: true,
-                          plugins: [
-                            "advlist autolink lists link image charmap print preview anchor",
-                            "searchreplace visualblocks code fullscreen",
-                            "insertdatetime media table paste code help wordcount",
-                            "table",
-                            "image",
-                            "bbcode",
-                            "link",
-                            "image paste",
-                          ],
-                          toolbar:
-                            "undo redo | formatselect | bold italic backcolor | \
-                      alignleft aligncenter alignright alignjustify | \
-                      bullist numlist outdent indent | removeformat | help | \
-                      table | image media | link",
-                        }}
-                        value={formik.values?.description ?? ""}
-                        onEditorChange={(content) => {
-                          formik.setFieldValue("description", content);
-                        }}
-                      />
-
-                      {formik.errors.description &&
-                        formik.touched.description && (
-                          <p className="text-red-500">
-                            {formik.errors.description}
-                          </p>
-                        )}
-                    </div>
-
                     <div className="flex flex-col gap-5">
                       <div>
-                        <div className="mb-1.5">
+                        <div className="mb-5 flex justify-between items-center">
                           <Checkbox
                             label="Stock management"
                             name="stock_management"
                             onChange={formik.handleChange}
                             checked={formik.values?.stock_management ?? false}
                           />
+
+                          {formik.values?.stock_management && (
+                            <div>
+                              <Input
+                                type="number"
+                                label="Quantity"
+                                size="lg"
+                                name="quantity"
+                                error={
+                                  formik.errors.quantity &&
+                                  formik.touched.quantity
+                                }
+                                value={formik.values?.quantity ?? ""}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                              />
+                            </div>
+                          )}
+
+                          <div>
+                            <ul className="flex gap-5 items-center">
+                              <li>
+                                <input
+                                  type="radio"
+                                  id={`in-stock-${index}`}
+                                  name="stock_status"
+                                  value="in_stock"
+                                  className="hidden peer"
+                                  checked={
+                                    formik.values?.stock_status === "in_stock"
+                                  }
+                                  onChange={formik.handleChange}
+                                />
+                                <label
+                                  htmlFor={`in-stock-${index}`}
+                                  className="inline-flex items-center justify-between w-full p-3 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:text-primary-200 peer-checked:border-primary-200 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
+                                >
+                                  <div className="block">
+                                    <div className="w-full text-base font-medium">
+                                      In Stock
+                                    </div>
+                                  </div>
+                                </label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  id={`out-of-stock-${index}`}
+                                  name="stock_status"
+                                  value="out_of_stock"
+                                  className="hidden peer"
+                                  checked={
+                                    formik.values?.stock_status ===
+                                    "out_of_stock"
+                                  }
+                                  onChange={formik.handleChange}
+                                />
+                                <label
+                                  htmlFor={`out-of-stock-${index}`}
+                                  className="inline-flex items-center justify-between w-full p-3 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:text-primary-200 peer-checked:border-primary-200 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
+                                >
+                                  <div className="block">
+                                    <div className="w-full text-base font-medium">
+                                      Out Of Stock
+                                    </div>
+                                  </div>
+                                </label>
+                              </li>
+                            </ul>
+                          </div>
                         </div>
-                        {formik.values?.stock_management && (
-                          <Input
-                            type="number"
-                            label="Quantity"
-                            size="lg"
-                            name="quantity"
-                            error={
-                              formik.errors.quantity && formik.touched.quantity
-                            }
-                            value={formik.values?.quantity ?? ""}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                          />
-                        )}
-                      </div>
-                      <div>
-                        <h4 className="mb-2">Stock Status</h4>
-                        <ul className="flex gap-5 items-center">
-                          <li>
-                            <input
-                              type="radio"
-                              id={`in-stock-${index}`}
-                              name="stock_status"
-                              value="in_stock"
-                              className="hidden peer"
-                              checked={
-                                formik.values?.stock_status === "in_stock"
-                              }
-                              onChange={formik.handleChange}
-                            />
-                            <label
-                              htmlFor={`in-stock-${index}`}
-                              className="inline-flex items-center justify-between w-full p-3 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:text-primary-200 peer-checked:border-primary-200 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
-                            >
-                              <div className="block">
-                                <div className="w-full text-base font-medium">
-                                  In Stock
-                                </div>
-                              </div>
-                            </label>
-                          </li>
-                          <li>
-                            <input
-                              type="radio"
-                              id={`out-of-stock-${index}`}
-                              name="stock_status"
-                              value="out_of_stock"
-                              className="hidden peer"
-                              checked={
-                                formik.values?.stock_status === "out_of_stock"
-                              }
-                              onChange={formik.handleChange}
-                            />
-                            <label
-                              htmlFor={`out-of-stock-${index}`}
-                              className="inline-flex items-center justify-between w-full p-3 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:text-primary-200 peer-checked:border-primary-200 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
-                            >
-                              <div className="block">
-                                <div className="w-full text-base font-medium">
-                                  Out Of Stock
-                                </div>
-                              </div>
-                            </label>
-                          </li>
-                        </ul>
                       </div>
                     </div>
 
@@ -970,19 +990,6 @@ const Variation = ({
 
                     {!formik.values?.isPriceFixed && (
                       <>
-                        <div>
-                          {/* <Input
-                            type="number"
-                            label="Metal Amount"
-                            name="metal_amount"
-                            size="lg"
-                            value={formik.values?.metal_amount ?? ""}
-                            error={formik.errors.metal_amount}
-                            onChange={formik.handleChange}
-                            disabled
-                          /> */}
-                        </div>
-
                         <div className="w-full flex gap-5 items-center">
                           <div className="w-1/2">
                             <Select
@@ -1526,7 +1533,7 @@ const Variation = ({
                                 Fixed Price
                               </td>
                               <td className="text-right text-gray-700">
-                                {formik?.values?.regular_price}
+                                {formik?.values?.regular_price || 0}
                               </td>
                             </tr>
                           </>
@@ -1539,20 +1546,11 @@ const Variation = ({
                                 Making Charge
                               </td>
                               <td className="text-right text-gray-700">
-                                {parseFloat(formik?.values?.net_weight) *
-                                  parseFloat(formik?.values?.metal_amount) || 0}
+                                {totalMakingCharge}
                               </td>
                             </tr>
                           </>
                         )}
-                        <tr>
-                          <td className="text-left text-gray-700">
-                            Additional Charge
-                          </td>
-                          <td className="text-right text-gray-700">
-                            {totalAdditionalCharge}
-                          </td>
-                        </tr>
                         <tr>
                           <td className="text-left text-gray-700">
                             Other Charge
@@ -1561,6 +1559,15 @@ const Variation = ({
                             {totalOtherCharge}
                           </td>
                         </tr>
+                        <tr>
+                          <td className="text-left text-gray-700">
+                            Additional Charge
+                          </td>
+                          <td className="text-right text-gray-700">
+                            {totalAdditionalCharge}
+                          </td>
+                        </tr>
+
                         <tr>
                           <td className="text-left text-gray-700">Discount</td>
                           <td className="text-right text-gray-700">

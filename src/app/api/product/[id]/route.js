@@ -16,6 +16,10 @@ const productSchema = z.object({
   patterns: z.array(z.string()).optional().nullable(),
   states: z.array(z.string()).optional().nullable(),
   genders: z.array(z.string()).optional().nullable(),
+  offline_reason: z.string().optional().nullable(),
+  delivery_includes: z.string(),
+  return_policy: z.string(),
+  purchase_note: z.string().optional().nullable(),
 });
 
 const checkUserSession = async () => {
@@ -127,6 +131,12 @@ export async function PUT(request, { params }) {
       req.get("states") !== "" ? req.get("states").split(",") : null;
     const genders =
       req.get("genders") !== "" ? req.get("genders").split(",") : null;
+    const offline_reason = isOnlineBuyable ? req.get("offline_reason") : "";
+    const delivery_includes = req.get("delivery_includes");
+    const return_policy = req.get("return_policy");
+    const purchase_note = req.get("purchase_note")
+      ? req.get("purchase_note")
+      : "";
 
     const productData = productSchema.parse({
       product_name,
@@ -141,6 +151,10 @@ export async function PUT(request, { params }) {
       patterns,
       states,
       genders,
+      offline_reason,
+      delivery_includes,
+      return_policy,
+      purchase_note,
     });
 
     const result = await prisma.product.update({
@@ -148,6 +162,10 @@ export async function PUT(request, { params }) {
       data: {
         product_name: productData.product_name,
         status: productData.status,
+        offline_reason: productData.offline_reason,
+        delivery_includes: productData.delivery_includes,
+        return_policy: productData.return_policy,
+        purchase_note: productData.purchase_note,
         isOnlineBuyable: productData.isOnlineBuyable,
         attributes: {
           deleteMany: {},

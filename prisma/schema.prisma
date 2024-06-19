@@ -84,6 +84,10 @@ model Product {
   ProductAttributeValue ProductAttributeValue[]
   categoryId            Int
   subCategoryId         Int?
+  offline_reason        String?
+  delivery_includes     String
+  return_policy         String
+  purchase_note         String?
 
   // Define relations to Category
   category    Category @relation("CategoryProducts", fields: [categoryId], references: [category_id])
