@@ -13,13 +13,7 @@ import { enqueueSnackbar } from "notistack";
 import { useSession } from "next-auth/react";
 import SessionLoader from "@/components/SessionLoader";
 export default function UserForm({ roles, user }) {
-  const [loading, setLoading] = useState(false);
-
   const { data: session, status } = useSession();
-
-  // const userRoles = roles?.map((role) => {
-  //   return { label: role.role_name, value: role.role_id };
-  // });
 
   const userAcountType = Object.keys(AcountType)?.map((type) => {
     return { label: type, value: type };
@@ -48,46 +42,50 @@ export default function UserForm({ roles, user }) {
           const response = await update(`/api/user/${user.id}`, values);
           router.push("/admin/users");
           router.refresh();
-          enqueueSnackbar("User updated successfully", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
+          if (response.status === 200) {
+            enqueueSnackbar("User updated successfully", {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+          }
         } catch (error) {}
       } else {
         try {
           const response = await post("/api/user/", values);
           router.push("/admin/users");
           router.refresh();
-          enqueueSnackbar("User created successfully", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
+          if (response.status === 200) {
+            enqueueSnackbar("User created successfully", {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+          }
         } catch (e) {
           enqueueSnackbar(e.response?.data?.error, {
             variant: "error",

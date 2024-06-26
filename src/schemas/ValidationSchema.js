@@ -1,4 +1,6 @@
+import { INDIA, attributeIDs } from "@/utils/constants";
 import * as Yup from "yup";
+import { z } from "zod";
 
 export const permissionValidationSchema = Yup.object({
   permission_name: Yup.string().required("Please enter permission name"),
@@ -74,13 +76,84 @@ export const productValidationSchema = Yup.object().shape({
   subCategory: Yup.number().required("Sub category is required"),
   attributes: Yup.array()
     .min(1, "At least one attribute is required")
-    .required("Attributes are required"),
-  tags: Yup.array().notRequired(),
-  country_id: Yup.number().notRequired(),
-  isOnlineBuyable: Yup.boolean().notRequired(),
-  states: Yup.number().notRequired(),
-  status: Yup.string().notRequired(),
-  collections: Yup.array().required("Collections are required").notRequired(),
-  patterns: Yup.array().notRequired(),
-  genders: Yup.array().notRequired(),
+    .required("Attributes are required")
+    .test("attributes-material", "Attributes must have material", (value) => {
+      return value && value.includes(attributeIDs.MATERIAL);
+    }),
 });
+
+export const additionalValidationSchema = Yup.object().shape({
+  country_id: Yup.number().required("Country is required"),
+  states: Yup.number().when("country_id", {
+    is: INDIA,
+    then: (schema) => schema.required("States are required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  return_policy: Yup.string().required("Return policy is required"),
+  delivery_includes: Yup.string().required("Delivery includes is required"),
+});
+
+export const variationValidationSchema = (isVariation) => {
+  const baseSchema = {
+    description: z
+      .string()
+      .min(1, "Description is required")
+      .max(200, "Description must be less than 200 characters"),
+    length: z.number().min(0, "Length is required"),
+    width: z.number().min(0, "Width is required"),
+    height: z.number().min(0, "Height is required"),
+    thickness: z.number().min(0, "Thickness is required"),
+    sku: z
+      .string()
+      .min(1, "SKU is required")
+      .max(20, "SKU must be less than 20 characters"),
+    stock_management: z.boolean().optional(),
+    stock_status: z.enum(
+      ["in_stock", "out_of_stock"],
+      "Stock status is required"
+    ),
+    weight_unit: z
+      .string()
+      .min(1, "Weight unit is required")
+      .max(20, "Weight unit must be less than 20 characters"),
+    net_weight: z.number().min(0, "Net weight is required"),
+    gross_weight: z
+      .number()
+      .min(0, "Gross weight should be greater than zero")
+      .refine((val, ctx) => val >= ctx.parent.net_weight, {
+        message: "Gross weight should be more than net weight",
+      }),
+    isPriceFixed: z.boolean(),
+    regular_price: z
+      .number()
+      .optional()
+      .refine(
+        (val, ctx) => {
+          if (ctx.parent.isPriceFixed && val === undefined) {
+            return false;
+          }
+          return true;
+        },
+        { message: "Regular price is required when price is fixed" }
+      ),
+  };
+
+  if (!isVariation) {
+    baseSchema.files = z
+      .array(
+        z.object({
+          size: z
+            .number()
+            .refine((val) => val <= FILE_SIZE, { message: "File too large" }),
+          type: z.string().refine((val) => SUPPORTED_FORMATS.includes(val), {
+            message: "Unsupported Format",
+          }),
+        })
+      )
+      .min(1, { message: "At least one image is required" });
+  }
+
+  return z.object(baseSchema);
+};
+
+export default variationValidationSchema;

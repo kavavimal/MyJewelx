@@ -2,10 +2,16 @@
 import React from "react";
 import { Button, Chip, IconButton } from "@material-tailwind/react";
 import Link from "next/link";
-import DataTable from "react-data-table-component";
+const DataTable = dynamic(() => import("react-data-table-component"), {
+  ssr: false,
+});
 import DeleteProduct from "./DeleteProduct";
 import { ADMIN_ID, CUSTOMER_ID, VENDOR_ID } from "@/utils/constants";
+import dynamic from "next/dynamic";
+import { ProductStatus } from "@prisma/client";
+import { updateProductStatus } from "@/actions/product";
 const Products = ({ products }) => {
+  console.log(products);
   if (typeof window !== "undefined") {
     localStorage.setItem("activeStep", 0);
   }
@@ -14,31 +20,52 @@ const Products = ({ products }) => {
       name: "Product Name",
       selector: (row) => row?.product_name,
     },
-    {
-      name: "SKU",
-      selector: (row) => row.sku,
-    },
+    // {
+    //   name: "SKU",
+    //   selector: (row) => row.sku,
+    // },
     {
       name: "Created By",
       selector: (row) => {
-        if (row?.user?.role_id === VENDOR_ID) {
-          return "Vendor";
-        } else if (row?.user?.role_id === ADMIN_ID) {
-          return "Admin";
-        } else if (row?.user?.role_id == CUSTOMER_ID) {
-          return "Customer";
-        }
+        return `${row?.user?.firstName} ${row?.user?.lastName} (${row?.user?.account_type})`;
       },
     },
     {
       name: "Status",
       selector: (row) => (
-        <Chip
-          value={row?.status}
-          size="sm"
-          className="normal-case font-emirates"
-          color="indigo"
-        />
+        <>
+          <div className="flex justify-between items-center grow">
+            {row?.status}
+            {/* <Chip
+            value={row?.status}
+            size="sm"
+            className="normal-case font-emirates"
+            color="indigo"
+          /> */}
+            {row?.status === ProductStatus.DRAFT && (
+              <Button
+                size="sm"
+                className="w-full"
+                onClick={() =>
+                  updateProductStatus(row.product_id, ProductStatus.PUBLISHED)
+                }
+              >
+                Publish
+              </Button>
+            )}
+            {row?.status === ProductStatus.PUBLISHED && (
+              <Button
+                className="w-1/2"
+                size="sm"
+                onClick={() =>
+                  updateProductStatus(row.product_id, ProductStatus.DRAFT)
+                }
+              >
+                Draft
+              </Button>
+            )}
+          </div>
+        </>
       ),
     },
     {
@@ -66,7 +93,6 @@ const Products = ({ products }) => {
     },
   ];
 
-  console.log(products);
   return (
     <>
       <div className="flex justify-between items-center btn btn-primary mb-10">
@@ -95,7 +121,13 @@ const Products = ({ products }) => {
         </Link>
       </div>
 
-      <DataTable columns={columns} data={products} highlightOnHover />
+      <DataTable
+        columns={columns}
+        data={products}
+        highlightOnHover
+        pagination
+        pointerOnHover
+      />
     </>
   );
 };

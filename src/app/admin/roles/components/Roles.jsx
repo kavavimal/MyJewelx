@@ -1,12 +1,5 @@
 "use client";
-import {
-  Button,
-  IconButton,
-  Menu,
-  MenuHandler,
-  MenuItem,
-  MenuList,
-} from "@material-tailwind/react";
+import { Button, IconButton } from "@material-tailwind/react";
 import Link from "next/link";
 import React from "react";
 import DataTable from "react-data-table-component";

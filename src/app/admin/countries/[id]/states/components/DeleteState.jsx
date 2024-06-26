@@ -20,11 +20,52 @@ const DeleteState = ({ state_id }) => {
   const del = async () => {
     setLoading(true);
     try {
-      await fetch(`/api/state/${state_id}`, {
+      const response = await fetch(`/api/state/${state_id}`, {
         method: "DELETE",
       });
-      enqueueSnackbar("State deleted successfully", {
-        variant: "success",
+
+      if (response.status === 201) {
+        enqueueSnackbar("State deleted successfully", {
+          variant: "success",
+          preventDuplicates: true,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
+          autoHideDuration: 3000,
+          style: {
+            background: "white",
+            color: "black",
+            borderRadius: ".5rem",
+            boxShadow:
+              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+            padding: "0 4px",
+          },
+        });
+      } else if (response.status === 405) {
+        enqueueSnackbar("State Is In Use, Can't Be Deleted", {
+          variant: "error",
+          preventDuplicates: true,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
+          autoHideDuration: 3000,
+          style: {
+            background: "white",
+            color: "black",
+            borderRadius: ".5rem",
+            boxShadow:
+              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+            padding: "0 4px",
+          },
+        });
+      }
+      router.refresh();
+    } catch (e) {
+      console.log(e);
+      enqueueSnackbar(e?.response?.data?.error, {
+        variant: "error",
         preventDuplicates: true,
         anchorOrigin: {
           vertical: "top",
@@ -40,9 +81,6 @@ const DeleteState = ({ state_id }) => {
           padding: "0 4px",
         },
       });
-      router.refresh();
-    } catch (e) {
-      console.error(e);
     }
     setOpen(false);
     setLoading(false);

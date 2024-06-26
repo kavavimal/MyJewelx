@@ -57,24 +57,26 @@ const GenderForm = ({ genders }) => {
             `/api/gender/${gender.gender_id}`,
             values
           );
+          if (response?.status === 201) {
+            enqueueSnackbar("Gender Updated", {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+          }
           router.refresh();
-          enqueueSnackbar("Gender Updated", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
           setGender(false);
           formik.setValues({ name: "" });
         } catch (error) {
@@ -100,28 +102,30 @@ const GenderForm = ({ genders }) => {
       } else {
         try {
           const response = await post("/api/gender", values);
+          if (response?.status === 201) {
+            enqueueSnackbar("Gender Created", {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+          }
           router.refresh();
           formik.resetForm();
-          enqueueSnackbar("Gender Created", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
         } catch (error) {
           console.log(error);
-          enqueueSnackbar(error?.response?.data?.message, {
+          enqueueSnackbar(error?.response?.data?.error, {
             variant: "error",
             preventDuplicate: true,
             anchorOrigin: {

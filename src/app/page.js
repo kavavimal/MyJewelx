@@ -1,3 +1,4 @@
+import Footer from "@/components/frontend/common/Footer";
 import FrontendHeader from "@/components/frontend/common/Header";
 import Image from "next/image";
 
@@ -58,6 +59,7 @@ export default function Home() {
           </div>
         </section>
       </main>
+      <Footer />
     </>
   );
 }

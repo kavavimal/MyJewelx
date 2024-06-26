@@ -24,14 +24,16 @@ export async function PUT(request, { params }) {
       );
     } else if (state.products.length > 0) {
       return NextResponse.json(
-        { error: "State is in use and can't be deleted" },
+        { error: "State is in use and can't be updated" },
         { status: 405 }
       );
     }
     const req = await request.formData();
     const name = req.get("name");
 
-    const stateWithName = await prisma.state.findFirst({ where: { name: name } });
+    const stateWithName = await prisma.state.findFirst({
+      where: { name: name },
+    });
 
     if (stateWithName) {
       return NextResponse.json({

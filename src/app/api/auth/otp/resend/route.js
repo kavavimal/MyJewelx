@@ -29,15 +29,18 @@ export async function POST(req) {
             { status: 400 }
           );
         } else {
-        await emailOtpSend(email, mode, expiry, otpResend);
-        return NextResponse.json(
-          { message: "Otp resend successfully" },
-          { status: 201 }
-        );
-      }
+          await emailOtpSend(email, mode, expiry, otpResend);
+          return NextResponse.json(
+            { message: "Otp resend successfully" },
+            { status: 201 }
+          );
+        }
       } else if (phone_number !== null) {
         return NextResponse.json(
-          { message: "Jwelex working on messaging capabilities, try using Email for now" },
+          {
+            message:
+              "Jwelex working on messaging capabilities, try using Email for now",
+          },
           { status: 201 }
         );
       }
@@ -75,10 +78,13 @@ export async function POST(req) {
             { status: 400 }
           );
         } else {
-            return NextResponse.json(
-                { message: "Jwelex working on messaging capabilities, try using Email for now" },
-                { status: 201 }
-              );
+          return NextResponse.json(
+            {
+              message:
+                "Jwelex working on messaging capabilities, try using Email for now",
+            },
+            { status: 201 }
+          );
         }
       }
     }

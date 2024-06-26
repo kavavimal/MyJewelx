@@ -85,8 +85,8 @@ model Product {
   categoryId            Int
   subCategoryId         Int?
   offline_reason        String?
-  delivery_includes     String
-  return_policy         String
+  delivery_includes     String?
+  return_policy         String?
   purchase_note         String?
 
   // Define relations to Category
@@ -99,6 +99,7 @@ model Product {
   states      ProductState[]
   tags        ProductTag[]
   variations  ProductVariation[]
+  productChars	ProductChars[]
 }
 
 model Vendor {
@@ -314,6 +315,24 @@ model ProductGender {
   @@id([gender_id, product_id])
 }
 
+model Characteristic {
+	chars_id		  Int		                     @id @default(autoincrement())
+	name		      String
+	chars_type	  CharsType
+	productChars	ProductChars[]
+}
+
+model ProductChars {
+	chars_id		Int	
+	product_id		Int
+	
+	product    		        Product 		        @relation(fields: [product_id], references: [product_id])
+	characteristic       	Characteristic     	@relation(fields: [chars_id], references: [chars_id])
+
+	@@id([chars_id, product_id])
+}
+
+
 model ProductVariation {
   variation_id              Int                         @id @default(autoincrement())
   product_id                Int
@@ -427,4 +446,11 @@ enum AcountType {
 enum ProductStatus {
   DRAFT
   PUBLISHED
+}
+
+enum CharsType {
+	BRAND
+	STYLE
+	THEME
+	TREND
 }

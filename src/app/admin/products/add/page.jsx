@@ -1,8 +1,8 @@
 import React from "react";
-import dynamic from "next/dynamic";
 import ProductForm from "../componets/ProductForm";
 import prisma from "@/lib/prisma";
 import { attributeIDs } from "@/utils/constants";
+import { CharsType } from "@prisma/client";
 
 const getCategories = async () => {
   return await prisma.category.findMany({});
@@ -53,6 +53,38 @@ const getUsSize = () => {
   });
 };
 
+const getBrands = () => {
+  return prisma.characteristic.findMany({
+    where: {
+      chars_type: CharsType.BRAND,
+    },
+  });
+};
+
+const getStyles = () => {
+  return prisma.characteristic.findMany({
+    where: {
+      chars_type: CharsType.STYLE,
+    },
+  });
+};
+
+const getThemes = () => {
+  return prisma.characteristic.findMany({
+    where: {
+      chars_type: CharsType.THEME,
+    },
+  });
+};
+
+const getTrends = () => {
+  return prisma.characteristic.findMany({
+    where: {
+      chars_type: CharsType.TREND,
+    },
+  });
+};
+
 const page = async () => {
   const categories = await getCategories();
   const tags = await getTags();
@@ -64,6 +96,10 @@ const page = async () => {
   const karats = await getGoldKarat();
   const asianSizes = await getAsianSize();
   const usSizes = await getUsSize();
+  const brands = await getBrands();
+  const styles = await getStyles();
+  const themes = await getThemes();
+  const trends = await getTrends();
 
   return (
     <ProductForm
@@ -77,6 +113,10 @@ const page = async () => {
       karats={karats}
       asian={asianSizes}
       usSize={usSizes}
+      brands={brands}
+      styles={styles}
+      themes={themes}
+      trends={trends}
     />
   );
 };

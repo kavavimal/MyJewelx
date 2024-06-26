@@ -16,7 +16,7 @@ import {
   Button,
 } from "@material-tailwind/react";
 import Image from "next/image";
-import { Formik, useFormik } from "formik";
+import { Form, Formik, useFormik } from "formik";
 import { Editor } from "@tinymce/tinymce-react";
 import { post, update } from "@/utils/api";
 import { useRouter } from "next/navigation";
@@ -119,7 +119,7 @@ const Variation = ({
   const [makingCharge, setMakingCharge] = useState("Per Gram On Net Weight");
   const [files, setFiles] = useState([]);
   const [previewURLs, setPreviewURLs] = useState([]);
-  const [chargeValue, setChargeValue] = useState(0);
+  const [chargeValue, setChargeValue] = useState("");
   const [gemstoneRemark, setGemstoneRemark] = useState("");
   const [chargeRemark, setChargeRemark] = useState("");
   const [uploadedImages, setUploadedImages] = useState([]);
@@ -127,6 +127,7 @@ const Variation = ({
   const [totalOtherCharge, setTotalOtherCharge] = useState(0);
   const [appliedDiscout, setAppliedDiscout] = useState(0);
   const [totalMakingCharge, setTotalMakingCharge] = useState(0);
+  const [appliedVatTax, setAppliedVatTax] = useState(0);
   const [subtotal, setSubTotal] = useState(0);
   const [total, setTotal] = useState(0);
 
@@ -202,9 +203,17 @@ const Variation = ({
       .max(20),
     net_weight: Yup.number().required("Net weight is required"),
     gross_weight: Yup.number()
-      .min(Yup.ref("net_weight"), "Gross weight should be less than net weight")
+      .min(Yup.ref("net_weight"), "Gross weight should be more than net weight")
       .required("Gross weight is required"),
     isPriceFixed: Yup.boolean().required("Is price fixed is required"),
+    regular_price: Yup.number().when("isPriceFixed", {
+      is: true,
+      then: (schema) => schema.required("Regular price is required"),
+    }),
+    making_charge: Yup.number().when("isPriceFixed", {
+      is: false,
+      then: (schema) => schema.required("Making charge is required"),
+    }),
     ...(!isVariation && {
       files: Yup.array()
         .of(
@@ -221,7 +230,7 @@ const Variation = ({
                 !value || (value && SUPPORTED_FORMATS.includes(value.type))
             )
         )
-        .min(1, "At least one image is required"),
+        .min(5, "At least 5 image is required"),
     }),
   });
 
@@ -248,6 +257,7 @@ const Variation = ({
       gross_weight: isVariation ? variation.gross_weight : "",
       isPriceFixed: isVariation ? variation.isPriceFixed : false,
       metal_amount: getMetalPrice(),
+      making_charge: "",
       files: [],
     },
     validationSchema: variatonValidationSchema,
@@ -484,12 +494,13 @@ const Variation = ({
         if (makingCharge === "Per Gram On Net Weight") {
           price =
             price +
-              parseFloat(chargeValue) *
+              parseFloat(chargeValue || 0) *
                 parseFloat(formik.values?.net_weight || 0) || 0;
           setTotalMakingCharge(
             parseFloat(chargeValue) *
               parseFloat(formik.values?.net_weight || 0) || 0
           );
+          console.log(price);
         } else if (makingCharge === "Per Piece / Flat") {
           price = price + (parseFloat(chargeValue) || 0);
           setTotalMakingCharge(parseFloat(chargeValue || 0));
@@ -537,9 +548,28 @@ const Variation = ({
 
       if (taxValue === "5") {
         totalPrice = price + (price * 5) / 100 || 0;
+        setAppliedVatTax(parseFloat((price * 5) / 100 || 0));
+      } else {
+        totalPrice = price;
+        setAppliedVatTax(0);
       }
-      setSubTotal(price);
-      setTotal(totalPrice);
+
+      if (formik.values?.net_weight || formik.values.regular_price) {
+        setSubTotal(price);
+        setTotal(totalPrice);
+      } else {
+        setSubTotal(0);
+        setTotal(0);
+        setAppliedVatTax(0);
+      }
+    } else {
+      setSubTotal(0);
+      setTotal(0);
+      setAppliedVatTax(0);
+      setTotalMakingCharge(0);
+      setTotalOtherCharge(0);
+      setTotalAdditionalCharge(0);
+      setAppliedDiscout(0);
     }
   };
   useEffect(() => {
@@ -575,7 +605,6 @@ const Variation = ({
           );
           formik.setFieldValue("metal_amount", charges.metalPrice);
         }
-
         if (otherCharges) {
           const newGemstoneCharges = [];
           const newAdditionalCharges = [];
@@ -679,7 +708,7 @@ const Variation = ({
         </AccordionHeader>
         <AccordionBody>
           <Formik initialValues={formik.initialValues}>
-            <form onSubmit={formik.handleSubmit}>
+            <Form onSubmit={formik.handleSubmit}>
               <div className="grid grid-cols-3 gap-5">
                 <div className="col-span-2">
                   <div className="flex flex-col gap-5 border-b border-gray-300 pb-8">
@@ -735,53 +764,84 @@ const Variation = ({
                       <div>
                         <div className="flex flex-col gap-5">
                           <div className="flex gap-5 items-center">
-                            <Input
-                              label="Length"
-                              type="number"
-                              name="length"
-                              value={formik.values?.length ?? ""}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                              error={
-                                formik.errors.length && formik.touched.length
-                              }
-                            />
-                            <Input
-                              label="Height"
-                              type="number"
-                              name="height"
-                              value={formik.values?.height ?? ""}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                              error={
-                                formik.errors.height && formik.touched.height
-                              }
-                            />
+                            <div className="w-1/2">
+                              <Input
+                                label="Length"
+                                type="number"
+                                name="length"
+                                value={formik.values?.length ?? ""}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                error={
+                                  formik.errors.length && formik.touched.length
+                                }
+                              />
+                              {formik.errors.length &&
+                                formik.touched.length && (
+                                  <p className="text-red-500 text-xs">
+                                    {formik.errors.length}
+                                  </p>
+                                )}
+                            </div>
+                            <div className="w-1/2">
+                              <Input
+                                label="Height"
+                                type="number"
+                                name="height"
+                                value={formik.values?.height ?? ""}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                error={
+                                  formik.errors.height && formik.touched.height
+                                }
+                              />
+                              {formik.errors.height &&
+                                formik.touched.height && (
+                                  <p className="text-red-500 text-xs">
+                                    {formik.errors.height}
+                                  </p>
+                                )}
+                            </div>
                           </div>
                           <div className="flex gap-5 items-center">
-                            <Input
-                              label="Width"
-                              type="number"
-                              name="width"
-                              value={formik.values?.width ?? ""}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                              error={
-                                formik.errors.width && formik.touched.width
-                              }
-                            />
-                            <Input
-                              label="Thickness"
-                              type="number"
-                              name="thickness"
-                              value={formik.values?.thickness ?? ""}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                              error={
-                                formik.errors.thickness &&
-                                formik.touched.thickness
-                              }
-                            />
+                            <div className="w-1/2">
+                              <Input
+                                label="Width"
+                                type="number"
+                                name="width"
+                                value={formik.values?.width ?? ""}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                error={
+                                  formik.errors.width && formik.touched.width
+                                }
+                              />
+                              {formik.errors.width && formik.touched.width && (
+                                <p className="text-red-500 text-xs">
+                                  {formik.errors.width}
+                                </p>
+                              )}
+                            </div>
+                            <div className="w-1/2">
+                              <Input
+                                label="Thickness"
+                                type="number"
+                                name="thickness"
+                                value={formik.values?.thickness ?? ""}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                error={
+                                  formik.errors.thickness &&
+                                  formik.touched.thickness
+                                }
+                              />
+                              {formik.errors.thickness &&
+                                formik.touched.thickness && (
+                                  <p className="text-red-500 text-xs">
+                                    {formik.errors.thickness}
+                                  </p>
+                                )}
+                            </div>
                           </div>
                         </div>
                         <Typography
@@ -884,6 +944,12 @@ const Variation = ({
                                 </label>
                               </li>
                             </ul>
+                            {formik.errors.stock_status &&
+                              formik.touched.stock_status && (
+                                <p className="text-red-500 text-xs">
+                                  {formik.errors.stock_status}
+                                </p>
+                              )}
                           </div>
                         </div>
                       </div>
@@ -909,36 +975,52 @@ const Variation = ({
 
                       {formik.values?.weight_unit === "Grams" && (
                         <div className="flex gap-5 items-center">
-                          <Input
-                            type="number"
-                            label="Net Weight (grams)"
-                            size="lg"
-                            name="net_weight"
-                            value={formik.values?.net_weight ?? ""}
-                            error={
-                              formik.errors.net_weight &&
-                              formik.touched.net_weight
-                            }
-                            onChange={(e) => {
-                              formik.handleChange(e);
-                              formik.setFieldValue(
-                                "gross_weight",
-                                e.target.value
-                              );
-                            }}
-                          />
-                          <Input
-                            type="number"
-                            label="Gross Weight (grams)"
-                            size="lg"
-                            name="gross_weight"
-                            value={formik.values?.gross_weight ?? ""}
-                            error={
-                              formik.errors.gross_weight &&
-                              formik.touched.gross_weight
-                            }
-                            onChange={formik.handleChange}
-                          />
+                          <div className="w-1/2">
+                            <Input
+                              type="number"
+                              label="Net Weight (grams)"
+                              size="lg"
+                              name="net_weight"
+                              value={formik.values?.net_weight ?? ""}
+                              error={
+                                formik.errors.net_weight &&
+                                formik.touched.net_weight
+                              }
+                              onChange={(e) => {
+                                formik.handleChange(e);
+                                formik.setFieldValue(
+                                  "gross_weight",
+                                  e.target.value
+                                );
+                              }}
+                            />
+                            {formik.errors.net_weight &&
+                              formik.touched.net_weight && (
+                                <p className="text-red-500 text-xs">
+                                  {formik.errors.net_weight}
+                                </p>
+                              )}
+                          </div>
+                          <div className="w-1/2">
+                            <Input
+                              type="number"
+                              label="Gross Weight (grams)"
+                              size="lg"
+                              name="gross_weight"
+                              value={formik.values?.gross_weight ?? ""}
+                              error={
+                                formik.errors.gross_weight &&
+                                formik.touched.gross_weight
+                              }
+                              onChange={formik.handleChange}
+                            />
+                            {formik.errors.gross_weight &&
+                              formik.touched.gross_weight && (
+                                <p className="text-red-500 text-xs">
+                                  {formik.errors.gross_weight}
+                                </p>
+                              )}
+                          </div>
                         </div>
                       )}
 
@@ -985,6 +1067,12 @@ const Variation = ({
                             formik.touched.regular_price
                           }
                         />
+                        {formik.errors.regular_price &&
+                          formik.touched.regular_price && (
+                            <p className="text-red-500 text-xs">
+                              {formik.errors.regular_price}
+                            </p>
+                          )}
                       </div>
                     )}
 
@@ -1015,7 +1103,14 @@ const Variation = ({
                               name="making_charge"
                               label={makingCharge}
                               value={chargeValue}
-                              onChange={(e) => setChargeValue(e.target.value)}
+                              onChange={(e) => {
+                                setChargeValue(e.target.value);
+                                formik.handleChange(e);
+                              }}
+                              error={
+                                formik.errors.making_charge &&
+                                formik.touched.making_charge
+                              }
                             />
                           </div>
                         </div>
@@ -1278,48 +1373,53 @@ const Variation = ({
                       </div>
                     )}
 
-                    <div>
-                      <Checkbox
-                        label="Discount"
-                        checked={isDiscount}
-                        onChange={(e) => setIsDiscount(e.target.checked)}
-                      />
-                    </div>
-
-                    {isDiscount && (
-                      <div className="w-full flex gap-5 items-center">
-                        <div className="w-1/2">
-                          <Select
-                            label="Discount Type"
-                            size="lg"
-                            onChange={(value) => setDiscountType(value)}
-                            value={discountType}
-                          >
-                            <Option value="Per Gram On Net Weight">
-                              Per Gram On Net Weight
-                            </Option>
-                            <Option value="Per Piece / Flat">
-                              Per Piece / Flat
-                            </Option>
-                            <Option
-                              disabled={formik.values?.isPriceFixed}
-                              value="Per(%) On Metal Rate On Karat"
-                            >
-                              Per(%) On Metal Rate On Karat
-                            </Option>
-                          </Select>
-                        </div>
-                        <div className="w-1/2">
-                          <Input
-                            label={discountType}
-                            size="lg"
-                            type="number"
-                            value={discountValue}
-                            onChange={(e) => setDiscountValue(e.target.value)}
-                          />
-                        </div>
+                    <div className="border-t pt-2 mt-5">
+                      <div>
+                        <Checkbox
+                          label={<Typography>Discount</Typography>}
+                          checked={isDiscount}
+                          onChange={(e) => setIsDiscount(e.target.checked)}
+                        />
                       </div>
-                    )}
+
+                      {isDiscount && (
+                        <div className="w-full flex gap-5 items-center">
+                          <div className="w-1/2">
+                            <Select
+                              label="Discount Type"
+                              size="lg"
+                              onChange={(value) => setDiscountType(value)}
+                              value={discountType}
+                            >
+                              <Option
+                                value="Per Gram On Net Weight"
+                                disabled={formik.values?.isPriceFixed}
+                              >
+                                Per Gram On Net Weight
+                              </Option>
+                              <Option value="Per Piece / Flat">
+                                Per Piece / Flat
+                              </Option>
+                              <Option
+                                disabled={formik.values?.isPriceFixed}
+                                value="Per(%) On Metal Rate On Karat"
+                              >
+                                Per(%) On Metal Rate On Karat
+                              </Option>
+                            </Select>
+                          </div>
+                          <div className="w-1/2">
+                            <Input
+                              label={discountType}
+                              size="lg"
+                              type="number"
+                              value={discountValue}
+                              onChange={(e) => setDiscountValue(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     <div className="mt-5">
                       <Select
                         label="VAT/Taxes Type"
@@ -1332,7 +1432,7 @@ const Variation = ({
                       </Select>
                     </div>
 
-                    <div className="mt-5 flex gap-5 items-center">
+                    {/* <div className="mt-5 flex gap-5 items-center">
                       <Input
                         disabled
                         label="Subtotal"
@@ -1348,21 +1448,22 @@ const Variation = ({
                         type="number"
                         value={total}
                       />
-                    </div>
+                    </div> */}
                   </div>
+
                   <div className="mt-5">
                     <div className="flex gap-5">
                       <Button type="submit" loading={formik.isSubmitting}>
                         {isVariation ? "Update" : "Save"}
                       </Button>
 
-                      {isVariation && (
-                        <DeleteVariation
-                          variation_id={variation?.variation_id}
-                          variations={variations}
-                          setVariations={setVariations}
-                        />
-                      )}
+                      <DeleteVariation
+                        variation_id={variation?.variation_id}
+                        variations={variations}
+                        setVariations={setVariations}
+                        index={index}
+                        isVariation={isVariation}
+                      />
                     </div>
                   </div>
                 </div>
@@ -1510,7 +1611,7 @@ const Variation = ({
                             Description
                           </th>
                           <th className="text-right font-bold text-gray-700">
-                            Amount
+                            AED
                           </th>
                         </tr>
                       </thead>
@@ -1522,7 +1623,15 @@ const Variation = ({
                                 Metal Amount
                               </td>
                               <td className="text-right text-gray-700">
-                                {formik?.values?.metal_amount}
+                                {(
+                                  formik?.values?.metal_amount *
+                                  parseFloat(
+                                    formik.values?.net_weight || 0
+                                  ).toFixed(2)
+                                ).toLocaleString("en-IN", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}{" "}
                               </td>
                             </tr>
                           </>
@@ -1533,7 +1642,12 @@ const Variation = ({
                                 Fixed Price
                               </td>
                               <td className="text-right text-gray-700">
-                                {formik?.values?.regular_price || 0}
+                                {parseFloat(
+                                  formik?.values?.regular_price || 0
+                                ).toLocaleString("en-IN", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
                               </td>
                             </tr>
                           </>
@@ -1546,7 +1660,13 @@ const Variation = ({
                                 Making Charge
                               </td>
                               <td className="text-right text-gray-700">
-                                {totalMakingCharge}
+                                {parseFloat(totalMakingCharge).toLocaleString(
+                                  "en-IN",
+                                  {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  }
+                                )}
                               </td>
                             </tr>
                           </>
@@ -1556,7 +1676,13 @@ const Variation = ({
                             Other Charge
                           </td>
                           <td className="text-right text-gray-700">
-                            {totalOtherCharge}
+                            {parseFloat(totalOtherCharge).toLocaleString(
+                              "en-IN",
+                              {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              }
+                            )}
                           </td>
                         </tr>
                         <tr>
@@ -1564,20 +1690,47 @@ const Variation = ({
                             Additional Charge
                           </td>
                           <td className="text-right text-gray-700">
-                            {totalAdditionalCharge}
+                            {parseFloat(totalAdditionalCharge).toLocaleString(
+                              "en-IN",
+                              {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              }
+                            )}
                           </td>
                         </tr>
 
                         <tr>
                           <td className="text-left text-gray-700">Discount</td>
                           <td className="text-right text-gray-700">
-                            {appliedDiscout}
+                            -
+                            {parseFloat(appliedDiscout).toLocaleString(
+                              "en-IN",
+                              {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              }
+                            )}
                           </td>
                         </tr>
                         <tr>
                           <td className="text-left text-gray-700">Sub Total</td>
                           <td className="text-right text-gray-700">
-                            {subtotal}
+                            {parseFloat(subtotal).toLocaleString("en-IN", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="text-left text-gray-700">
+                            VAT {taxValue !== "None" ? `(${taxValue}%)` : "0%"}
+                          </td>
+                          <td className="text-right text-gray-700">
+                            {parseFloat(appliedVatTax).toLocaleString("en-IN", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
                           </td>
                         </tr>
                       </tbody>
@@ -1587,7 +1740,10 @@ const Variation = ({
                             Total
                           </td>
                           <td className="text-right font-bold text-gray-700">
-                            {total}
+                            {parseFloat(total).toLocaleString("en-IN", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
                           </td>
                         </tr>
                       </tfoot>
@@ -1595,7 +1751,7 @@ const Variation = ({
                   </div>
                 </div>
               </div>
-            </form>
+            </Form>
           </Formik>
         </AccordionBody>
       </Accordion>

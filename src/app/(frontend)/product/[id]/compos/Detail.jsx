@@ -8,7 +8,7 @@ import "slick-carousel/slick/slick.css";
 
 const Detail = ({ product }) => {
   const [variation, setVariation] = useState(product.variations[0]);
-  const [mainImage, setMainImage] = useState(variation.image[0].path);
+  const [mainImage, setMainImage] = useState(variation?.image[0].path);
   const [makingC, setMakingC] = useState();
   console.log("product", product);
   const sizes = [];
@@ -18,22 +18,135 @@ const Detail = ({ product }) => {
     }
   });
 
-  const attribute_and_value_change = (attribute_id, attributeValue_id) => {
-    let productAttributeValue_ids = [];
-    product.ProductAttributeValue.map((record) => {
-      if (
-        record.attribute_id === attribute_id &&
-        record.attributeValue_id === attributeValue_id
-      ) {
-        productAttributeValue_ids.push(record.productAttributeValue_id);
-      }
-    });
-    productAttributeValue_ids.every((id) =>
-      product.variation.ProductAttributeValues.some(
-        (pav) => pav.productAttributeValue_id === id
-      )
-    );
-  };
+  let newarr = [];
+  // product.variations.map((variation) => {
+  //   variation.productAttributeValues.map((productAttributeValue) => {
+  //     if (
+  //       productAttributeValue &&
+  //       productAttributeValue.productAttributeValue
+  //     ) {
+  //       const attributeValueId =
+  //         productAttributeValue.productAttributeValue.attributeValue_id;
+  //       const attributeId =
+  //         productAttributeValue.productAttributeValue.attribute_id;
+  //       let attributObjcetItem = {
+  //         productAttributeValue_id:
+  //           productAttributeValue.productAttributeValue
+  //             .productAttributeValue_id,
+  //         attribute_id: attributeId,
+  //         attribute_name:
+  //           productAttributeValue.productAttributeValue.attribute.name,
+  //         attributeValue_id: attributeValueId,
+  //         attributeValue_name:
+  //           productAttributeValue.productAttributeValue.attributeValue.name,
+  //       };
+  //       // check if attribute is already in newarr
+  //       if (typeof newarr[attributeId] !== "undefined") {
+  //         let existing = newarr[attributeId];
+  //         // check if new attribuete has value already?
+  //         if (
+  //           !existing.find((e_a) => e_a.attributeValue_id === attributeValue_id)
+  //         ) {
+  //           newarr[attributeId] = [...newarr[attributeId], attributObjcetItem];
+  //         }
+  //       } else {
+  //         newarr[attributeId] = [attributObjcetItem];
+  //       }
+  //     }
+  //   });
+  // });
+
+  console.log("newarr", newarr);
+  // Check if product and product.variations exist and are arrays
+  // const allProductAttributeValuesWithVariation = [];
+  // const uniqueValuesSet = new Set();
+
+  // if (product && Array.isArray(product.variations)) {
+  //   product.variations.map((variation) => {
+  //     if (variation && Array.isArray(variation.productAttributeValues)) {
+  //       variation.productAttributeValues.map((productAttributeValue) => {
+  //         if (
+  //           productAttributeValue &&
+  //           productAttributeValue.productAttributeValue
+  //         ) {
+  //           const attributeValueId =
+  //             productAttributeValue.productAttributeValue.attributeValue_id;
+  //           const attributeId =
+  //             productAttributeValue.productAttributeValue.attribute_id;
+  //           const uniqueKey = `${attributeId}-${attributeValueId}`;
+
+  //           // Check if the combination of attribute_id and attributeValue_id already exists in the set
+  //           if (!uniqueValuesSet.has(uniqueKey)) {
+  //             uniqueValuesSet.add(uniqueKey);
+  //             allProductAttributeValuesWithVariation.push({
+  //               productAttributeValue_id:
+  //                 productAttributeValue.productAttributeValue.productAttributeValue_id,
+  //               attribute_id: attributeId,
+  //               attribute_name:
+  //                 productAttributeValue.productAttributeValue.attribute.name,
+  //               attributeValue_id: attributeValueId,
+  //               attributeValue_name:
+  //                 productAttributeValue.productAttributeValue.attributeValue
+  //                   .name,
+  //             });
+  //           }
+  //         }
+  //       });
+  //     }
+  //   });
+  // } else {
+  //   console.log("product or product.variations is not defined or not an array");
+  // }
+
+  // console.log(
+  //   "allProductAttributeValuesWithVariation",
+  //   allProductAttributeValuesWithVariation
+  // );
+
+  // const attributeValuePairs = [
+  //   { attribute_id: 1, attributeValue_id: 1 },
+  //   // { attribute_id: 1, attributeValue_id: 2 },
+  //   // { attribute_id: 1, attributeValue_id: 3 },
+  //   { attribute_id: 2, attributeValue_id: 4 },
+  //   // { attribute_id: 2, attributeValue_id: 5 },
+  //   // { attribute_id: 2, attributeValue_id: 6 },
+  //   // { attribute_id: 2, attributeValue_id: 7 },
+  // ];
+  // const attribute_and_value_change = (attributeValuePairs) => {
+  //   let productAttributeValue_ids = [];
+  //   // product.ProductAttributeValue.map((record) => {
+  //   //   if (
+  //   //     record.attribute_id === attribute_id &&
+  //   //     record.attributeValue_id === attributeValue_id
+  //   //   ) {
+  //   //     productAttributeValue_ids.push(record.productAttributeValue_id);
+  //   //   }
+  //   // });
+  //   const productAttributeValueIdsArray = attributeValuePairs.map(
+  //     ({ attribute_id, attributeValue_id }) => {
+  //       return product.ProductAttributeValue.filter((record) => {
+  //         return (
+  //           record.attribute_id === attribute_id &&
+  //           record.attributeValue_id === attributeValue_id
+  //         );
+  //       }).map((record) => record.productAttributeValue_id);
+  //     }
+  //   );
+
+  //   const selectedVariation = product.variations.find((variation) => {
+  //     const found = variation.ProductAttributeValues.find(
+  //       (ProductAttributeValue) => {
+  //         return productAttributeValue_ids.includes(
+  //           ProductAttributeValue.productAttributeValue_id
+  //         );
+  //       }
+  //     );
+  //     if (variation.ProductAttributeValues.length === found.length) {
+  //       return true;
+  //     } else return false;
+  //   });
+  //   return selectedVariation;
+  // };
 
   const settings = {
     // dots: true,
@@ -49,8 +162,12 @@ const Detail = ({ product }) => {
       console.log("after change", currentSlide);
     },
   };
-  const making_charges = JSON.parse(variation.making_charges);
-  const other_charges = JSON.parse(variation.other_charges);
+  const making_charges = variation?.making_charges
+    ? JSON.parse(variation.making_charges)
+    : null;
+  const other_charges = variation?.other_charges
+    ? JSON.parse(variation.other_charges)
+    : null;
   let other_charges_total = 0;
   useEffect(() => {
     if (making_charges) {
@@ -75,7 +192,7 @@ const Detail = ({ product }) => {
     }
   }, [making_charges, variation]);
 
-  other_charges.map((charges) => {
+  other_charges?.map((charges) => {
     other_charges_total = other_charges_total + Number(charges.value);
   });
 
@@ -88,31 +205,35 @@ const Detail = ({ product }) => {
             <div className="lg:w-1/2 flex gap-1">
               <div className="w-1/4 slider-container">
                 <Slider {...settings}>
-                  {variation.image.map((image, index) => {
-                    return (
-                      <Image
-                        className="border-1 shadow"
-                        key={index}
-                        src={image.path}
-                        onClick={() => setMainImage(image.path)}
-                        alt="Gallery Image"
-                        width="125"
-                        height="125"
-                      />
-                    );
-                  })}
-                  {variation.image.map((image, index) => {
-                    return (
-                      <Image
-                        key={index}
-                        src={image.path}
-                        onClick={() => setMainImage(image.path)}
-                        alt="Gallery Image"
-                        width="125"
-                        height="125"
-                      />
-                    );
-                  })}
+                  {variation?.image &&
+                    variation?.image.length > 0 &&
+                    variation?.image?.map((image, index) => {
+                      return (
+                        <Image
+                          className="border-1 shadow"
+                          key={index}
+                          src={image.path}
+                          onClick={() => setMainImage(image.path)}
+                          alt="Gallery Image"
+                          width="125"
+                          height="125"
+                        />
+                      );
+                    })}
+                  {variation?.image &&
+                    variation?.image.length > 0 &&
+                    variation?.image?.map((image, index) => {
+                      return (
+                        <Image
+                          key={index}
+                          src={image.path}
+                          onClick={() => setMainImage(image.path)}
+                          alt="Gallery Image"
+                          width="125"
+                          height="125"
+                        />
+                      );
+                    })}
                 </Slider>
                 {/* {variation.image.map((image, index) => {
                   return (
@@ -167,7 +288,7 @@ const Detail = ({ product }) => {
               <div class="flex items-center">
                 <StarRatings
                   starRatings={
-                    variation.starRatings ? variation.starRatings : 4.5
+                    variation?.starRatings ? variation?.starRatings : 4.5
                   }
                 />
                 <span class="text-gray-600 ml-3">4 Reviews</span>
@@ -215,12 +336,12 @@ const Detail = ({ product }) => {
               </p>
               <p className="mb-1">
                 <span>AED </span>
-                {variation.selling_price
-                  ? variation.selling_price
-                  : variation.regular_price}
+                {variation?.selling_price
+                  ? variation?.selling_price
+                  : variation?.regular_price}
               </p>
               <p class="leading-relaxed border-b-2 border-gray-100 pb-3">
-                {variation.description}
+                {variation?.description}
               </p>
               <div class="leading-relaxed border-b-2 border-gray-100 py-3">
                 <p class="leading-relaxed pb-3">
@@ -232,7 +353,7 @@ const Detail = ({ product }) => {
                   {other_charges_total}
                 </p>
                 <p class="leading-relaxed pb-3">
-                  Value Added Tax :{variation.vat ? variation.vat : 0}
+                  Value Added Tax :{variation?.vat ? variation?.vat : 0}
                 </p>
                 <p class="leading-relaxed">Total Amount :{}</p>
               </div>
@@ -248,7 +369,7 @@ const Detail = ({ product }) => {
                     <span class="mr-3">Size</span>
                     <div class="relative">
                       <select class="rounded border appearance-none border-gray-300 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:border-yellow-500 text-base pl-3 pr-10">
-                        {sizes.map((size, index) => (
+                        {sizes?.map((size, index) => (
                           <option key={index}>{size}</option>
                         ))}
                       </select>

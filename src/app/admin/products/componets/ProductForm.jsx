@@ -3,6 +3,7 @@ import {
   Alert,
   Button,
   Checkbox,
+  IconButton,
   Input,
   Option,
   Select,
@@ -18,10 +19,16 @@ import Variation from "./Variation";
 import { get, post, update } from "@/utils/api";
 import { Form, Formik, useFormik } from "formik";
 import { useRouter } from "next/navigation";
-import { productValidationSchema } from "@/schemas/ValidationSchema";
+import {
+  additionalValidationSchema,
+  productValidationSchema,
+} from "@/schemas/ValidationSchema";
 import { attributeIDs } from "@/utils/constants";
 import ProductAttributeItem from "./ProductAttributeItem";
 import { Router } from "next/router";
+import { CharsType } from "@prisma/client";
+import Link from "next/link";
+import ProductVariationsStepWrap from "./ProductVariationsStepWrap";
 
 const ProductForm = ({
   product,
@@ -35,10 +42,13 @@ const ProductForm = ({
   karats,
   asian,
   usSize,
+  brands,
+  styles,
+  themes,
+  trends,
 }) => {
   const router = useRouter();
-
-  const [attributes, setAttributes] = useState([]);
+  const [attributes, setAttributes] = useState([attributeIDs.MATERIAL]);
   const [loading, setLoading] = useState(true);
   const [activeStep, setActiveStep] = useState(() => {
     if (typeof window !== "undefined") {
@@ -67,6 +77,10 @@ const ProductForm = ({
   const [goldCarate, setGoldCarate] = useState([]);
   const [productData, setProductData] = useState(product ?? {});
   const [pricing, setPricing] = useState({});
+  const [productBrand, setProductBrand] = useState([]);
+  const [productStyle, setProductStyle] = useState([]);
+  const [productTheme, setProductTheme] = useState([]);
+  const [productTrend, setProductTrend] = useState([]);
 
   const getPricing = async () => {
     const data = await get("/api/pricing_history/latest");
@@ -218,28 +232,26 @@ const ProductForm = ({
   };
 
   const getTransformedValues = () => {
-    return selectedValues
-      .map((attr) => ({
-        id: attr.attribute_id,
-        isMultiple: attr.isMultiple,
-        attribute: {
-          name: productAttributes.find(
-            (pa) => pa.attribute_id === attr.attribute_id
-          )?.name,
-          values: Array.isArray(attr.aValues)
-            ? attr.aValues?.map((valueId) => {
-                const valueObject = productAttributes
-                  .find((pa) => pa.attribute_id === attr.attribute_id)
-                  ?.values.find((v) => v.id === valueId);
-                return {
-                  name: valueObject?.name,
-                  id: valueObject?.id,
-                };
-              })
-            : attr.aValues,
-        },
-      }))
-      .filter((attr) => attributes.includes(attr.id));
+    return selectedValues.map((attr) => ({
+      id: attr.attribute_id,
+      isMultiple: attr.isMultiple,
+      attribute: {
+        name: productAttributes.find(
+          (pa) => pa.attribute_id === attr.attribute_id
+        )?.name,
+        values: Array.isArray(attr.aValues)
+          ? attr.aValues?.map((valueId) => {
+              const valueObject = productAttributes
+                .find((pa) => pa.attribute_id === attr.attribute_id)
+                ?.values.find((v) => v.id === valueId);
+              return {
+                name: valueObject?.name,
+                id: valueObject?.id,
+              };
+            })
+          : attr.aValues,
+      },
+    }));
   };
 
   const style = {
@@ -296,7 +308,13 @@ const ProductForm = ({
     label: tag?.name,
   }));
 
-  const productAttributesOptions = productAttributes
+  const sortedProductAttributes = [...productAttributes].sort((a, b) => {
+    if (a.name === "Material") return -1;
+    if (b.name === "Material") return 1;
+    return 0;
+  });
+
+  let productAttributesOptions = sortedProductAttributes
     ?.filter(
       (a) =>
         a.attribute_id !== attributeIDs.GOLDKARAT &&
@@ -308,6 +326,17 @@ const ProductForm = ({
       label: item?.name,
       id: item?.attribute_id,
     }));
+
+  const materialAttribute = productAttributesOptions?.find(
+    (a) => a.label === "Material"
+  );
+  const otherAttributes = productAttributesOptions?.filter(
+    (a) => a.label !== "Material"
+  );
+
+  if (materialAttribute) {
+    productAttributesOptions = [materialAttribute, ...otherAttributes];
+  }
 
   const gendersOptions = genders?.map((gender) => ({
     value: gender?.gender_id,
@@ -334,85 +363,25 @@ const ProductForm = ({
     label: size.name,
   }));
 
-  const brandsOptions = [
-    {
-      value: "jimmy_choo",
-      label: "Jimmy Choo",
-    },
-    {
-      value: "manolo",
-      label: "Manolo",
-    },
-    {
-      value: "Prada",
-      label: "Prada",
-    },
-    {
-      value: "galiano",
-      label: "Galiano",
-    },
-    {
-      value: "louis vuitton",
-      label: "Louis Vuitton",
-    },
-    {
-      value: "stella_mccartney",
-      label: "Stella McCartney",
-    },
-    {
-      value: "donatella_versace",
-      label: "Donatella Versace",
-    },
-    {
-      value: "gucci",
-      label: "Gucci",
-    },
-  ];
+  const brandsOptions = brands?.map((brand) => ({
+    value: brand?.chars_id,
+    label: brand?.name,
+  }));
 
-  const stylesOptions = [
-    {
-      value: "classic",
-      label: "Classic",
-    },
-    {
-      value: "modern",
-      label: "Modern",
-    },
-    {
-      value: "vintage",
-      label: "Vintage",
-    },
-  ];
+  const stylesOptions = styles?.map((style) => ({
+    value: style?.chars_id,
+    label: style?.name,
+  }));
 
-  const themeOptions = [
-    {
-      value: "nature_inspired",
-      label: "Nature Inspired",
-    },
-    {
-      value: "Floral",
-      label: "Floral",
-    },
-    {
-      value: "Celestial",
-      label: "Celestial",
-    },
-  ];
+  const themeOptions = themes?.map((theme) => ({
+    value: theme?.chars_id,
+    label: theme?.name,
+  }));
 
-  const trendsOptions = [
-    {
-      value: "color",
-      label: "Color",
-    },
-    {
-      value: "material",
-      label: "Material",
-    },
-    {
-      value: "size",
-      label: "Size",
-    },
-  ];
+  const trendsOptions = trends?.map((trend) => ({
+    value: trend?.chars_id,
+    label: trend?.name,
+  }));
 
   const handlePrev = () => !isFirstStep && setActiveStep((cur) => cur - 1);
   const formik = useFormik({
@@ -424,7 +393,7 @@ const ProductForm = ({
       country_id: product ? product?.country_id ?? "" : "",
       isOnlineBuyable: product ? product?.isOnlineBuyable : false,
       states: product ? product?.states[0]?.state_id ?? "" : "",
-      status: product ? product?.status : "PUBLISHED",
+      status: product ? product?.status : "DRAFT",
       collections: product
         ? product?.collections?.map((item) => item?.collection_id)
         : [],
@@ -434,12 +403,20 @@ const ProductForm = ({
       genders: product ? product?.genders?.map((item) => item?.gender_id) : [],
       attributes: product
         ? product?.attributes?.map((item) => item?.attribute_id)
-        : [],
+        : [attributeIDs.MATERIAL],
+      offline_reason: product ? product?.offline_reason ?? "" : "",
+      delivery_includes: product ? product?.delivery_includes ?? "" : "",
+      return_policy: product ? product?.return_policy ?? "" : "",
+      purchase_note: product ? product?.purchase_note ?? "" : "",
     },
 
     enableReinitialize: true,
     validationSchema:
-      activeStep === 0 || activeStep === 3 ? productValidationSchema : null,
+      activeStep === 0
+        ? productValidationSchema
+        : activeStep === 3
+        ? additionalValidationSchema
+        : null,
     onSubmit: async (values) => {
       if (product) {
         if (activeStep === 0) {
@@ -447,14 +424,32 @@ const ProductForm = ({
             const response = await update(
               `/api/product/${product.product_id}`,
               {
-                ...values,
+                // ...values,
+                // attributes: values.attributes.join(","),
+                // tags: values.tags.join(","),
+                // collections: values.collections.join(","),
+                // genders: values.genders.join(","),
+                // patterns: values.patterns.join(","),
+                // characteristics: [
+                //   productBrand,
+                //   productStyle,
+                //   productTheme,
+                //   productTrend,
+                // ]
+                //   .flat()
+                //   .join(","),
+                product_name: values.product_name,
+                status: values.status,
                 attributes: values.attributes.join(","),
-                tags: values.tags.join(","),
-                collections: values.collections.join(","),
-                genders: values.genders.join(","),
-                patterns: values.patterns.join(","),
+                category: values.category,
+                subCategory: values.subCategory,
+                slug: "basic_details",
               }
             );
+
+            // if (response.status === 201) {
+            //   setAttributes(values.attributes);
+            // }
             window.localStorage.setItem("product_id", product.product_id);
             router.refresh();
             !isLastStep && setActiveStep((cur) => cur + 1);
@@ -517,7 +512,9 @@ const ProductForm = ({
               product_id: localStorage.getItem("product_id"),
             });
 
-            const productData = await get(`/api/product/${product.product_id}`);
+            const productData = await get(
+              `/api/product/${product.product_id}/attributes`
+            );
             setProductData(productData.data?.product);
             router.refresh();
             !isLastStep && setActiveStep((cur) => cur + 1);
@@ -535,30 +532,58 @@ const ProductForm = ({
             const response = await update(
               `/api/product/${product.product_id}`,
               {
-                ...values,
-                attributes: values.attributes.join(","),
+                slug: "additional_tags_attributes",
+                return_policy: values.return_policy,
+                purchase_note: values.purchase_note,
+                delivery_includes: values.delivery_includes,
+                country_id: values.country_id,
                 tags: values.tags.join(","),
+                isOnlineBuyable: values.isOnlineBuyable,
                 collections: values.collections.join(","),
-                genders: values.genders.join(","),
                 patterns: values.patterns.join(","),
+                states: values.states,
+                genders: values.genders.join(","),
+                offline_reason: values.offline_reason,
+                characteristics: [
+                  productBrand,
+                  productStyle,
+                  productTheme,
+                  productTrend,
+                ]
+                  .flat()
+                  .join(","),
               }
             );
-            router.refresh();
             router.push(`/admin/products`);
-            setActiveStep(0);
-          } catch (error) {}
+            router.refresh();
+          } catch (error) {
+            console.log(error);
+          }
         }
       } else {
         if (activeStep === 0) {
           try {
             setLoading(true);
             const response = await post("/api/product", {
-              ...values,
+              // ...values,
+              // attributes: values.attributes.join(","),
+              // tags: values.tags.join(","),
+              // collections: values.collections.join(","),
+              // genders: values.genders.join(","),
+              // patterns: values.patterns.join(","),
+              // characteristics: [
+              //   productBrand,
+              //   productStyle,
+              //   productTheme,
+              //   productTrend,
+              // ]
+              //   .flat()
+              //   .join(","),
+              product_name: values.product_name,
+              status: values.status,
               attributes: values.attributes.join(","),
-              tags: values.tags.join(","),
-              collections: values.collections.join(","),
-              genders: values.genders.join(","),
-              patterns: values.patterns.join(","),
+              category: values.category,
+              subCategory: values.subCategory,
             });
 
             if (typeof window !== "undefined") {
@@ -591,7 +616,8 @@ const ProductForm = ({
 
   useEffect(() => {
     setStatesOptions(
-      countries?.find((c) => c.country_id === formik.values.country_id)?.states
+      countries?.find((c) => c.country_id === formik.values.country_id)
+        ?.states ?? []
     );
   }, [formik.values.country_id]);
 
@@ -667,19 +693,60 @@ const ProductForm = ({
         setVariations(variation);
       }
     }
+
+    if (product) {
+      let themes = [];
+      let styles = [];
+      let brands = [];
+      let trends = [];
+      let variation = [];
+      variation = product.variations;
+      setVariations(variation);
+
+      if (product.productChars?.length > 0 || product.productChars) {
+        product.productChars.forEach((element) => {
+          if (element.characteristic?.chars_type === CharsType.THEME) {
+            themes.push(element.chars_id);
+          }
+
+          if (element.characteristic?.chars_type === CharsType.STYLE) {
+            styles.push(element.chars_id);
+          }
+
+          if (element.characteristic?.chars_type === CharsType.BRAND) {
+            brands.push(element.chars_id);
+          }
+
+          if (element.characteristic?.chars_type === CharsType.TREND) {
+            trends.push(element.chars_id);
+          }
+
+          setProductBrand(brands);
+          setProductStyle(styles);
+          setProductTheme(themes);
+          setProductTrend(trends);
+        });
+      } else {
+        setProductBrand(brands);
+        setProductStyle(styles);
+        setProductTheme(themes);
+        setProductTrend(trends);
+      }
+    }
   }, [productData, product]);
 
   useEffect(() => {
     if (product) {
-      setSelectedProductAttributes(() => {
-        const attributeIds = product.attributes.map(
-          (attr) => attr.attribute_id
-        );
+      // setSelectedProductAttributes(() => {
+      //   const attributeIds = product.attributes.map(
+      //     (attr) => attr.attribute_id
+      //   );
 
-        return productAttributesOptions.filter((option) =>
-          attributeIds.includes(option.id)
-        );
-      });
+      //   return productAttributesOptions.filter((option) =>
+      //     attributeIds.includes(option.id)
+      //   );
+      // });
+      setAttributes(formik.values.attributes);
     }
   }, [formik.values.attributes]);
 
@@ -715,10 +782,28 @@ const ProductForm = ({
 
   return (
     <div className="mb-5">
-      <div className="flex items-center intro-y">
-        <h2 className="text-2xl font-semibold mb-10">
+      <div className="flex items-center intro-y justify-between mb-10">
+        <h2 className="text-2xl font-semibold">
           {product ? "Edit" : "Save"} Product
         </h2>
+        <Link href={"/admin/products"}>
+          <IconButton variant="text" className="rounded-full">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="size-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"
+              />
+            </svg>
+          </IconButton>
+        </Link>
       </div>
       <div className="flex flex-col gap-5">
         <div className="mb-20">
@@ -726,30 +811,30 @@ const ProductForm = ({
             activeStep={activeStep}
             isLastStep={(value) => setIsLastStep(value)}
             isFirstStep={(value) => setIsFirstStep(value)}
+            lineClassName="bg-[#E6E6E6]"
+            activeLineClassName="bg-primary-200"
           >
-            <Step onClick={() => setActiveStep(0)}>
+            <Step
+              onClick={() => setActiveStep(0)}
+              activeClassName="bg-primary-200 text-black"
+              completedClassName="bg-primary-200 text-black"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke-width="1.5"
+                strokeLinejoin="1.5"
                 stroke="currentColor"
                 className="size-6"
               >
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"
                 />
               </svg>
 
-              <div className="absolute -bottom-[4.5rem] left-0 w-max text-start">
-                <Typography
-                  variant="h6"
-                  color={activeStep === 0 ? "blue-gray" : "gray"}
-                >
-                  Step 1
-                </Typography>
+              <div className="absolute -bottom-[2.5rem] left-0 w-max text-start">
                 <Typography
                   color={activeStep === 0 ? "blue-gray" : "gray"}
                   className="font-normal"
@@ -758,29 +843,27 @@ const ProductForm = ({
                 </Typography>
               </div>
             </Step>
-            <Step onClick={() => setActiveStep(1)}>
+            <Step
+              onClick={() => setActiveStep(1)}
+              activeClassName="bg-primary-200 text-black"
+              completedClassName="bg-primary-200 text-black"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke-width="1.5"
+                strokeLinejoin="1.5"
                 stroke="currentColor"
                 className="size-6"
               >
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
                 />
               </svg>
 
-              <div className="absolute -bottom-[4.5rem] w-max text-center">
-                <Typography
-                  variant="h6"
-                  color={activeStep === 1 ? "blue-gray" : "gray"}
-                >
-                  Step 2
-                </Typography>
+              <div className="absolute -bottom-[2.5rem] w-max text-center">
                 <Typography
                   color={activeStep === 1 ? "blue-gray" : "gray"}
                   className="font-normal"
@@ -789,29 +872,27 @@ const ProductForm = ({
                 </Typography>
               </div>
             </Step>
-            <Step onClick={() => setActiveStep(2)}>
+            <Step
+              onClick={() => setActiveStep(2)}
+              activeClassName="bg-primary-200 text-black"
+              completedClassName="bg-primary-200 text-black"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke-width="1.5"
+                strokeLinejoin="1.5"
                 stroke="currentColor"
                 className="size-6"
               >
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 9m18 0V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v3"
                 />
               </svg>
 
-              <div className="absolute -bottom-[4.5rem] w-max text-center">
-                <Typography
-                  variant="h6"
-                  color={activeStep === 2 ? "blue-gray" : "gray"}
-                >
-                  Step 3
-                </Typography>
+              <div className="absolute -bottom-[2.5rem] w-max text-center">
                 <Typography
                   color={activeStep === 2 ? "blue-gray" : "gray"}
                   className="font-normal"
@@ -820,29 +901,27 @@ const ProductForm = ({
                 </Typography>
               </div>
             </Step>
-            <Step onClick={() => setActiveStep(3)}>
+            <Step
+              onClick={() => setActiveStep(3)}
+              activeClassName="bg-primary-200 text-black"
+              completedClassName="bg-primary-200 text-black"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke-width="1.5"
+                strokeLinejoin="1.5"
                 stroke="currentColor"
                 className="size-6"
               >
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
                 />
               </svg>
 
-              <div className="absolute right-0 -bottom-[4.5rem] w-max text-end">
-                <Typography
-                  variant="h6"
-                  color={activeStep === 3 ? "blue-gray" : "gray"}
-                >
-                  Step 4
-                </Typography>
+              <div className="absolute right-0 -bottom-[2.5rem] w-max text-end">
                 <Typography
                   color={activeStep === 3 ? "blue-gray" : "gray"}
                   className="font-normal"
@@ -921,6 +1000,13 @@ const ProductForm = ({
                       formik.errors.product_name && formik.touched.product_name
                     }
                   />
+
+                  {formik.errors.product_name &&
+                    formik.touched.product_name && (
+                      <p className="text-red-500">
+                        {formik.errors.product_name}
+                      </p>
+                    )}
                 </div>
 
                 <div>
@@ -931,7 +1017,8 @@ const ProductForm = ({
                         "attributes",
                         options.map((option) => option.value)
                       );
-                      setSelectedProductAttributes(options);
+                      // setSelectedProductAttributes(options);
+                      setAttributes(options.map((option) => option.value));
                     }}
                     options={productAttributesOptions}
                     value={
@@ -989,7 +1076,7 @@ const ProductForm = ({
                     Add Attributes : {product?.product_name ?? ""}
                   </h3>
 
-                  <div className="flex flex-col gap-1">
+                  {/* <div className="flex flex-col gap-1">
                     <Typography>Attributes</Typography>
                     <ReactSelect
                       isMulti
@@ -1010,11 +1097,11 @@ const ProductForm = ({
                         });
                       }}
                     />
-                  </div>
+                  </div> */}
 
                   <div className="mt-5 flex flex-col gap-5">
                     {/* filter attribute to restrict goldcaret attribute */}
-                    {productAttributes
+                    {sortedProductAttributes
                       .filter((a) => {
                         return (
                           a.attribute_id !== attributeIDs.GOLDKARAT &&
@@ -1038,6 +1125,7 @@ const ProductForm = ({
 
                         return (
                           <ProductAttributeItem
+                            key={index}
                             attributes={attributes}
                             productAttribute={productAttribute}
                             options={options}
@@ -1068,99 +1156,10 @@ const ProductForm = ({
         )}
 
         {activeStep === 2 && (
-          <>
-            <div className="p-7 shadow-3xl rounded-2xl bg-white">
-              <div className="mb-6 flex justify-between items-center">
-                <h3 className="text-xl font-medium tracking-wide">
-                  Product Details : {product?.product_name ?? ""}
-                </h3>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    if (
-                      productAttributeValues &&
-                      productAttributeValues.length > 0
-                    ) {
-                      setVariations([
-                        ...variations,
-                        {
-                          name: productAttributeValues
-                            .filter(Boolean)
-                            ?.map((pa) => pa?.name)
-                            .join(", "),
-                          productAttributeValues:
-                            productAttributeValues.filter(Boolean),
-                        },
-                      ]);
-                    }
-                  }}
-                >
-                  Add
-                </Button>
-              </div>
-              <div className="w-full flex flex-col gap-5">
-                <div className="flex flex-wrap gap-5">
-                  {selectedAttributes &&
-                    selectedAttributes.length > 0 &&
-                    selectedAttributes.map(
-                      (attribute, index) =>
-                        attribute?.attribute?.values &&
-                        attribute?.attribute?.values.length > 0 && (
-                          <div className="w-[32%]" key={index}>
-                            <Select
-                              label={attribute?.attribute?.name}
-                              onChange={(value) => {
-                                let id = product?.ProductAttributeValue.find(
-                                  (pa) => {
-                                    return (
-                                      pa?.attribute_id === attribute.id &&
-                                      pa.attributeValue_id === value?.id
-                                    );
-                                  }
-                                )?.productAttributeValue_id;
-                                if (id) {
-                                  setProductAttributeValues((prev) => {
-                                    let attributeValues = [...prev];
-                                    attributeValues[index] = {
-                                      productAttributeValue_id: id,
-                                      name: `${attribute?.attribute?.name} : ${value?.name}`,
-                                      id: value?.id,
-                                      attributeId: attribute.id,
-                                      attributeValueName: value?.name,
-                                    };
-                                    return attributeValues;
-                                  });
-                                }
-                              }}
-                            >
-                              {attribute?.attribute?.values.map((value, i) => (
-                                <Option key={i} value={value ?? ""}>
-                                  {value?.name}
-                                </Option>
-                              ))}
-                            </Select>
-                          </div>
-                        )
-                    )}
-                </div>
-              </div>
-              {variations?.map((variation, index) => (
-                <Variation
-                  key={index}
-                  index={index}
-                  open={open}
-                  handleOpen={handleOpen}
-                  variation={variation}
-                  productAttributeValues={productAttributeValues.filter(
-                    Boolean
-                  )}
-                  variations={variations}
-                  setVariations={setVariations}
-                  pricing={pricing}
-                />
-              ))}
-            </div>
-          </>
+          <ProductVariationsStepWrap
+            product_id={product.product_id}
+            pricing={pricing}
+          />
         )}
 
         {activeStep === 3 && (
@@ -1187,8 +1186,10 @@ const ProductForm = ({
                     <div className="col-span-2">
                       <Textarea
                         label="Remarks"
-                        name="remarks"
+                        name="offline_reason"
                         className="min-h-[50px]"
+                        value={formik.values.offline_reason ?? ""}
+                        onChange={formik.handleChange}
                       />
                     </div>
                   )}
@@ -1196,7 +1197,7 @@ const ProductForm = ({
                   <div>
                     {countries?.length > 0 && (
                       <Select
-                        label="Made in Country"
+                        label="Made in"
                         size="lg"
                         name="country_id"
                         error={
@@ -1217,10 +1218,13 @@ const ProductForm = ({
                         ))}
                       </Select>
                     )}
+                    {formik.errors.country_id && formik.touched.country_id && (
+                      <p className="text-red-500">{formik.errors.country_id}</p>
+                    )}
                   </div>
 
                   <div>
-                    {statesOptions && statesOptions.length > 0 ? (
+                    {statesOptions && statesOptions.length > 0 && (
                       <Select
                         label="State"
                         size="lg"
@@ -1229,7 +1233,7 @@ const ProductForm = ({
                         onChange={(value) => {
                           formik.setFieldValue("states", value);
                         }}
-                        value={formik.values.states || ""}
+                        value={formik.values.states ?? ""}
                       >
                         {statesOptions.map((state) => (
                           <Option key={state.state_id} value={state.state_id}>
@@ -1237,10 +1241,19 @@ const ProductForm = ({
                           </Option>
                         ))}
                       </Select>
-                    ) : (
-                      <Select label="State" size="lg">
-                        <Option disabled>No States</Option>
-                      </Select>
+                    )}
+
+                    {!statesOptions ||
+                      (statesOptions.length === 0 && (
+                        <Select label="State" size="lg">
+                          <Option value="No State" disabled>
+                            No State
+                          </Option>
+                        </Select>
+                      ))}
+
+                    {formik.errors.states && formik.touched.states && (
+                      <p className="text-red-500">{formik.errors.states}</p>
                     )}
                   </div>
 
@@ -1349,6 +1362,12 @@ const ProductForm = ({
                       name="brand"
                       options={brandsOptions}
                       styles={style}
+                      value={brandsOptions.filter((option) =>
+                        productBrand.includes(option.value)
+                      )}
+                      onChange={(options) =>
+                        setProductBrand(options.map((option) => option.value))
+                      }
                     />
                   </div>
 
@@ -1360,6 +1379,12 @@ const ProductForm = ({
                       name="style"
                       options={stylesOptions}
                       styles={style}
+                      value={stylesOptions.filter((option) =>
+                        productStyle.includes(option.value)
+                      )}
+                      onChange={(options) =>
+                        setProductStyle(options.map((option) => option.value))
+                      }
                     />
                   </div>
 
@@ -1371,6 +1396,12 @@ const ProductForm = ({
                       name="theme"
                       options={themeOptions}
                       styles={style}
+                      value={themeOptions.filter((option) =>
+                        productTheme.includes(option.value)
+                      )}
+                      onChange={(options) =>
+                        setProductTheme(options.map((option) => option.value))
+                      }
                     />
                   </div>
 
@@ -1382,24 +1413,61 @@ const ProductForm = ({
                       name="trends"
                       options={trendsOptions}
                       styles={style}
+                      value={trendsOptions.filter((option) =>
+                        productTrend.includes(option.value)
+                      )}
+                      onChange={(options) =>
+                        setProductTrend(options.map((option) => option.value))
+                      }
                     />
                   </div>
 
                   <div className="col-span-2">
-                    <Textarea label="Delivery Includes" name="delivery" />
+                    <Textarea
+                      label="Delivery Includes"
+                      name="delivery_includes"
+                      value={formik.values.delivery_includes}
+                      onChange={formik.handleChange}
+                      error={
+                        formik?.errors?.delivery_includes &&
+                        formik?.touched?.delivery_includes
+                      }
+                    />
+                    {formik?.errors?.delivery_includes &&
+                      formik?.touched?.delivery_includes && (
+                        <p className="text-red-500 text-xs">
+                          {formik.errors.delivery_includes}
+                        </p>
+                      )}
                   </div>
                   <div className="col-span-2">
                     <Textarea
                       label="Return Policy"
                       name="return_policy"
                       className="min-h-[50px]"
+                      value={formik.values.return_policy ?? ""}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      error={
+                        formik?.errors?.return_policy &&
+                        formik?.touched?.return_policy
+                      }
                     />
+                    {formik?.errors?.return_policy &&
+                      formik?.touched?.return_policy && (
+                        <p className="text-red-500 text-xs">
+                          {formik.errors.return_policy}
+                        </p>
+                      )}
                   </div>
                   <div className="col-span-2">
                     <Textarea
                       label="Purchase Notes"
-                      name="purchase_notes"
+                      name="purchase_note"
                       className="min-h-[50px]"
+                      onBlur={formik.handleBlur}
+                      value={formik.values.purchase_note ?? ""}
+                      onChange={formik.handleChange}
                     />
                   </div>
                 </div>
@@ -1408,10 +1476,16 @@ const ProductForm = ({
           </>
         )}
 
-        <div className="flex justify-between items-center">
-          <Button onClick={handlePrev} type="button">
-            Prev
-          </Button>
+        <div
+          className={`flex ${
+            activeStep !== 0 ? "justify-between" : "justify-end"
+          } items-center`}
+        >
+          {activeStep !== 0 && (
+            <Button onClick={handlePrev} type="button">
+              Prev
+            </Button>
+          )}
           <Button
             onClick={() => formik.handleSubmit()}
             loading={formik.isSubmitting}

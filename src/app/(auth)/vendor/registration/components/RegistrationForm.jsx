@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { enqueueSnackbar } from "notistack";
 import React, { useState } from "react";
 import * as Yup from "yup";
+import OTP from "./OTP";
 
 const RegistrationForm = () => {
   const router = useRouter();
@@ -31,7 +32,10 @@ const RegistrationForm = () => {
   });
 
   const [isShowPassword, setIsShowPassword] = useState(false);
-
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  if (isOtpSent) {
+    return <OTP />;
+  }
   const formik = useFormik({
     initialValues: {
       firstName: "",
@@ -46,47 +50,57 @@ const RegistrationForm = () => {
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
-      console.log(values);
-      const response = await post("/api/vendor_registration", values);
-      console.log(response);
-      if (response.status === 201) {
-        enqueueSnackbar("Vendor account created successfully", {
-          variant: "success",
-          preventDuplicates: true,
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "right",
+      try {
+        const response = await fetch("/api/auth/otp/resend", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-          autoHideDuration: 3000,
-          style: {
-            background: "white",
-            color: "black",
-            borderRadius: ".5rem",
-            boxShadow:
-              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-            padding: "0 4px",
-          },
+          body: JSON.stringify({
+            email: values?.email,
+            mode: "registration",
+          }),
         });
-        router.push("/login");
-      } else {
-        enqueueSnackbar(response.message, {
-          variant: "error",
-          preventDuplicates: true,
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "right",
-          },
-          autoHideDuration: 3000,
-          style: {
-            background: "white",
-            color: "black",
-            borderRadius: ".5rem",
-            boxShadow:
-              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-            padding: "0 4px",
-          },
-        });
-      }
+        console.log(response);
+        if (response.status === 201) {
+          enqueueSnackbar("Otp Is Send To Your Mail", {
+            variant: "success",
+            preventDuplicates: true,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
+            autoHideDuration: 3000,
+            style: {
+              background: "white",
+              color: "black",
+              borderRadius: ".5rem",
+              boxShadow:
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              padding: "0 4px",
+            },
+          });
+          setIsOtpSent(true);
+        } else {
+          enqueueSnackbar(response.message, {
+            variant: "error",
+            preventDuplicates: true,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
+            autoHideDuration: 3000,
+            style: {
+              background: "white",
+              color: "black",
+              borderRadius: ".5rem",
+              boxShadow:
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              padding: "0 4px",
+            },
+          });
+        }
+      } catch (error) {}
     },
   });
   return (
@@ -192,7 +206,7 @@ const RegistrationForm = () => {
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
-                            stroke-width="1.5"
+                            strokeWidth="1.5"
                             stroke="currentColor"
                             class="size-5"
                           >
@@ -212,7 +226,7 @@ const RegistrationForm = () => {
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
-                            stroke-width="1.5"
+                            strokeWidth="1.5"
                             stroke="currentColor"
                             className="size-5"
                           >
@@ -243,7 +257,7 @@ const RegistrationForm = () => {
                     //       xmlns="http://www.w3.org/2000/svg"
                     //       fill="none"
                     //       viewBox="0 0 24 24"
-                    //       stroke-width="1.5"
+                    //       strokeWidth="1.5"
                     //       stroke="currentColor"
                     //       className="size-5"
                     //     >
@@ -270,7 +284,7 @@ const RegistrationForm = () => {
                     fullWidth
                     size="lg"
                     type="submit"
-                    className="normal-case rounded bg-primary-200 text-black shadow-none"
+                    className="flex justify-center items-center"
                     loading={formik.isSubmitting}
                   >
                     Registration

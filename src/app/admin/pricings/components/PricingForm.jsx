@@ -1,27 +1,21 @@
 "use client";
-import { patternValidationSchema } from "@/schemas/ValidationSchema";
-import { post, update } from "@/utils/api";
-import {
-  Button,
-  IconButton,
-  Input,
-  Option,
-  Select,
-} from "@material-tailwind/react";
+import { post } from "@/utils/api";
+import { Button, Input } from "@material-tailwind/react";
 import { Formik, useFormik } from "formik";
 import { enqueueSnackbar } from "notistack";
-import React, { useState } from "react";
+import React from "react";
 import DataTable from "react-data-table-component";
 import { useRouter } from "next/navigation";
 import * as Yup from "yup";
 import Moment from "react-moment";
+import { formatDateString } from "@/utils/helper";
 
 const PricingForm = ({ pricing, pricings }) => {
   const router = useRouter();
   const columns = [
     {
       name: "Date",
-      selector: (row) => row?.date,
+      selector: (row) => formatDateString(row?.date),
     },
     {
       name: "Time",
@@ -96,23 +90,25 @@ const PricingForm = ({ pricing, pricings }) => {
         const response = await post("/api/pricing_history", values);
         router.refresh();
         formik.resetForm();
-        enqueueSnackbar("Pricing Created Successfully", {
-          variant: "success",
-          preventDuplicate: true,
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "right",
-          },
-          autoHideDuration: 3000,
-          style: {
-            background: "white",
-            color: "black",
-            borderRadius: ".5rem",
-            boxShadow:
-              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-            padding: "0 4px",
-          },
-        });
+        if (response?.status === 200) {
+          enqueueSnackbar("Pricing Created Successfully", {
+            variant: "success",
+            preventDuplicate: true,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
+            autoHideDuration: 3000,
+            style: {
+              background: "white",
+              color: "black",
+              borderRadius: ".5rem",
+              boxShadow:
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              padding: "0 4px",
+            },
+          });
+        }
       } catch (error) {
         console.log(error);
         enqueueSnackbar(error?.response?.data?.message, {

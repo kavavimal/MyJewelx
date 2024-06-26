@@ -12,9 +12,8 @@ export async function PUT(request, { params }) {
     const country_id = Number(params.id);
     const country = await prisma.country.findUnique({
       where: { country_id },
-      include: { product: true },
-    });
-
+      include: { Product: true },
+    });    
     if (!country) {
       return NextResponse.json(
         { error: "Can't find the country with given country_id" },
@@ -26,13 +25,13 @@ export async function PUT(request, { params }) {
     const name = req.get("name");
 
     const exists = await prisma.country.findFirst({
-      where: { name: parseCountryData.name, NOT: { country_id: country_id } },
+      where: { name: name, NOT: { country_id: country_id } },
     });
 
     if (exists) {
       return NextResponse.json(
         {
-          error: `Country with name ${parseCountryData.name} already exists.`,
+          error: `Country with name ${name} already exists.`,
         },
         { status: 405 }
       );
@@ -42,7 +41,7 @@ export async function PUT(request, { params }) {
 
     const parseCountryData = countryUpdateSchema.parse({ name, region });
 
-    if (country.product.length > 0) {
+    if (country.Product.length > 0) {
       return NextResponse.json(
         { error: `${country.name} country is in use, can't be updated` },
         { status: 400 }
@@ -80,7 +79,7 @@ export async function DELETE(request, { params }) {
     const country_id = Number(params.id);
     const country = await prisma.country.findUnique({
       where: { country_id },
-      include: { product: true },
+      include: { Product: true },
     });
 
     if (!country) {
@@ -90,7 +89,7 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    if (country.product.length > 0) {
+    if (country.Product.length > 0) {
       return NextResponse.json(
         { error: `${country.name} country is in use, can't be deleted` },
         { status: 400 }

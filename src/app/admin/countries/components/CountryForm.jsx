@@ -79,24 +79,26 @@ const CountryForm = ({ countries }) => {
             `/api/country/${country.country_id}`,
             values
           );
+          if (response.status === 201) {
+            enqueueSnackbar("Country updated successfully", {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+          }
           router.refresh();
-          enqueueSnackbar("Country updated successfully", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
           setCountry(false);
           formik.setValues({ name: "", description: "" });
         } catch (error) {
@@ -122,25 +124,27 @@ const CountryForm = ({ countries }) => {
       } else {
         try {
           const response = await post("/api/country", values);
+          if (response.status === 201) {
+            enqueueSnackbar("Country created successfully", {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+          }
           router.refresh();
           formik.resetForm();
-          enqueueSnackbar("Country created successfully", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
         } catch (error) {
           console.log(error);
           enqueueSnackbar(error?.response?.data?.message, {
@@ -169,6 +173,7 @@ const CountryForm = ({ countries }) => {
       <div className="flex items-center justify-between mb-10 intro-y">
         <h2 className="text-2xl font-semibold">Countries</h2>
         <Button
+          onClick={() => setCountry(false)}
           size="md"
           className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
         >

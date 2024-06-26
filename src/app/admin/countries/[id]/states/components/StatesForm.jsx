@@ -53,29 +53,31 @@ const StatesForm = ({ states, id }) => {
       if (state) {
         try {
           const response = await update(`/api/state/${state.state_id}`, values);
-          router.refresh();
-          enqueueSnackbar("Attribute Value Updated", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
+          if (response?.status === 201) {
+            enqueueSnackbar("State Updated", {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+          }
           setState(false);
+          router.refresh();
           formik.resetForm();
         } catch (error) {
           console.log(error);
-          enqueueSnackbar(error?.message, {
+          enqueueSnackbar(error?.response?.data?.error, {
             variant: "error",
             preventDuplicate: true,
             anchorOrigin: {
@@ -98,23 +100,25 @@ const StatesForm = ({ states, id }) => {
           const response = await post("/api/state", values);
           router.refresh();
           formik.resetForm();
-          enqueueSnackbar("Attribute Value Added", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
+          if (response?.status === 201) {
+            enqueueSnackbar("State Created", {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+          }
         } catch (error) {
           console.log(error);
           enqueueSnackbar(error?.response?.data?.message, {

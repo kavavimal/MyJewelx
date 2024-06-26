@@ -59,24 +59,26 @@ const GemstoneForm = ({ gemstones }) => {
             `/api/gemstone/${gemstone.gemstone_id}`,
             values
           );
+          if (response?.status === 201) {
+            enqueueSnackbar("Gemstone Updated", {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+          }
           router.refresh();
-          enqueueSnackbar("Gemstone Updated", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
           setGemstone(false);
           formik.resetForm();
         } catch (error) {
@@ -147,7 +149,7 @@ const GemstoneForm = ({ gemstones }) => {
   return (
     <>
       <div className="flex items-center justify-between mb-10 intro-y">
-        <h2 className="text-2xl font-semibold">Genders</h2>
+        <h2 className="text-2xl font-semibold">Gemstones</h2>
         <Button
           size="md"
           className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"

@@ -4,6 +4,7 @@ import FrontendHeader from "@/components/frontend/common/Header";
 import LoadingDots from "@/components/loading-dots";
 import "@/styles/globals.css";
 import SnackbarWrapper from "@/components/SnackbarWrapper";
+import Footer from "@/components/frontend/common/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -15,16 +16,21 @@ export default async function AuthLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Suspense
-          fallback={
-            <div className="fixed h-full w-full flex item-center justify-center bg-gray-400/[.5]  top-0 left-0 z-40">
-              <LoadingDots color="#808080" size="15px" />
-            </div>
-          }
-        >
-          <FrontendHeader />
-          <SnackbarWrapper>{children}</SnackbarWrapper>
-        </Suspense>
+        <main className="flex flex-col min-h-screen">
+          <SnackbarWrapper>
+            <Suspense
+              fallback={
+                <div className="h-screen w-full flex items-center justify-center bg-white z-40">
+                  <LoadingDots color="#808080" size="12" />
+                </div>
+              }
+            >
+              <FrontendHeader />
+              <div className="flex-grow bg-[#FFFCF5]">{children}</div>
+              <Footer />
+            </Suspense>
+          </SnackbarWrapper>
+        </main>
       </body>
     </html>
   );

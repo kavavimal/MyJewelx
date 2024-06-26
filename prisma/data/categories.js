@@ -1,4 +1,4 @@
-module.export = [
+module.exports = [
   {
     name: "Rings",
     description: "Rings",

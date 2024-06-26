@@ -4,9 +4,9 @@ import prisma from "@/lib/prisma";
 
 const getPatterns = () => prisma.pattern.findMany();
 
-const patterns = async () => {
+const page = async () => {
   const patterns = await getPatterns();
   return <PatternForm patterns={patterns} />;
 };
 
-export default patterns;
+export default page;

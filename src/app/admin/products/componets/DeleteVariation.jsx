@@ -11,10 +11,19 @@ import { useRouter } from "next/navigation";
 import { enqueueSnackbar } from "notistack";
 import { useState } from "react";
 
-const DeleteVariation = ({ variation_id, variations, setVariations }) => {
+const DeleteVariation = ({
+  variation_id,
+  variations,
+  setVariations,
+  index,
+  isVariation,
+}) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(!open);
+  const handleOpen = () =>
+    isVariation
+      ? setOpen(!open)
+      : setVariations(variations.filter((_, i) => i !== index));
   const router = useRouter();
 
   const del = async () => {

@@ -38,3 +38,9 @@ td,
 div {
   @apply font-emirates;
 }
+
+.container {
+  width: 1280px;
+  margin: 0 auto;
+  max-width: 96%;
+}

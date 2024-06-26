@@ -73,12 +73,22 @@ const DeleteProduct = ({ product_id }) => {
       <Dialog
         open={open}
         handler={handleOpen}
-        animate={{
-          mount: { opacity: 1 },
-          unmount: { opacity: 0 },
-        }}
         size="sm"
         className="rounded-2xl"
+        animate={{
+          mount: {
+            scale: 1,
+            y: 0,
+            opacity: 1,
+            transition: { duration: 0, transitionStyle: "none" },
+          },
+          unmount: {
+            scale: 1,
+            y: 0,
+            opacity: 0,
+            transition: { duration: 0, transitionStyle: "none" },
+          },
+        }}
       >
         <DialogHeader>Delete</DialogHeader>
         <DialogBody>

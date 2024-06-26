@@ -1,7 +1,10 @@
 "use client";
 import { Button, IconButton } from "@material-tailwind/react";
 import React from "react";
-import DataTable from "react-data-table-component";
+import dynamic from "next/dynamic";
+const DataTable = dynamic(() => import("react-data-table-component"), {
+  ssr: false,
+});
 import CategoryForm from "./CategoryForm";
 import Link from "next/link";
 import DeleteCategory from "./DeleteCategory";
@@ -70,7 +73,13 @@ const Categories = ({ categories }) => {
         </Link>
       </div>
       {/* <CategoryForm /> */}
-      <DataTable columns={column} data={categories} />
+      <DataTable
+        columns={column}
+        data={categories}
+        pagination
+        highlightOnHover
+        pointerOnHover
+      />
     </>
   );
 };

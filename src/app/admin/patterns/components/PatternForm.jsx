@@ -5,9 +5,14 @@ import { Button, IconButton, Input } from "@material-tailwind/react";
 import { Formik, useFormik } from "formik";
 import { enqueueSnackbar } from "notistack";
 import React, { useState } from "react";
-import DataTable from "react-data-table-component";
+import dynamic from "next/dynamic";
+
+const DataTable = dynamic(() => import("react-data-table-component"), {
+  ssr: false,
+});
 import { useRouter } from "next/navigation";
 import DeletePattern from "./DeletePattern";
+import dynamic from "next/dynamic";
 
 const PatternForm = ({ patterns }) => {
   const router = useRouter();
@@ -62,23 +67,25 @@ const PatternForm = ({ patterns }) => {
             values
           );
           router.refresh();
-          enqueueSnackbar("Pattern updated successfully", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
+          if (response?.status === 201) {
+            enqueueSnackbar("Pattern updated successfully", {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+          }
           setPattern(false);
         } catch (error) {
           console.log(error);
@@ -105,23 +112,25 @@ const PatternForm = ({ patterns }) => {
           const response = await post("/api/pattern", values);
           router.refresh();
           formik.resetForm();
-          enqueueSnackbar("Pattern created successfully", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
+          if (response?.status === 201) {
+            enqueueSnackbar("Pattern created successfully", {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+          }
         } catch (error) {
           console.log(error);
           enqueueSnackbar(error?.response?.data?.message, {
@@ -213,7 +222,12 @@ const PatternForm = ({ patterns }) => {
         </Formik>
       </div>
 
-      <DataTable data={patterns} columns={columns} highlightOnHover />
+      <DataTable
+        data={patterns}
+        columns={columns}
+        pagination
+        highlightOnHover
+      />
     </>
   );
 };

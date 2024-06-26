@@ -84,19 +84,10 @@ async function seedAttributes() {
 
     // Seed attribute values for each attribute
     for (const v of attribute.values) {
-      const createdAValue = await prisma.attributeValue.upsert({
-        create: {
+      const createdAValue = await prisma.attributeValue.create({
+        data: {
           name: v.name,
-          description: v.description,
-          attribute_id: attributeId,
-        },
-        update: {
-          name: v.name,
-          description: v.description,
-          attribute_id: attributeId,
-        },
-        where: {
-          name: v.name,
+          // description: v.description,
           attribute_id: attributeId,
         },
       });

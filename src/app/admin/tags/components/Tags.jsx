@@ -5,9 +5,12 @@ import { Button, IconButton, Input } from "@material-tailwind/react";
 import { Formik, useFormik } from "formik";
 import { enqueueSnackbar } from "notistack";
 import React, { useState } from "react";
-import DataTable from "react-data-table-component";
+const DataTable = dynamic(() => import("react-data-table-component"), {
+  ssr: false,
+});
 import DeleteTag from "./DeleteTag";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 
 const Tags = ({ tags }) => {
   const router = useRouter();
@@ -60,28 +63,30 @@ const Tags = ({ tags }) => {
         try {
           const response = await update(`/api/tag/${tag.tag_id}`, values);
           router.refresh();
-          enqueueSnackbar("Tag updated successfully", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
+          if (response?.status === 200) {
+            enqueueSnackbar("Tag updated successfully", {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+          }
           setTag(false);
           formik.setValues({ name: "", description: "" });
         } catch (error) {
           console.log(error);
-          enqueueSnackbar(error?.message, {
+          enqueueSnackbar(error?.response?.data?.error, {
             variant: "error",
             preventDuplicate: true,
             anchorOrigin: {
@@ -102,25 +107,29 @@ const Tags = ({ tags }) => {
       } else {
         try {
           const response = await post("/api/tag", values);
+
+          if (response?.status === 200) {
+            enqueueSnackbar("Tag created successfully", {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+          }
+
           router.refresh();
           formik.resetForm();
-          enqueueSnackbar("Tag created successfully", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
         } catch (error) {
           console.log(error);
           enqueueSnackbar(error?.response?.data?.message, {
@@ -210,7 +219,13 @@ const Tags = ({ tags }) => {
         </Formik>
       </div>
 
-      <DataTable data={tags} columns={columns} highlightOnHover />
+      <DataTable
+        data={tags}
+        columns={columns}
+        highlightOnHover
+        pagination
+        pointerOnHover
+      />
     </>
   );
 };

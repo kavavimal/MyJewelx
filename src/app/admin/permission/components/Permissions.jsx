@@ -1,13 +1,9 @@
 "use client";
-import {
-  Button,
-  IconButton,
-  Menu,
-  MenuHandler,
-  MenuItem,
-  MenuList,
-} from "@material-tailwind/react";
-import DataTable from "react-data-table-component";
+import { Button, IconButton } from "@material-tailwind/react";
+import dynamic from "next/dynamic";
+const DataTable = dynamic(() => import("react-data-table-component"), {
+  ssr: false,
+});
 import AddPermission from "./AddPermission";
 import DeletePermission from "./DeletePermission";
 import { useState } from "react";
@@ -94,7 +90,13 @@ const Permissions = ({ permissions }) => {
         </Button>
       </div>
       <AddPermission edit={editData} />
-      <DataTable data={permissions} columns={columns} highlightOnHover />
+      <DataTable
+        data={permissions}
+        columns={columns}
+        highlightOnHover
+        pagination
+        pointerOnHover
+      />
     </>
   );
 };
