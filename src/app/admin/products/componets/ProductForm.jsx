@@ -29,6 +29,7 @@ import { Router } from "next/router";
 import { CharsType } from "@prisma/client";
 import Link from "next/link";
 import ProductVariationsStepWrap from "./ProductVariationsStepWrap";
+import { getProduct } from "@/actions/product";
 
 const ProductForm = ({
   product,
@@ -48,6 +49,7 @@ const ProductForm = ({
   trends,
 }) => {
   const router = useRouter();
+  const [currentProduct, setCurrentProduct] = useState(product ?? {});
   const [attributes, setAttributes] = useState([attributeIDs.MATERIAL]);
   const [loading, setLoading] = useState(true);
   const [activeStep, setActiveStep] = useState(() => {
@@ -450,6 +452,8 @@ const ProductForm = ({
             // if (response.status === 201) {
             //   setAttributes(values.attributes);
             // }
+            const productRes = await getProduct(product.product_id);
+            setCurrentProduct(productRes?.productData);
             window.localStorage.setItem("product_id", product.product_id);
             router.refresh();
             !isLastStep && setActiveStep((cur) => cur + 1);
@@ -516,6 +520,8 @@ const ProductForm = ({
               `/api/product/${product.product_id}/attributes`
             );
             setProductData(productData.data?.product);
+            const productRes = await getProduct(product.product_id);
+            setCurrentProduct(productRes?.productData);
             router.refresh();
             !isLastStep && setActiveStep((cur) => cur + 1);
           } catch (error) {
@@ -1042,9 +1048,9 @@ const ProductForm = ({
 
         {activeStep === 1 && (
           <>
-            {product &&
-              product?.ProductAttributeValue &&
-              product?.ProductAttributeValue.length > 0 && (
+            {currentProduct &&
+              currentProduct?.ProductAttributeValue &&
+              currentProduct?.ProductAttributeValue.length > 0 && (
                 <Alert
                   color="red"
                   open={true}
@@ -1106,7 +1112,7 @@ const ProductForm = ({
                         return (
                           a.attribute_id !== attributeIDs.GOLDKARAT &&
                           a.attribute_id !== attributeIDs.SIZE_ASIAN &&
-                          a.attribute_id !== attributeIDs.SIZE_US
+                          a.attribute_id !== attributeIDs.SIZE_US && currentProduct.attributes.find((pa) => pa.attribute_id === a.attribute_id)
                         );
                       })
                       .map((productAttribute, index) => {
