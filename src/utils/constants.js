@@ -27,3 +27,9 @@ export const ATTRIBUTE_ORDER = [
 ];
 
 export const INDIA = 1;
+
+export const variation_discount_types = {
+  1 : "Per Gram On Net Weight",
+  2  : "Per(%) On Metal Rate On Karat",
+  3 : "Per Piece / Flat",
+};

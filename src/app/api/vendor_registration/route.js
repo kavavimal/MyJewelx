@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { AcountType } from "@prisma/client";
+import { AcountType, UserStatus } from "@prisma/client";
 import { hash } from "bcrypt";
 import { isCompanyEmail } from "company-email-validator";
 import { NextResponse } from "next/server";
@@ -74,6 +74,7 @@ export async function POST(request) {
           ? await hash(parsedVendorData.password, 10)
           : "",
         account_type: parsedVendorData.account_type,
+        status: UserStatus.DISABLED,
         role: {
           connect: {
             role_id: Number(parsedVendorData.role_id),

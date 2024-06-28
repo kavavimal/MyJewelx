@@ -33,7 +33,7 @@ const getCollections = () => prisma.collection.findMany();
 const getGoldKarat = () =>
   prisma.attributeValue.findMany({
     where: {
-      attribute_id: 10,
+      attribute_id: attributeIDs.GOLDKARAT,
     },
   });
 

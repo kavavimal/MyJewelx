@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+/* @type {import('tailwindcss').Config} */
 import withMT from "@material-tailwind/react/utils/withMT";
 
 export default withMT({
@@ -17,6 +17,11 @@ export default withMT({
       boxShadow: {
         "3xl": "0px 0px 20px 1px #0000000D",
       },
+
+      maxWidth: {
+        "screen-xl": "1280px", // Default value
+      },
+
       colors: {
         primary: {
           // 50: "#078dee14",
@@ -39,6 +44,10 @@ export default withMT({
       },
       fontFamily: {
         emirates: ["emirates"],
+        playfairdisplay: ["playfairdisplay"],
+      },
+      fontSize: {
+        "3xl": "28px",
       },
     },
   },

@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import * as yup from "yup";
 import moment from "moment";
 import { useRouter } from "next/navigation";
+import { post } from "@/utils/api";
 
 const validationSchema = yup.object({
   otp: yup
@@ -48,8 +49,37 @@ const OTP = () => {
         });
 
         if (response.status === 201) {
-          enqueueSnackbar("OTP verified successfully", {
-            variant: "success",
+          let registration = await post(
+            "/api/vendor_registration",
+            JSON.parse(localStorage.getItem("values"))
+          );
+
+          console.log(registration);
+
+          if (registration.status === 201) {
+            enqueueSnackbar("Vendor Registration Success", {
+              variant: "success",
+              preventDuplicates: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+          }
+
+          router.push(`/vendor/details?id=${registration.data?.vendor?.id}`);
+        } else if (registration.status === 500) {
+          enqueueSnackbar("Failed to verify OTP", {
+            variant: "error",
             preventDuplicates: true,
             anchorOrigin: {
               vertical: "top",
@@ -65,11 +95,28 @@ const OTP = () => {
               padding: "0 4px",
             },
           });
-
-          router.push("/vendor/details");
-        } else if (response.status === 500) {
+        } else if (registration.status === 400) {
+          enqueueSnackbar("Invalid OTP", {
+            variant: "error",
+            preventDuplicates: true,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
+            autoHideDuration: 3000,
+            style: {
+              background: "white",
+              color: "black",
+              borderRadius: ".5rem",
+              boxShadow:
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              padding: "0 4px",
+            },
+          });
         }
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
     },
   });
 

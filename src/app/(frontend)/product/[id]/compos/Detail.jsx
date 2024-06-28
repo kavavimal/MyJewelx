@@ -7,10 +7,10 @@ import "slick-carousel/slick/slick.css";
 // import "slick-carousel/slick/slick-theme.css";
 
 const Detail = ({ product }) => {
-  const [variation, setVariation] = useState(product.variations[0]);
+  const [variation, setVariation] = useState(product?.variations[0]);
   const [mainImage, setMainImage] = useState(variation?.image[0].path);
   const [makingC, setMakingC] = useState();
-  console.log("product", product);
+  const [quantity, setQuantity] = useState(1);
   const sizes = [];
   product.ProductAttributeValue.forEach((pav) => {
     if (pav.attribute.name === "Size") {
@@ -196,7 +196,50 @@ const Detail = ({ product }) => {
     other_charges_total = other_charges_total + Number(charges.value);
   });
 
-  console.log("other_charges_total");
+  const variation_price = variation?.selling_price
+    ? variation?.selling_price
+    : variation?.regular_price;
+  const variation_vat =
+    (variation_price * quantity * (variation?.vat ? variation_vat : 0)) / 100;
+  const total_amount = (
+    variation_price +
+    variation_vat +
+    (makingC ? Number(makingC) : 0) +
+    other_charges_total
+  ).toFixed(2);
+
+  const addToCart = () => {
+    const cartItemData = new FormData();
+
+    cartItemData.append("variation_id", variation.variation_id);
+    cartItemData.append("quantity", quantity);
+    cartItemData.append("discount", 0);
+    cartItemData.append("discount_type", "fixedAmount");
+
+    fetch("/api/cartItem", {
+      method: "POST",
+      body: cartItemData,
+    }).then(async (res) => {
+      if (res.status === 201) {
+        console.log("res", res.message);
+      } else {
+        const { error, issues } = await res.json();
+        console.error("send Otp Failed", error);
+        // toast.error(error);
+      }
+    });
+  };
+
+  const incrementValue = (e) => {
+    e.preventDefault();
+    setQuantity((prevQuantity) => prevQuantity + 1);
+  };
+
+  const decrementValue = (e) => {
+    e.preventDefault();
+    setQuantity((prevQuantity) => (prevQuantity > 1 ? prevQuantity - 1 : 1));
+  };
+
   return (
     <>
       <section class="text-gray-600 body-font overflow-hidden">
@@ -341,12 +384,14 @@ const Detail = ({ product }) => {
                   : variation?.regular_price}
               </p>
               <p class="leading-relaxed border-b-2 border-gray-100 pb-3">
-                {variation?.description}
+                <div
+                  dangerouslySetInnerHTML={{ __html: variation?.description }}
+                ></div>
               </p>
               <div class="leading-relaxed border-b-2 border-gray-100 py-3">
                 <p class="leading-relaxed pb-3">
                   Making Charges :<span> AED </span>
-                  {makingC}
+                  {makingC ? makingC : 0}
                 </p>
                 <p class="leading-relaxed pb-3">
                   Other Charges :<span> AED </span>
@@ -354,10 +399,14 @@ const Detail = ({ product }) => {
                 </p>
                 <p class="leading-relaxed pb-3">
                   Value Added Tax :{variation?.vat ? variation?.vat : 0}
+                  <span>&#37;</span>
                 </p>
-                <p class="leading-relaxed">Total Amount :{}</p>
+                <p class="leading-relaxed">
+                  <span> AED </span>
+                  Total Amount :{total_amount}
+                </p>
               </div>
-              <div class="flex mt-6 items-center pb-3 border-b-1 border-gray-100 mb-5">
+              <div class="flex mt-6 items-center border-b-1 border-gray-100">
                 <div class="flex">
                   <span class="mr-3">Color</span>
                   <button class="border-2 border-gray-300 rounded-full w-6 h-6 focus:outline-none"></button>
@@ -390,8 +439,35 @@ const Detail = ({ product }) => {
                   </div>
                 )}
               </div>
+              <div className="flex items-center my-4">
+                <button
+                  type="button"
+                  className="bg-gray-200 font-bold h-7 w-7 flex items-center justify-center"
+                  onClick={decrementValue}
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  step="1"
+                  value={quantity}
+                  name="quantity"
+                  className="border border-gray-300 text-center h-7 w-20"
+                  readOnly
+                />
+                <button
+                  type="button"
+                  className="bg-gray-200 font-bold h-7 w-7 flex items-center justify-center"
+                  onClick={incrementValue}
+                >
+                  +
+                </button>
+              </div>
               <div class="flex justify-between text-xs">
-                <button class="text-black weight-700 bg-[#F0AE11] border-0 py-2 flex-1 px-3 mr-2 focus:outline-none hover:bg-yellow-600 rounded">
+                <button
+                  class="text-black weight-700 bg-[#F0AE11] border-0 py-2 flex-1 px-3 mr-2 focus:outline-none hover:bg-yellow-600 rounded"
+                  onClick={addToCart}
+                >
                   Add to Cart
                 </button>
                 <button class="text-[#F0AE11] bg-white border py-2 px-4 border-[#F0AE11] focus:outline-none hover:bg-yellow-600 rounded">

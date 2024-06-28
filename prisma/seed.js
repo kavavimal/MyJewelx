@@ -140,7 +140,9 @@ async function addCat(category, parent_id = null) {
   });
   // check recursinve
   if (category.children && category.children.length > 0) {
-    addCat(cat, createdCat.category_id)
+    for (const categoryChild of category.children) {
+      addCat(categoryChild, createdCat.category_id)
+    }
   }
 }
 
@@ -173,6 +175,7 @@ async function seed() {
   await seedUsers();
   await seedAttributes();
   await seedCategory();
+  await seedCollection();
 }
 
 // Run the seeding function

@@ -8,6 +8,7 @@ const vendorStoreSchema = z.object({
     .max(20, "To long license number"),
   issued_at: z.string().min(1, "License Issued place required"),
   issued_date: z.string().min(1, "License Issued date required"),
+  expiry_date: z.string().min(1, "License Issued date required"),
   licence_address: z.string().optional(),
   licence_city: z.string().min(1, "License city required"),
   licence_state: z.string().min(1, "License state required"),
@@ -18,6 +19,7 @@ const vendorPaymentInfoSchema = z.object({
   account_name: z.string().min(1, "License Issued date required"),
   account_number: z.string().min(8, "License Issued date required"),
   bank_name: z.string().min(1, "License Issued date required"),
+  routing_number: z.string().min(1, "Routing Number required"),
   bank_iban: z.string().min(1, "License Issued date required"),
   bank_swift_code: z.string().min(1, "License Issued date required"),
   bank_address: z.string().optional(),
@@ -35,6 +37,7 @@ export async function PUT(request, { params }) {
     const license_number = res.get("license_number");
     const issued_at = res.get("issued_at");
     const issued_date = res.get("issued_date");
+    const expiry_date = res.get("expiry_date");
     const licence_address = res.get("licence_address");
     const licence_city = res.get("licence_city");
     const licence_state = res.get("licence_state");
@@ -44,6 +47,7 @@ export async function PUT(request, { params }) {
     const account_number = res.get("account_number");
     const bank_name = res.get("bank_name");
     const bank_iban = res.get("bank_iban");
+    const routing_number = res.get("routing_number");
     const bank_swift_code = res.get("bank_swift_code");
     const bank_address = res.get("bank_address");
     const bank_city = res.get("bank_city");
@@ -55,6 +59,7 @@ export async function PUT(request, { params }) {
       vendorUpdateData = vendorStoreSchema.parse({
         issued_at,
         issued_date,
+        expiry_date,
         license_number,
         licence_address,
         licence_city,
@@ -68,6 +73,7 @@ export async function PUT(request, { params }) {
         account_number,
         bank_name,
         bank_iban,
+        routing_number,
         bank_swift_code,
         bank_address,
         bank_city,

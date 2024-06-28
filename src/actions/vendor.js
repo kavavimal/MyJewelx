@@ -1,0 +1,21 @@
+"use server";
+import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+
+export const changeVendorStatus = async (id, status) => {
+  try {
+    const vendor = await prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        status: status,
+      },
+    });
+    revalidatePath("/");
+    return vendor;
+  } catch (e) {
+    console.log(e);
+    return e;
+  }
+};

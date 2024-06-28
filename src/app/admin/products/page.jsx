@@ -5,8 +5,8 @@ import { checkUserSession } from "@/app/(frontend)/layout";
 
 export const revalidate = 0;
 
-const getProducts = async () => {
-  const user = await checkUserSession();
+const user = await checkUserSession();
+const getProducts = () => {
   try {
     if (user.role.role_name !== "ADMIN") {
       return prisma.product.findMany({

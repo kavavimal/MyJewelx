@@ -12,7 +12,6 @@ const DataTable = dynamic(() => import("react-data-table-component"), {
 });
 import { useRouter } from "next/navigation";
 import DeletePattern from "./DeletePattern";
-import dynamic from "next/dynamic";
 
 const PatternForm = ({ patterns }) => {
   const router = useRouter();

@@ -587,7 +587,7 @@ export default function Form({ type }) {
               <Typography className="font-emirates text-sm text-gray-700">
                 By proceeding next, you are agree with the my jewlex Term of use
                 and{" "}
-                <Link href="#" className="text-primary-200">
+                <Link href="/" className="text-primary-200">
                   Privacy Policy
                 </Link>
               </Typography>

@@ -34,6 +34,7 @@ model User {
   updatedAt    DateTime   @updatedAt
   // image        String?
   account_type AcountType @default(CUSTOMER)
+  status       UserStatus @default(ACTIVE)
   role_id      Int
   phone_number String?
   otp          String?
@@ -110,6 +111,7 @@ model Vendor {
   license_number   String?   @unique
   issued_at        String?
   issued_date      DateTime?
+  expiry_date      DateTime?
   licence_address  String?
   licence_city     String?
   licence_state    String?
@@ -118,6 +120,7 @@ model Vendor {
   account_name     String?
   account_number   String?   @unique
   bank_name        String?
+  routing_number   String?
   bank_iban        String?
   bank_swift_code  String?
   bank_address     String?
@@ -355,12 +358,14 @@ model ProductVariation {
   other_charges             String?
   regular_price             Float
   selling_price             Float?
+  isDiscount                Boolean                     @default(false)
+  variation_discount        Float?
+  variation_discount_type   Int?
   product                   Product                     @relation(fields: [product_id], references: [product_id], onDelete: Cascade)
   productAttributeValues    ProductVariationAttribute[]
   cartItems                 CartItem[]
   gemstoneProductVariations GemstoneProductVariation[]
   image                     Image[]
-
 }
 
 model Image {
@@ -441,6 +446,11 @@ enum AcountType {
   CUSTOMER
   ADMIN
   VENDOR
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
 }
 
 enum ProductStatus {

@@ -336,9 +336,9 @@ const ProductForm = ({
     (a) => a.label !== "Material"
   );
 
-  if (materialAttribute) {
-    productAttributesOptions = [materialAttribute, ...otherAttributes];
-  }
+  // if (materialAttribute) {
+  //   productAttributesOptions = [materialAttribute, ...otherAttributes];
+  // }
 
   const gendersOptions = genders?.map((gender) => ({
     value: gender?.gender_id,
@@ -1112,7 +1112,10 @@ const ProductForm = ({
                         return (
                           a.attribute_id !== attributeIDs.GOLDKARAT &&
                           a.attribute_id !== attributeIDs.SIZE_ASIAN &&
-                          a.attribute_id !== attributeIDs.SIZE_US && currentProduct.attributes.find((pa) => pa.attribute_id === a.attribute_id)
+                          a.attribute_id !== attributeIDs.SIZE_US &&
+                          currentProduct?.attributes?.find(
+                            (pa) => pa.attribute_id === a.attribute_id
+                          )
                         );
                       })
                       .map((productAttribute, index) => {

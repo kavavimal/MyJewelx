@@ -6,6 +6,7 @@ import React, { useState } from "react";
 
 export default function ProfileMenu() {
   const { data: session, status } = useSession();
+  console.log(useSession());
   const [visible, setVisible] = useState(false);
   return (
     <>
@@ -66,7 +67,7 @@ export default function ProfileMenu() {
                     </li>
                     <li>
                       <Link
-                        href="#"
+                        href="/profile"
                         className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                       >
                         Profile
@@ -86,7 +87,7 @@ export default function ProfileMenu() {
             </>
           ) : (
             <li>
-              <Link href="/login" aria-current="page">
+              <Link href="/login">
                 <Button
                   className="rounded text-primary-200 border-primary-200 font-emirates"
                   variant="text"

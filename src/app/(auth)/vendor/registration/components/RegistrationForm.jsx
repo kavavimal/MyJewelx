@@ -1,14 +1,14 @@
 "use client";
-import { post } from "@/utils/api";
 import { VENDOR_ID } from "@/utils/constants";
 import { Button, Input, Typography } from "@material-tailwind/react";
 import { Form, Formik, useFormik } from "formik";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { enqueueSnackbar } from "notistack";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import * as Yup from "yup";
 import OTP from "./OTP";
+import { isCompanyEmail } from "company-email-validator";
 
 const RegistrationForm = () => {
   const router = useRouter();
@@ -23,7 +23,10 @@ const RegistrationForm = () => {
       .required("Store URL is required"),
     email: Yup.string()
       .email("Invalid email")
-      .required("Store Email is required"),
+      .required("Store Email is required")
+      .test("is-company-email", "Invalid email", async (value) =>
+        isCompanyEmail(value)
+      ),
     phone_number: Yup.string().required("Mobile Number is required"),
     password: Yup.string()
       .min(8, "Password must have 8 characters")
@@ -49,7 +52,7 @@ const RegistrationForm = () => {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
-        const response = await fetch("/api/auth/otp/resend", {
+        const response = await fetch("/api/auth/otp/send", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -79,6 +82,7 @@ const RegistrationForm = () => {
             },
           });
           localStorage.setItem("email", values?.email);
+          localStorage.setItem("values", JSON.stringify(values));
           router.push(`?email=${values?.email}`);
         } else if (response.status === 400) {
           enqueueSnackbar("Email Is Already Exist", {

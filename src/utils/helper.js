@@ -1,4 +1,5 @@
 import moment from "moment";
+import { enqueueSnackbar } from "notistack";
 
 export function checkPermission(userPermissions = [], allowPermission = "") {
   return (
@@ -63,4 +64,24 @@ export function formatDateString(dateString) {
   const year = date.format("YY"); // Get two-digit year
 
   return `${day}${getOrdinalSuffix(day)} ${month} ${year}`;
+}
+
+export function showToast(data) {
+  enqueueSnackbar(data.message, {
+    variant: data.variant ? data.variant : "success",
+    preventDuplicates: true,
+    anchorOrigin: {
+      vertical: "top",
+      horizontal: "right",
+    },
+    autoHideDuration: 3000,
+    style: {
+      background: "white",
+      color: "black",
+      borderRadius: ".5rem",
+      boxShadow:
+        "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+      padding: "0 4px",
+    },
+  });
 }

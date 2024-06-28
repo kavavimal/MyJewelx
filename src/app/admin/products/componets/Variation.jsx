@@ -722,6 +722,12 @@ const Variation = ({
                         onBlur={formik.handleBlur}
                         error={formik.errors.sku && formik.touched.sku}
                       />
+
+                      {formik.errors.sku && formik.touched.sku && (
+                        <p className="text-red-500 text-xs">
+                          {formik.errors.sku}
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -754,7 +760,7 @@ const Variation = ({
 
                       {formik.errors.description &&
                         formik.touched.description && (
-                          <p className="text-red-500">
+                          <p className="text-red-500 text-xs">
                             {formik.errors.description}
                           </p>
                         )}
@@ -1112,6 +1118,12 @@ const Variation = ({
                                 formik.touched.making_charge
                               }
                             />
+                            {formik.errors.making_charge &&
+                              formik.touched.making_charge && (
+                                <p className="text-red-500 text-xs">
+                                  {formik.errors.making_charge}
+                                </p>
+                              )}
                           </div>
                         </div>
                       </>
@@ -1543,7 +1555,7 @@ const Variation = ({
                                 height={100}
                                 src={url}
                                 alt={`Preview ${i}`}
-                                className="w-20 h-20 transition-all duration-300 rounded-lg"
+                                className="w-36 h-36 transition-all duration-300 rounded-lg"
                               />
                             </div>
                           ))}

@@ -10,6 +10,9 @@ const productVariationSchema = z.object({
   variation_name: z.string().min(1, "variation_name required").max(100),
   regular_price: z.number(),
   selling_price: z.number().optional(),
+  isDiscount: z.boolean(),
+  variation_discount: z.number().optional().nullable(),
+  variation_discount_type: z.number().optional().nullable(),
   description: z.string().min(1, "description required").max(200),
   sku: z.string().min(1, "sku required").max(20),
   stock_management: z.boolean(),
@@ -31,6 +34,8 @@ export async function POST(request) {
   try {
     const req = await request.formData();
 
+    const isDiscount = req.get("isDiscount") === "true" ? true : false;
+
     const variationData = {
       product_id: Number(req.get("product_id")),
       productAttributeValue_id: req
@@ -41,6 +46,9 @@ export async function POST(request) {
       variation_name: req.get("variation_name"),
       regular_price: Number(req.get("regular_price")),
       selling_price: Number(req.get("selling_price")),
+      isDiscount: isDiscount,
+      variation_discount: isDiscount ? Number(req.get("variation_discount")) : null,
+      variation_discount_type: isDiscount ? Number(req.get("variation_discount_type")) : null,
       description: req.get("description"),
       stock_management: req.get("stock_management") === "true" ? true : false,
       stock_status: req.get("stock_status") === "true" ? true : false,
@@ -122,6 +130,9 @@ export async function POST(request) {
         ? parsedVariation.selling_price
         : null,
       description: parsedVariation.description,
+      isDiscount: parsedVariation.isDiscount,
+      variation_discount: parsedVariation.variation_discount,
+      variation_discount_type: parsedVariation.variation_discount_type,
       sku: parsedVariation.sku,
       stock_management: parsedVariation.stock_management,
       stock_status: parsedVariation.stock_status,

@@ -1,8 +1,19 @@
 "use client";
-import { Button, IconButton } from "@material-tailwind/react";
+import { changeVendorStatus } from "@/actions/vendor";
+import {
+  Button,
+  Chip,
+  IconButton,
+  Option,
+  Switch,
+} from "@material-tailwind/react";
+import { UserStatus } from "@prisma/client";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import DataTable from "react-data-table-component";
+import React from "react";
+const DataTable = dynamic(() => import("react-data-table-component"), {
+  ssr: false,
+});
 
 const Vendors = ({ vendors }) => {
   const columns = [
@@ -21,6 +32,26 @@ const Vendors = ({ vendors }) => {
     {
       name: "Vendor Role",
       selector: (row) => row?.role?.role_name,
+    },
+    {
+      name: "Status",
+      cell: (row) => {
+        const isActive = row.status === UserStatus.ACTIVE;
+        return (
+          <Switch
+            value={row.status}
+            checked={isActive}
+            label={row.status}
+            ripple={false}
+            onChange={() =>
+              changeVendorStatus(
+                row.id,
+                isActive ? UserStatus.DISABLED : UserStatus.ACTIVE
+              )
+            }
+          />
+        );
+      },
     },
     // {
     //   name: "Actions",
@@ -75,7 +106,13 @@ const Vendors = ({ vendors }) => {
           </Button>
         </Link>
       </div>
-      <DataTable data={vendors} columns={columns} highlightOnHover />
+      <DataTable
+        data={vendors}
+        columns={columns}
+        highlightOnHover
+        pagination
+        pointerOnHover
+      />
     </>
   );
 };

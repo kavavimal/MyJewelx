@@ -162,7 +162,7 @@ export default function ProductVariationsStepWrap({ product_id, pricing }) {
     <div className="p-7 shadow-3xl rounded-2xl bg-white">
       <div className="mb-6">
         <h3 className="text-xl font-medium tracking-wide">
-          Product Details :{" "}
+          Product Details :{productData?.product_name ?? ""}
           {isLoading ? (
             <div className="flex justify-center items-center h-32">
               <LoadingDots size="6" />{" "}
@@ -170,7 +170,6 @@ export default function ProductVariationsStepWrap({ product_id, pricing }) {
           ) : (
             ""
           )}
-          {productData?.product_name ?? ""}
         </h3>
       </div>
       {!isLoading && productAttributeValueData ? (

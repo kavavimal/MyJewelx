@@ -22,6 +22,7 @@ export const checkUserSession = async () => {
             role_name: true,
           },
         },
+        vendor: true,
       },
     });
     return user;
@@ -33,17 +34,17 @@ export default async function RootLayout({ children }) {
   const user = await checkUserSession();
 
   return (
-        <Suspense
-          fallback={
-            <div className="fixed h-full w-full flex item-center justify-center bg-gray-400/[.5]  top-0 left-0 z-40">
-              <LoadingDots color="#808080" size="15px" />
-            </div>
-          }
-        >
-          <FrontendHeader />
-          {/* <Header user={user} /> */}
-          {children}
-          {/* <Footer /> */}
-        </Suspense>
+    <Suspense
+      fallback={
+        <div className="fixed h-full w-full flex item-center justify-center bg-gray-400/[.5]  top-0 left-0 z-40">
+          <LoadingDots color="#808080" size="15px" />
+        </div>
+      }
+    >
+      <FrontendHeader />
+      {/* <Header user={user} /> */}
+      {children}
+      {/* <Footer /> */}
+    </Suspense>
   );
 }

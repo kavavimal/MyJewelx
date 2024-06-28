@@ -6,6 +6,10 @@
   font-family: "emirates";
   src: url("../.././public/assets/fonts/Emirates-Medium.woff") format("woff");
 }
+@font-face {
+  font-family: "playfairdisplay";
+  src: url("../.././public/assets/fonts/PlayfairDisplay-Bold.ttf") format("ttf");
+}
 
 .rdt_TableHeadRow {
   @apply text-base font-semibold;

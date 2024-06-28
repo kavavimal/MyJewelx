@@ -88,21 +88,21 @@ export async function PUT(request, { params }) {
     const discount = cart.discount;
     const discount_type = cart.discount_type;
 
-    let cart_total = cart.cart_total;
-    let previous_item_total = cartItem.price * cartItem.quantity;
-    let item_total = price * quantity;
-    if (discount === "percentage") {
-      item_total = item_total + (item_total * discount) / 100;
-      previous_item_total =
-        previous_item_total + (previous_item_total * discount) / 100;
-    } else {
-      item_total = item_total + discount;
-      previous_item_total = previous_item_total + discount;
-    }
+    // let cart_total = cart.cart_total;
+    // let previous_item_total = cartItem.price * cartItem.quantity;
+    // let item_total = price * quantity;
+    // if (discount === "percentage") {
+    //   item_total = item_total + (item_total * discount) / 100;
+    //   previous_item_total =
+    //     previous_item_total + (previous_item_total * discount) / 100;
+    // } else {
+    //   item_total = item_total + discount;
+    //   previous_item_total = previous_item_total + discount;
+    // }
 
-    cart_total = Number(
-      (cart_total + item_total - previous_item_total).toFixed(2)
-    );
+    // cart_total = Number(
+    //   (cart_total + item_total - previous_item_total).toFixed(2)
+    // );
 
     const cartItemData = cartItemSchema.parse({
       cart_id,
@@ -113,8 +113,25 @@ export async function PUT(request, { params }) {
 
     const updateCartItem = await prisma.cartItem.update({
       where: { cartItem_id },
-      data: cartItemData,
+      data: {
+        price: cartItemData.price,
+        quantity: cartItemData.quantity,
+      },
     });
+
+    const cartItems = await prisma.cartItem.findMany({
+      where: { cart_id: cartItem.cart_id },
+    });
+
+    let cart_total = cartItems.reduce((total, item) => {
+      let item_total = item.price * item.quantity;
+      if (discount_type === "percentage") {
+        item_total = item_total - (item_total * discount) / 100;
+      } else {
+        item_total = item_total - discount;
+      }
+      return total + item_total;
+    }, 0);
 
     const cartData = cartSchema.parse({
       user_id,
@@ -124,8 +141,12 @@ export async function PUT(request, { params }) {
     });
 
     const updateCart = await prisma.cart.update({
-      where: { cart_id: cart.cart_id },
-      data: cartData,
+      where: { cart_id: cartItemData.cart_id },
+      data: {
+        cart_total: cartData.cart_total,
+        discount: cartData.discount,
+        discount_type: cartData.discount_type,
+      },
     });
 
     return NextResponse.json(
@@ -170,17 +191,24 @@ export async function DELETE(request, { params }) {
     const user_id = user.id;
     const discount = cart.discount;
     const discount_type = cart.discount_type;
-    let cart_total = cart.cart_total;
-    let item_total = cartItem.price * cartItem.quantity;
-    if (discount === "percentage") {
-      item_total = item_total - (item_total * discount) / 100;
-    } else item_total = item_total - discount;
-
-    cart_total = Number((cart_total - item_total).toFixed(2));
 
     const deletedCartItem = await prisma.cartItem.delete({
       where: { cartItem_id },
     });
+
+    const cartItems = await prisma.cartItem.findMany({
+      where: { cart_id: cartItem.cart_id },
+    });
+
+    let cart_total = cartItems.reduce((total, item) => {
+      let item_total = item.price * item.quantity;
+      if (discount_type === "percentage") {
+        item_total = item_total - (item_total * discount) / 100;
+      } else {
+        item_total = item_total - discount;
+      }
+      return total + item_total;
+    }, 0);
 
     const cartData = cartSchema.parse({
       user_id,
@@ -191,7 +219,11 @@ export async function DELETE(request, { params }) {
 
     const updateCart = await prisma.cart.update({
       where: { cart_id: cartItem.cart_id },
-      data: cartData,
+      data: {
+        cart_total: cartData.cart_total,
+        discount: cartData.discount,
+        discount_type: cartData.discount_type,
+      },
     });
 
     return NextResponse.json(
@@ -215,96 +247,3 @@ export async function DELETE(request, { params }) {
     );
   }
 }
-
-// import prisma from "@/lib/prisma";
-// import { NextResponse } from "next/server";
-// import { z } from "zod";
-
-// const cartItemSchema = z.object({
-//   cart_id: z.number().min(1, "cart_id required"),
-//   variation_id: z.number().min(1, "variation_id required"),
-//   price: z.number().min(1, "price required"),
-//   quantity: z.number().min(1, "quantity required"),
-// });
-
-// export async function PUT(request, { params }) {
-//   try {
-//     const cartItem_id = Number(params.id);
-//     const res = await request.formData();
-
-//     const cartItem = prisma.cartItem.findUnique({
-//       where: { cartItem_id },
-//     });
-
-//     if (!cartItem) {
-//       return NextResponse.json(
-//         { error: "CartItem not found, try adding new Item." },
-//         { status: 400 }
-//       );
-//     }
-
-//     const cart_id = res.get("cart_id");
-//     const variation_id = res.get("variation_id");
-//     const price = res.get("price");
-//     const quantity = res.get("quantity");
-
-//     const cartItemData = cartItemSchema.parse({
-//       cart_id,
-//       variation_id,
-//       price,
-//       quantity,
-//     });
-
-//     const updateCartItem = await prisma.cartItem.update({
-//       where: { cartItem },
-//       data: cartItemData,
-//     });
-
-//     return NextResponse.json(
-//       { message: "User cartItem updated  successfully", updateCartItem },
-//       { status: 201 }
-//     );
-//   } catch (error) {
-//     if (error.name === "ZodError") {
-//       return NextResponse.json(
-//         { error: "Validation Error", issues: error.errors },
-//         { status: 400 }
-//       );
-//     }
-//     NextResponse.json({ error: "Internal server error" }, { status: 500 });
-//   }
-// }
-
-// export async function DELETE(request, { params }) {
-//   try {
-//     const cartItem_id = Number(params.id);
-
-//     const cartItem = await prisma.cartItem.findUnique({
-//       where: { cartItem_id },
-//     });
-
-//     if (!cartItem) {
-//       return NextResponse.json(
-//         { error: "Couldn't find the cartItem" },
-//         { status: 500 }
-//       );
-//     }
-
-//     const deletedCartItem = await prisma.cartItem.delete({
-//       where: { cartItem },
-//     });
-
-//     return NextResponse.json(
-//       {
-//         message: "cartItem removed from cart successfully",
-//         cartItem,
-//       },
-//       { status: 201 }
-//     );
-//   } catch (error) {
-//     return NextResponse.json(
-//       { error: "Internal server Error", e: error },
-//       { status: 500 }
-//     );
-//   }
-// }

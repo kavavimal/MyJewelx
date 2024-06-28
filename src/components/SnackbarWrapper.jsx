@@ -39,6 +39,8 @@ const SnackbarWrapper = ({ children }) => {
           </div>
         ),
       }}
+      // SnackbarProps={{
+      // }}
     >
       {children}
     </SnackbarProvider>

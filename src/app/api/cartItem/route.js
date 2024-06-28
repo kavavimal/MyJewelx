@@ -64,7 +64,7 @@ export async function POST(request) {
       : variation.regular_price;
 
     // const price = res.get("price");
-    const quantity = Number(res.get("quantity"));
+    let quantity = Number(res.get("quantity"));
     const discount = parseFloat(res.get("discount") ? res.get("discount") : 0);
     console.log("discount", discount);
     const discount_type = res.get("discount_type")
@@ -77,9 +77,10 @@ export async function POST(request) {
 
     if (!cart) {
       let cart_total = 0;
+      let item_total = price * quantity;
       if (discount === "percentage") {
-        cart_total = cart_total - (price * quantity * discount) / 100;
-      } else cart_total = cart_total + price * quantity - discount;
+        cart_total = cart_total + item_total - (item_total * discount) / 100;
+      } else cart_total = cart_total + item_total - discount;
       const cartData = cartSchema.parse({
         user_id,
         cart_total,
@@ -119,17 +120,15 @@ export async function POST(request) {
         { status: 201 }
       );
     } else {
-      let cart_total = cart.cart_total;
-      console.log("cart_total", cart_total);
+      // let cart_total = cart.cart_total;
+
       let item_total = price * quantity;
-      console.log("item_total", item_total);
+
       if (discount_type === "percentage") {
         item_total = item_total - (item_total * discount) / 100;
       } else item_total = item_total - discount;
-      console.log("item_total", item_total);
-      
-      cart_total = Number((cart_total + item_total).toFixed(2));
-      console.log("cart_total", cart_total);
+
+      // cart_total = Number((cart_total + item_total).toFixed(2));
       let cart_id = cart.cart_id;
 
       const cartWithCartItem = await prisma.cartItem.findFirst({
@@ -137,18 +136,53 @@ export async function POST(request) {
       });
 
       if (cartWithCartItem) {
+        quantity = Number(cartWithCartItem.quantity) + quantity;
+
+        const cartItemData = cartItemSchema.parse({
+          cart_id,
+          variation_id,
+          price,
+          quantity,
+        });
+
+        const cartItem = await prisma.cartItem.update({
+          where: { cartItem_id: cartWithCartItem.cartItem_id },
+          data: {
+            quantity: quantity,
+          },
+        });
+
+        const cartItems = await prisma.cartItem.findMany({
+          where: { cart_id: cartItem.cart_id },
+        });
+
+        let cart_total = cartItems.reduce((total, item) => {
+          let item_total = item.price * item.quantity;
+          if (discount_type === "percentage") {
+            item_total = item_total - (item_total * discount) / 100;
+          } else {
+            item_total = item_total - discount;
+          }
+          return total + item_total;
+        }, 0);
+
+        const cartData = cartSchema.parse({
+          user_id,
+          cart_total,
+          discount,
+          discount_type,
+        });
+
+        const updateCart = await prisma.cart.update({
+          where: { cart_id: cartItemData.cart_id },
+          data: cartData,
+        });
+
         return NextResponse.json(
-          { error: "This product variation is already added" },
-          { status: 400 }
+          { message: "Cart Item updated successfully", cartItem },
+          { status: 201 }
         );
       }
-
-      const cartData = cartSchema.parse({
-        user_id,
-        cart_total,
-        discount,
-        discount_type,
-      });
 
       const cartItemData = cartItemSchema.parse({
         cart_id,
@@ -158,12 +192,46 @@ export async function POST(request) {
       });
 
       const cartItem = await prisma.cartItem.create({
-        data: cartItemData,
+        data: {
+          cart: {
+            connect: { cart_id: cartItemData.cart_id },
+          },
+          productVariation: {
+            connect: { variation_id: cartItemData.variation_id },
+          },
+          price: cartItemData.price,
+          quantity: cartItemData.quantity,
+        },
+      });
+
+      const cartItems = await prisma.cartItem.findMany({
+        where: { cart_id: cartItem.cart_id },
+      });
+
+      let cart_total = cartItems.reduce((total, item) => {
+        let item_total = item.price * item.quantity;
+        if (discount_type === "percentage") {
+          item_total = item_total - (item_total * discount) / 100;
+        } else {
+          item_total = item_total - discount;
+        }
+        return total + item_total;
+      }, 0);
+
+      const cartData = cartSchema.parse({
+        user_id,
+        cart_total,
+        discount,
+        discount_type,
       });
 
       const updateCart = await prisma.cart.update({
-        where : {cart_id : cartItemData.cart_id},
-        data: cartData,
+        where: { cart_id: cartItemData.cart_id },
+        data: {
+          cart_total: cartData.cart_total,
+          discount: cartData.discount,
+          discount_type: cartData.discount_type,
+        },
       });
 
       return NextResponse.json(
@@ -185,49 +253,3 @@ export async function POST(request) {
     );
   }
 }
-
-// import prisma from "@/lib/prisma";
-// import { NextResponse } from "next/server";
-// import { z } from "zod";
-
-// const cartItemSchema = z.object({
-//   cart_id: z.number().min(1, "cart_id required"),
-//   variation_id: z.number().min(1, "variation_id required"),
-//   price: z.number().min(1, "price required"),
-//   quantity: z.number().min(1, "quantity required"),
-// });
-
-// export async function POST(request) {
-//   try {
-//     const res = await request.formData();
-
-//     const cart_id = res.get("cart_id");
-//     const variation_id = res.get("variation_id");
-//     const price = res.get("price");
-//     const quantity = res.get("quantity");
-
-//     const cartItemData = cartItemSchema.parse({
-//       cart_id,
-//       variation_id,
-//       price,
-//       quantity,
-//     });
-
-//     const cart = await prisma.cart.create({
-//       data: cartItemData,
-//     });
-
-//     return NextResponse.json(
-//       { message: "Customer user shopping cart created successfully", cart },
-//       { status: 201 }
-//     );
-//   } catch (error) {
-//     if (error.name === "ZodError") {
-//       return NextResponse.json(
-//         { error: "Validation Error", issues: error.errors },
-//         { status: 400 }
-//       );
-//     }
-//     NextResponse.json({ error: "Internal server error" }, { status: 500 });
-//   }
-// }
