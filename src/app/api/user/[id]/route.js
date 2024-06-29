@@ -30,41 +30,6 @@ export async function PUT(request, { params }) {
       updateData.lastName = req.get("lastName");
     }
 
-    // if (
-    //   typeof file === "object" &&
-    //   file !== "" &&
-    //   file !== undefined &&
-    //   file !== null
-    // ) {
-    //   const timestamp = Date.now();
-    //   const bytes = await file.arrayBuffer();
-    //   const buffer = Buffer.from(bytes);
-    //   const path = join(
-    //     process.cwd(),
-    //     "/public/assets/uploads",
-    //     timestamp + "_" + file.name
-    //   );
-    //   await writeFile(path, buffer);
-
-    //   profileImage = "/assets/uploads/" + timestamp + "_" + file.name;
-    // }
-
-    // if (profileImage) {
-    //   updateData.image = {
-    //     update: {
-    //       path: profileImage,
-    //       image_type: "user",
-    //     },
-    //   };
-    // } else {
-    //   updateData.image = {
-    //     create: {
-    //       path: profileImage,
-    //       image_type: "user",
-    //     },
-    //   };
-    // }
-
     let user_image;
 
     if (file) {
@@ -81,7 +46,11 @@ export async function PUT(request, { params }) {
       user_image = `/assets/uploads/${updateData.firstName}_${file.name}`;
 
       if (existingUser.image?.path) {
-        const oldFilePath = join(process.cwd(), "public", existingUser.image.path);
+        const oldFilePath = join(
+          process.cwd(),
+          "public",
+          existingUser.image.path
+        );
         try {
           await unlink(oldFilePath);
           console.log(`Successfully deleted ${oldFilePath}`);
@@ -131,6 +100,48 @@ export async function PUT(request, { params }) {
       data: { ...updateData },
     });
 
+    const vendorData = {};
+
+    if (
+      typeof req.get("store_name") === "string" &&
+      req.get("store_name") !== ""
+    ) {
+      vendorData.store_name = req.get("store_name");
+    }
+    if (
+      typeof req.get("store_url") === "string" &&
+      req.get("store_url") !== ""
+    ) {
+      const store_url = req.get("store_url");
+      const existing_store_url = await prisma.vendor.findUnique({
+        where: {
+          store_url: store_url,
+          NOT: {
+            user_id: String(params.id),
+          },
+        },
+      });
+
+      if (existing_store_url) {
+        return NextResponse.json(
+          { error: "A user already created with a similar store_url." },
+          { status: 400 }
+        );
+      } else {
+        vendorData.store_url = store_url;
+      }
+    }
+
+    if (Object.keys(vendorData).length > 0) {
+      await prisma.vendor.update({
+        where: { user_id: String(params.id) },
+        data: vendorData,
+      });
+
+      result.store_name = vendorData.store_name;
+      result.store_url = vendorData.store_url;
+    }
+
     return NextResponse.json({ result });
   } catch (error) {
     console.error("Error updating User:", error);
@@ -163,11 +174,17 @@ export async function DELETE(request, { params }) {
       });
     }
 
-    // await prisma.image.delete({                     //check if Cascade do the same
-    //   where: { image_id: userImage.image_id },
-    // });
+    const vendorToDelete = await prisma.vendor.findFirst({
+      where: { user_id: userId },
+    });
 
-    const user_image_path = user.image.path;
+    if (vendorToDelete) {
+      await prisma.vendor.delete({
+        where: { user_id: userId },
+      });
+    }
+
+    const user_image_path = user?.image?.path;
     if (user_image_path) {
       const filePath = join(process.cwd(), "public", user_image_path);
       try {
@@ -176,11 +193,6 @@ export async function DELETE(request, { params }) {
       } catch (error) {
         console.error(`Error deleting file ${filePath}:`, error);
       }
-    } else {
-      NextResponse.json(
-        { error: `${user_image_path} image can't be deleted` },
-        { status: 400 }
-      );
     }
 
     const deletedUser = await prisma.user.delete({

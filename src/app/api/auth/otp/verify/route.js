@@ -1,9 +1,23 @@
 import prisma from "@/lib/prisma";
-import { generatePass } from "@/utils/helper";
+// import { generatePass } from "@/utils/helper";
 import { hash } from "bcrypt";
 
 import { NextResponse } from "next/server";
 import * as z from "zod";
+
+function generatePass() {
+  let pass = "";
+  let str =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "abcdefghijklmnopqrstuvwxyz0123456789@#$";
+
+  for (let i = 1; i <= 8; i++) {
+    let char = Math.floor(Math.random() * str.length + 1);
+
+    pass += str.charAt(char);
+  }
+
+  return pass;
+}
 
 const userSchema = z.object({
   email: z.string().optional(),

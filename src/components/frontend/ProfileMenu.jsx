@@ -1,12 +1,12 @@
 "use client";
 import { Button } from "@material-tailwind/react";
+import { UserStatus } from "@prisma/client";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import React, { useState } from "react";
 
 export default function ProfileMenu() {
-  const { data: session, status } = useSession();
-  console.log(useSession());
+  const { data: session, status, data } = useSession();
   const [visible, setVisible] = useState(false);
   return (
     <>
@@ -57,14 +57,16 @@ export default function ProfileMenu() {
                     className="py-2 text-sm text-gray-700 dark:text-gray-400"
                     aria-labelledby="dropdownLargeButton"
                   >
-                    <li>
-                      <Link
-                        href="/admin/dashboard"
-                        className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                      >
-                        Dashboard
-                      </Link>
-                    </li>
+                    {data?.user?.status === UserStatus.ACTIVE && (
+                      <li>
+                        <Link
+                          href="/admin/dashboard"
+                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                        >
+                          Dashboard
+                        </Link>
+                      </li>
+                    )}
                     <li>
                       <Link
                         href="/profile"

@@ -49,6 +49,13 @@ export async function POST(request) {
       },
     };
 
+    if (password !== confirmPassword) {
+      return NextResponse.json(
+        { error: "Password and confirm Password must be same" },
+        { status: 401 }
+      );
+    }
+
     const file = req.get("file");
     let profileImage = "";
 
@@ -82,13 +89,6 @@ export async function POST(request) {
           image_type: "user",
         },
       };
-    }
-
-    if (password !== confirmPassword) {
-      return NextResponse.json(
-        { error: "Password and confirm Password must be same" },
-        { status: 401 }
-      );
     }
 
     const result = await prisma.user.create({

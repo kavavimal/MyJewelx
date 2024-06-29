@@ -2,7 +2,7 @@
 import { getCart, removeFromCart } from "@/actions/cart";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import Quantity from "./cart/Quantiry";
+import Quantity from "./cart/Quantity";
 
 const CartSidebar = () => {
   const [cart, setCart] = useState(false);

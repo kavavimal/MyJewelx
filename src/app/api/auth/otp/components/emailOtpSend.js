@@ -1,6 +1,14 @@
-import { generateOTP } from "@/utils/helper";
+// import { generateOTP } from "@/utils/helper";
 import { mailOptions, transporter } from "@/config/nodemailer";
 import prisma from "@/lib/prisma";
+
+export function generateOTP() {
+  let OTP = "";
+  for (let i = 0; i < 6; i++) {
+    OTP += Math.floor(Math.random() * 10);
+  }
+  return OTP;
+}
 
 export default async function emailOtpSend(
   email,
@@ -22,14 +30,10 @@ export default async function emailOtpSend(
     } else if (mode === "forgotPassword") {
       stringData = `Your ${
         otpResend ? "new" : ""
-      } One time Password for resetting your password is: <h3 class="form-heading" align="left">${
-        otp
-      }</h3>`;
+      } One time Password for resetting your password is: <h3 class="form-heading" align="left">${otp}</h3>`;
       htmlData = `Your ${
         otpResend ? "new" : ""
-      } One time Password for resetting your password is: <h3 class="form-heading" align="left">${
-        otp
-      }</h3>`;
+      } One time Password for resetting your password is: <h3 class="form-heading" align="left">${otp}</h3>`;
     }
 
     return {
@@ -55,7 +59,11 @@ export default async function emailOtpSend(
         ...mailOptions,
         to: email,
         ...generateEmailContent(otp, mode, otpResend),
-        subject: `${mode === "registration" ? "Resend Registration OTP" : "Resend Reset-Password OTP"}`,
+        subject: `${
+          mode === "registration"
+            ? "Resend Registration OTP"
+            : "Resend Reset-Password OTP"
+        }`,
       });
     } else {
       await prisma.otpVerification.update({
@@ -71,7 +79,11 @@ export default async function emailOtpSend(
         ...mailOptions,
         to: email,
         ...generateEmailContent(otp, mode, otpResend),
-        subject: `${mode === "registration" ? "Resend Registration OTP" : "Resend Reset-Password OTP"}`,
+        subject: `${
+          mode === "registration"
+            ? "Resend Registration OTP"
+            : "Resend Reset-Password OTP"
+        }`,
       });
     }
   } else {
@@ -83,7 +95,7 @@ export default async function emailOtpSend(
     if (exists) {
       await prisma.otpVerification.update({
         where: {
-          email
+          email,
         },
         data: {
           email: email,
@@ -105,8 +117,10 @@ export default async function emailOtpSend(
     await transporter.sendMail({
       ...mailOptions,
       to: email,
-      ...generateEmailContent( otp, mode, otpResend ),
-      subject: `${mode === "registration" ? "Registration OTP" : "Reset Password OTP"}`,
+      ...generateEmailContent(otp, mode, otpResend),
+      subject: `${
+        mode === "registration" ? "Registration OTP" : "Reset Password OTP"
+      }`,
     });
   }
 }

@@ -724,7 +724,7 @@ const Variation = ({
                       />
 
                       {formik.errors.sku && formik.touched.sku && (
-                        <p className="text-red-500 text-xs">
+                        <p className="text-red-500 text-xs ">
                           {formik.errors.sku}
                         </p>
                       )}

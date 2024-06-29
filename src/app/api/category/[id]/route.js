@@ -188,7 +188,7 @@ export const DELETE = async (request, { params }) => {
       );
     }
 
-    const category_image_path = category.image.path;
+    const category_image_path = category?.image?.path;
     if (category_image_path) {
       const filePath = join(process.cwd(), "public", category_image_path);
       try {
@@ -197,16 +197,7 @@ export const DELETE = async (request, { params }) => {
       } catch (error) {
         console.error(`Error deleting file ${filePath}:`, error);
       }
-    } else {
-      NextResponse.json(
-        { error: `${category_image_path} image can't be deleted` },
-        { status: 400 }
-      );
     }
-
-    // await prisma.image.delete({                     //check if Cascade do the same
-    //   where: { image_id: userImage.image_id },
-    // });
 
     // Delete the category
     const result = await prisma.category.delete({

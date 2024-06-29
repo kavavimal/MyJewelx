@@ -19,3 +19,11 @@ export const changeVendorStatus = async (id, status) => {
     return e;
   }
 };
+
+export const getStoreURLs = () => {
+  return prisma.vendor.findMany({
+    select: {
+      store_url: true,
+    },
+  });
+};

@@ -192,7 +192,7 @@ export default function UserForm({ roles, user }) {
                 size="lg"
               />
             </div>
-            <div className="w-full col-span-2">
+            <div className="w-full">
               <Select
                 label="Role"
                 size="lg"

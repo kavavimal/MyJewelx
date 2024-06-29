@@ -5,13 +5,17 @@ import { checkUserSession } from "@/app/(frontend)/layout";
 
 export const revalidate = 0;
 
-const user = await checkUserSession();
-const getProducts = () => {
+const getProducts = async () => {
+  const user = await checkUserSession();
   try {
     if (user.role.role_name !== "ADMIN") {
       return prisma.product.findMany({
         include: {
-          user: true,
+          user: {
+            include: {
+              vendor: true,
+            },
+          },
         },
         orderBy: {
           product_id: "desc",
@@ -23,7 +27,11 @@ const getProducts = () => {
     }
     return prisma.product.findMany({
       include: {
-        user: true,
+        user: {
+          include: {
+            vendor: true,
+          },
+        },
       },
       orderBy: {
         product_id: "desc",

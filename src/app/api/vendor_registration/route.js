@@ -1,6 +1,8 @@
 import prisma from "@/lib/prisma";
 import { AcountType, UserStatus } from "@prisma/client";
 import { hash } from "bcrypt";
+import { join } from "path";
+import { writeFile } from "fs/promises";
 import { isCompanyEmail } from "company-email-validator";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -21,18 +23,18 @@ const vendorSchema = z.object({
 
 export async function POST(request) {
   try {
-    const res = await request.formData();
+    const req = await request.formData();
 
     const vendorData = {
-      email: res.get("email"),
-      firstName: res.get("firstName"),
-      lastName: res.get("lastName"),
-      store_name: res.get("store_name"),
-      store_url: res.get("store_url"),
-      phone_number: res.get("phone_number"),
-      role_id: Number(res.get("role_id")),
+      email: req.get("email"),
+      firstName: req.get("firstName"),
+      lastName: req.get("lastName"),
+      store_name: req.get("store_name"),
+      store_url: req.get("store_url"),
+      phone_number: req.get("phone_number"),
+      role_id: Number(req.get("role_id")),
       account_type: AcountType.VENDOR,
-      password: res.get("password"),
+      password: req.get("password"),
     };
 
     const parsedVendorData = vendorSchema.parse(vendorData);
@@ -60,27 +62,73 @@ export async function POST(request) {
       );
     }
 
-    const userResponse = await prisma.user.create({
-      data: {
-        firstName: vendorData.firstName
-          ? String(parsedVendorData.firstName)
-          : "",
-        lastName: vendorData.lastName ? String(parsedVendorData.lastName) : "",
-        email: vendorData.email ? String(parsedVendorData.email) : "",
-        phone_number: vendorData.phone_number
-          ? String(parsedVendorData.phone_number)
-          : "",
-        password: vendorData.password
-          ? await hash(parsedVendorData.password, 10)
-          : "",
-        account_type: parsedVendorData.account_type,
-        status: UserStatus.DISABLED,
-        role: {
-          connect: {
-            role_id: Number(parsedVendorData.role_id),
-          },
+    const existing_store_url = await prisma.vendor.findUnique({
+      where: { store_url: parsedVendorData.store_url },
+    });
+
+    if (existing_store_url) {
+      return NextResponse.json(
+        { error: "An user already Created with similar store_url." },
+        { status: 400 }
+      );
+    }
+
+    const userCreateQuery = {
+      firstName: vendorData.firstName ? String(parsedVendorData.firstName) : "",
+      lastName: vendorData.lastName ? String(parsedVendorData.lastName) : "",
+      email: vendorData.email ? String(parsedVendorData.email) : "",
+      phone_number: vendorData.phone_number
+        ? String(parsedVendorData.phone_number)
+        : "",
+      password: vendorData.password
+        ? await hash(parsedVendorData.password, 10)
+        : "",
+      account_type: parsedVendorData.account_type,
+      status: UserStatus.DISABLED,
+      role: {
+        connect: {
+          role_id: Number(parsedVendorData.role_id),
         },
       },
+    };
+
+    const file = req.get("file");
+    let profileImage = "";
+
+    if (
+      typeof file === "object" &&
+      file !== "" &&
+      file !== undefined &&
+      file !== null
+    ) {
+      const timestamp = Date.now();
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const path = join(
+        process.cwd(),
+        "/public/assets/uploads",
+        timestamp + "_" + file.name
+      );
+      await writeFile(path, buffer);
+      profileImage = "/assets/uploads/" + timestamp + "_" + file.name;
+    } else {
+      return NextResponse.json(
+        { error: "User profile image missing from the request" },
+        { status: 401 }
+      );
+    }
+
+    if (profileImage) {
+      userCreateQuery.image = {
+        create: {
+          path: profileImage,
+          image_type: "user",
+        },
+      };
+    }
+
+    const userResponse = await prisma.user.create({
+      data: userCreateQuery,
     });
 
     if (userResponse && userResponse.id) {

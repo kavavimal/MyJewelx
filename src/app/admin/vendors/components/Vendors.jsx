@@ -11,6 +11,7 @@ import { UserStatus } from "@prisma/client";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import React from "react";
+import DeleteUser from "../../users/components/DeleteUser";
 const DataTable = dynamic(() => import("react-data-table-component"), {
   ssr: false,
 });
@@ -53,35 +54,35 @@ const Vendors = ({ vendors }) => {
         );
       },
     },
-    // {
-    //   name: "Actions",
-    //   cell: (row) => (
-    //     <>
-    //       <Link href={`/admin/vendors/edit/${row.id}`}>
-    //         <IconButton variant="text" className="rounded-full">
-    //           <svg
-    //             xmlns="http://www.w3.org/2000/svg"
-    //             width={18}
-    //             height={18}
-    //             viewBox="0 0 24 24"
-    //           >
-    //             <path
-    //               fill="currentColor"
-    //               d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83l3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"
-    //             ></path>
-    //           </svg>
-    //         </IconButton>
-    //       </Link>
+    {
+      name: "Actions",
+      cell: (row) => (
+        <>
+          <Link href={`/admin/vendors/edit/${row.id}`}>
+            <IconButton variant="text" className="rounded-full">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={18}
+                height={18}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83l3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"
+                ></path>
+              </svg>
+            </IconButton>
+          </Link>
 
-    //       <DeleteUser id={row.id} />
-    //     </>
-    //   ),
-    // },
+          <DeleteUser id={row.id} />
+        </>
+      ),
+    },
   ];
   return (
     <>
       <div className="flex justify-between items-center btn btn-primary mb-10">
-        <h2 className="text-2xl font-semibold ">Users</h2>
+        <h2 className="text-2xl font-semibold ">Vendors</h2>
         <Link
           href="/admin/vendors/add"
           className="flex justify-end btn btn-primary"

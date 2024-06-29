@@ -8,13 +8,6 @@ import moment from "moment";
 import { useRouter } from "next/navigation";
 import { post } from "@/utils/api";
 
-const validationSchema = yup.object({
-  otp: yup
-    .string()
-    .required("OTP is required")
-    .matches(/^\d{6}$/, "Enter a valid 6 digit OTP"),
-});
-
 const OTP = () => {
   const router = useRouter();
   const [remainingTime, setRemainingTime] = useState(60);
@@ -28,6 +21,13 @@ const OTP = () => {
       return () => clearTimeout(timer);
     }
   }, [isCounting, remainingTime]);
+
+  const validationSchema = yup.object({
+    otp: yup
+      .string()
+      .required("OTP is required")
+      .matches(/^\d{6}$/, "Enter a valid 6 digit OTP"),
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -53,8 +53,6 @@ const OTP = () => {
             "/api/vendor_registration",
             JSON.parse(localStorage.getItem("values"))
           );
-
-          console.log(registration);
 
           if (registration.status === 201) {
             enqueueSnackbar("Vendor Registration Success", {

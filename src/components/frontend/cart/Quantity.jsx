@@ -1,10 +1,11 @@
 import { updateCartQuantity } from "@/actions/cart";
 import { showToast } from "@/utils/helper";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const Quantity = ({ cartItem }) => {
   const [quantity, setQuantity] = useState(cartItem.quantity);
   const [isLoading, setIsLoading] = useState(false);
+  const previousQuantity = useRef(cartItem.quantity);
 
   const quantityChange = (type) => {
     setIsLoading(true);
@@ -27,7 +28,10 @@ const Quantity = ({ cartItem }) => {
   }
 
   useEffect(() => {
-    handleQuantity();
+    if (previousQuantity.current !== quantity) {
+      handleQuantity();
+    }
+    previousQuantity.current = quantity;
   }, [quantity]);
 
   return (

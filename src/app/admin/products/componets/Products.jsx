@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Button, Chip, IconButton } from "@material-tailwind/react";
+import { Button, Chip, IconButton, Switch } from "@material-tailwind/react";
 import Link from "next/link";
 const DataTable = dynamic(() => import("react-data-table-component"), {
   ssr: false,
@@ -10,60 +10,45 @@ import { ADMIN_ID, CUSTOMER_ID, VENDOR_ID } from "@/utils/constants";
 import dynamic from "next/dynamic";
 import { ProductStatus } from "@prisma/client";
 import { updateProductStatus } from "@/actions/product";
+
 const Products = ({ products }) => {
-  console.log(products);
   if (typeof window !== "undefined") {
     localStorage.setItem("activeStep", 0);
   }
+  console.log(products);
   const columns = [
     {
       name: "Product Name",
       selector: (row) => row?.product_name,
     },
-    // {
-    //   name: "SKU",
-    //   selector: (row) => row.sku,
-    // },
     {
       name: "Created By",
       selector: (row) => {
-        return `${row?.user?.firstName} ${row?.user?.lastName} (${row?.user?.account_type})`;
+        if (row?.user?.role_id === ADMIN_ID) {
+          return `${row?.user?.firstName} ${row?.user?.lastName} (ADMIN)`;
+        } else if (row?.user?.role_id === VENDOR_ID) {
+          return `${row?.user?.vendor?.store_name} (VENDOR)`;
+        }
       },
     },
     {
       name: "Status",
-      selector: (row) => (
+      cell: (row) => (
         <>
-          <div className="flex justify-between items-center grow">
-            {row?.status}
-            {/* <Chip
-            value={row?.status}
-            size="sm"
-            className="normal-case font-emirates"
-            color="indigo"
-          /> */}
-            {row?.status === ProductStatus.DRAFT && (
-              <Button
-                size="sm"
-                className="w-full"
-                onClick={() =>
-                  updateProductStatus(row.product_id, ProductStatus.PUBLISHED)
-                }
-              >
-                Publish
-              </Button>
-            )}
-            {row?.status === ProductStatus.PUBLISHED && (
-              <Button
-                className="w-1/2"
-                size="sm"
-                onClick={() =>
-                  updateProductStatus(row.product_id, ProductStatus.DRAFT)
-                }
-              >
-                Draft
-              </Button>
-            )}
+          <div className="flex items-center grow">
+            <Switch
+              checked={row.status === ProductStatus.PUBLISHED}
+              label={row.status}
+              ripple={false}
+              onChange={() =>
+                updateProductStatus(
+                  row.product_id,
+                  row.status === ProductStatus.PUBLISHED
+                    ? ProductStatus.DRAFT
+                    : ProductStatus.PUBLISHED
+                )
+              }
+            />
           </div>
         </>
       ),
