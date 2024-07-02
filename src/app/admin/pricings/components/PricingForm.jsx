@@ -323,7 +323,7 @@ const PricingForm = ({ pricing, pricings }) => {
                   className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
                   loading={formik.isSubmitting}
                 >
-                  Add
+                  Update
                 </Button>
               </div>
             </div>

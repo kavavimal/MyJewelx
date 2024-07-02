@@ -33,3 +33,4 @@ export const variation_discount_types = {
   2  : "Per(%) On Metal Rate On Karat",
   3 : "Per Piece / Flat",
 };
+export const CURRENCY_SYMBOL = 'AED';

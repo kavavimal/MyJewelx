@@ -429,7 +429,7 @@ const Sidebar = () => {
       ),
     },
     {
-      name: "Pricings",
+      name: "Daily Metal Rate",
       href: "/admin/pricings",
       permission: "products_view",
       icon: (

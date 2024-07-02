@@ -35,9 +35,11 @@
     "react-select": "^5.8.0",
     "react-slick": "^0.30.2",
     "slick-carousel": "^1.8.1",
+    "uuid": "^10.0.0",
     "use-react-countries": "^2.0.1",
     "yup": "^1.4.0",
-    "zod": "^3.23.5"
+    "zod": "^3.23.5",
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "eslint": "^8",

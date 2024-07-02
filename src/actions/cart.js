@@ -24,11 +24,13 @@ export const getCart = async () => {
     return {
       message: "cart data available",
       cartData,
+      status: "success",
       success: true,
     };
   } catch (e) {
     return {
       message: "Something went wrong",
+      status: "error",
       error: e,
     };
   }
@@ -42,12 +44,13 @@ export const removeFromCart = async (item_id) => {
     return {
       message: "Item Removed from Cart",
       cartData,
-      success: true,
+      status: "success",
     };
   } catch (e) {
     return {
       message: "Something went wrong",
       error: e,
+      status: "error",
     };
   }
 };
@@ -59,16 +62,22 @@ export const updateCartQuantity = async (item_id, quantity) => {
       data: {
         quantity: quantity,
       },
+      include: {
+        productVariation: {
+          include: { product: true },
+        },
+      },
     });
     return {
       message: "Cart item updated successfully",
       cartData,
-      success: true,
+      status: "success",
     };
   } catch (e) {
     return {
       message: "Something went wrong",
       error: e,
+      status: "error",
     };
   }
 };

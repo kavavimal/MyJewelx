@@ -19,7 +19,7 @@ const CountryForm = ({ countries }) => {
       selector: (row) => row?.name,
     },
     {
-      name: "Description",
+      name: "Region",
       selector: (row) => row?.region,
     },
     {

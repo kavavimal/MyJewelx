@@ -1,30 +1,28 @@
 "use client";
-import { getCart, removeFromCart } from "@/actions/cart";
-import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import Quantity from "./cart/Quantity";
+import { useCartStore } from "@/contexts/cartStore";
+import { CURRENCY_SYMBOL } from "@/utils/constants";
+import RemoveCartItem from "./cart/RemoveCartItem";
 
 const CartSidebar = () => {
-  const [cart, setCart] = useState(false);
+  const carts = useCartStore((state) => state);
+  const totalAmount = useCartStore((state) => state.totalAmount());
+
   const [isOpen, setIsOpen] = useState(false);
   const sidebarRef = useRef();
 
   const refreshCart = async () => {
-    const cartData = await getCart();
-    setCart(cartData?.cartData);
+    carts.emptyStore();
+    carts.fetchCart();
   };
   useEffect(() => {
     refreshCart();
   }, []);
+
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
-  };
-
-  const removeItemFromCart = async (id) => {
-    const d = await removeFromCart(id);
-    if (d.status === "success") {
-      refreshCart();
-    }
   };
 
   const handleClickOutside = (event) => {
@@ -48,7 +46,7 @@ const CartSidebar = () => {
     <>
       <button
         onClick={toggleSidebar}
-        className="px-4 py-2 rounded-md flex items-center"
+        className="px-4 py-2 rounded-md flex items-center relative"
       >
         <svg
           width="22"
@@ -62,9 +60,9 @@ const CartSidebar = () => {
             fill="#1A1A1A"
           />
         </svg>
-        {cart && cart?.cartItems.length > 0 && (
-          <span className="ml-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
-            {cart?.cartItems.length}
+        {carts && carts?.cartItems.length > 0 && (
+          <span className="absolute top-0 right-0 w-4 h-4 bg-red-400 text-white font-semibold text-xs rounded-full grid place-content-center">
+            {carts?.count()}
           </span>
         )}
       </button>
@@ -82,10 +80,10 @@ const CartSidebar = () => {
           >
             ×
           </button>
-          {cart && cart?.cartItems?.length > 0 ? (
+          {carts && carts?.cartItems?.length > 0 ? (
             <>
               <ul role="list" class="-my-6 divide-y divide-gray-200">
-                {cart?.cartItems?.map((cartItem) => {
+                {carts?.cartItems?.map((cartItem) => {
                   return (
                     <li class="flex py-6" key={cartItem.id}>
                       <div class="ml-4 flex flex-1 flex-col">
@@ -99,8 +97,8 @@ const CartSidebar = () => {
                                 }
                               </a>
                             </h3>
-                            <p class="ml-4">
-                              {cartItem.productVariation?.selling_price}
+                            <p class="ml-4 w-1/3 text-right">
+                              {CURRENCY_SYMBOL} {cartItem.price}
                             </p>
                           </div>
                           {/* <p class="mt-1 text-sm text-gray-500">vendor</p> */}
@@ -110,15 +108,7 @@ const CartSidebar = () => {
                           {/* <p class="text-gray-500">Qty {cartItem.quantity}</p> */}
 
                           <div class="flex">
-                            <button
-                              type="button"
-                              class="font-medium text-indigo-600 hover:text-indigo-500"
-                              onClick={() =>
-                                removeItemFromCart(cartItem.cartItem_id)
-                              }
-                            >
-                              Remove
-                            </button>
+                            <RemoveCartItem cartItem={cartItem} />
                           </div>
                         </div>
                       </div>
@@ -129,7 +119,9 @@ const CartSidebar = () => {
               <div class="border-t border-gray-200 px-4 py-6 sm:px-6">
                 <div class="flex justify-between text-base font-medium text-gray-900">
                   <p>Subtotal</p>
-                  <p>$262.00</p>
+                  <p>
+                    {CURRENCY_SYMBOL} {totalAmount}
+                  </p>
                 </div>
                 <div class="mt-6 flex">
                   <Link

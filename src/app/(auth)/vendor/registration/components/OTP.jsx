@@ -7,11 +7,14 @@ import * as yup from "yup";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import { post } from "@/utils/api";
+import LoadingDots from "@/components/loading-dots";
+import { showToast } from "@/utils/helper";
 
-const OTP = () => {
+const OTP = ({setShowOtp, onOTPVerified, email}) => {
   const router = useRouter();
   const [remainingTime, setRemainingTime] = useState(60);
   const [isCounting, setIsCounting] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (isCounting && remainingTime > 0) {
@@ -36,84 +39,33 @@ const OTP = () => {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
+        setIsLoading(true);
         const response = await fetch("/api/auth/otp/verify", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: localStorage.getItem("email"),
+            email: email,
             otp: values.otp,
             mode: "registration",
           }),
         });
 
         if (response.status === 201) {
-          let registration = await post(
-            "/api/vendor_registration",
-            JSON.parse(localStorage.getItem("values"))
-          );
-
-          if (registration.status === 201) {
-            enqueueSnackbar("Vendor Registration Success", {
-              variant: "success",
-              preventDuplicates: true,
-              anchorOrigin: {
-                vertical: "top",
-                horizontal: "right",
-              },
-              autoHideDuration: 3000,
-              style: {
-                background: "white",
-                color: "black",
-                borderRadius: ".5rem",
-                boxShadow:
-                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-                padding: "0 4px",
-              },
-            });
+          showToast({message: "OTP Verified successfully, processing your registration", variant: "success"});
+          if(onOTPVerified) {
+            onOTPVerified();
           }
-
-          router.push(`/vendor/details?id=${registration.data?.vendor?.id}`);
-        } else if (registration.status === 500) {
-          enqueueSnackbar("Failed to verify OTP", {
-            variant: "error",
-            preventDuplicates: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
-        } else if (registration.status === 400) {
-          enqueueSnackbar("Invalid OTP", {
-            variant: "error",
-            preventDuplicates: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
+        } else if (response.status === 500) {
+          showToast({message: "Failed to verify OTP", variant: "error"});
+        } else if (response.status === 400) {
+          showToast({message:"Invalid OTP", variant: "error"});
         }
+        setIsLoading(false);
       } catch (error) {
         console.log(error);
+        setIsLoading(false);
       }
     },
   });
@@ -141,7 +93,11 @@ const OTP = () => {
   };
 
   return (
-    <div className="shadow-3xl p-10 bg-white max-w-md w-full rounded border-t-2 border-primary-200">
+    <div className="relative shadow-3xl p-10 bg-white max-w-md w-full rounded border-t-2 border-primary-200">
+      {
+        isLoading && <div className="absolute -top-1 -left-1 bg-white bg-opacity-60 z-10 h-full w-full flex items-center justify-center">
+          <div class="flex items-center"><LoadingDots /></div></div>
+      }
       <div className="mb-10">
         <h4 className="text-2xl font-bold trekking-wide font-emirates mb-6">
           OTP

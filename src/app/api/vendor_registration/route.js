@@ -83,7 +83,7 @@ export async function POST(request) {
       password: vendorData.password
         ? await hash(parsedVendorData.password, 10)
         : "",
-      account_type: parsedVendorData.account_type,
+      account_type: AcountType.VENDOR,
       status: UserStatus.DISABLED,
       role: {
         connect: {
@@ -93,7 +93,6 @@ export async function POST(request) {
     };
 
     const file = req.get("file");
-    let profileImage = "";
 
     if (
       typeof file === "object" &&
@@ -110,15 +109,7 @@ export async function POST(request) {
         timestamp + "_" + file.name
       );
       await writeFile(path, buffer);
-      profileImage = "/assets/uploads/" + timestamp + "_" + file.name;
-    } else {
-      return NextResponse.json(
-        { error: "User profile image missing from the request" },
-        { status: 401 }
-      );
-    }
-
-    if (profileImage) {
+      let profileImage = "/assets/uploads/" + timestamp + "_" + file.name;
       userCreateQuery.image = {
         create: {
           path: profileImage,

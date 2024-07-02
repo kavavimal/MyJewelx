@@ -6,6 +6,7 @@ import DataTable from "react-data-table-component";
 import DeleteUser from "./DeleteUser";
 
 const Users = ({ users }) => {
+  console.log(users);
   const columns = [
     {
       name: "Name",
