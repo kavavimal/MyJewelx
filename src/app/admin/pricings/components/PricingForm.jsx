@@ -160,7 +160,7 @@ const PricingForm = ({ pricing, pricings }) => {
           <form onSubmit={formik.handleSubmit} className=" rounded p-7 mb-4">
             <div className="flex flex-col gap-5">
               <div className="grid items-start grid-cols-3 gap-5">
-                <div class="col-span-3 flex items-center text-sm text-gray-800 after:flex-1 after:border-t after:border-gray-200 after:ms-6 dark:text-white dark:after:border-neutral-600">
+                <div className="col-span-3 flex items-center text-sm text-gray-800 after:flex-1 after:border-t after:border-gray-200 after:ms-6 dark:text-white dark:after:border-neutral-600">
                   Metal
                 </div>
 
@@ -206,7 +206,7 @@ const PricingForm = ({ pricing, pricings }) => {
                   />
                 </div>
 
-                <div class="col-span-3 pt-1  flex items-center text-sm text-gray-800 after:flex-1 after:border-t after:border-gray-200 after:ms-6 dark:text-white dark:after:border-neutral-600">
+                <div className="col-span-3 pt-1  flex items-center text-sm text-gray-800 after:flex-1 after:border-t after:border-gray-200 after:ms-6 dark:text-white dark:after:border-neutral-600">
                   Gold
                 </div>
 

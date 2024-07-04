@@ -6,16 +6,14 @@ import { writeFile } from "fs/promises";
 import { isCompanyEmail } from "company-email-validator";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { sendVendorRegistrationEmail } from "@/lib/sendMails";
 
 const vendorSchema = z.object({
   email: z.string().email("Invalid email format").min(1, "email required"),
   firstName: z.string().min(1, "firstName required").max(20),
   lastName: z.string().min(1, "lastName required").max(20),
   store_name: z.string().min(1, "store_name required"),
-  store_url: z
-    .string()
-    .url({ message: "Invalid url format" })
-    .min(1, "store_url required"),
+  store_url: z.string().optional(),
   phone_number: z.string().min(1, "phone_number required"),
   role_id: z.number(),
   password: z.string().min(1, "password required"),
@@ -50,28 +48,29 @@ export async function POST(request) {
       );
     }
 
-    const isBusinessEmail = isCompanyEmail(parsedVendorData.email);
+    // velidate email for allow business emails only
+    // const isBusinessEmail = isCompanyEmail(parsedVendorData.email);
 
-    if (!isBusinessEmail) {
-      return NextResponse.json(
-        {
-          error: "Error validating business email. It's not a business email",
-          email: parsedVendorData.email,
-        },
-        { status: 400 }
-      );
-    }
+    // if (!isBusinessEmail) {
+    //   return NextResponse.json(
+    //     {
+    //       error: "Error validating business email. It's not a business email",
+    //       email: parsedVendorData.email,
+    //     },
+    //     { status: 400 }
+    //   );
+    // }
 
-    const existing_store_url = await prisma.vendor.findUnique({
-      where: { store_url: parsedVendorData.store_url },
-    });
+    // const existing_store_url = await prisma.vendor.findUnique({
+    //   where: { store_url: parsedVendorData.store_url },
+    // });
 
-    if (existing_store_url) {
-      return NextResponse.json(
-        { error: "An user already Created with similar store_url." },
-        { status: 400 }
-      );
-    }
+    // if (existing_store_url) {
+    //   return NextResponse.json(
+    //     { error: "An user already Created with similar store_url." },
+    //     { status: 400 }
+    //   );
+    // }
 
     const userCreateQuery = {
       firstName: vendorData.firstName ? String(parsedVendorData.firstName) : "",
@@ -132,9 +131,9 @@ export async function POST(request) {
       const vendor = await prisma.vendor.create({
         data: storeData,
       });
-
+      sendVendorRegistrationEmail(userResponse, vendor);
       return NextResponse.json(
-        { message: "vendor registration successful", vendor },
+        { message: "vendor registration successful", vendor, userResponse },
         { status: 201 }
       );
     } else

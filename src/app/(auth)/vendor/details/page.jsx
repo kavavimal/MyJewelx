@@ -1,8 +1,16 @@
 import React from "react";
 import DetailsForm from "./components/DetailsForm";
+import { getAccountNumbers, getLicenseNumbers } from "@/actions/vendor";
 
-const page = () => {
-  return <DetailsForm />;
+const page = async () => {
+  const accountNumbers = await getAccountNumbers();
+  const licenseNumbers = await getLicenseNumbers();
+  return (
+    <DetailsForm
+      accountNumbers={accountNumbers}
+      licenseNumbers={licenseNumbers}
+    />
+  );
 };
 
 export default page;

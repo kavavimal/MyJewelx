@@ -11,12 +11,13 @@ import {
   PopoverContent,
 } from "@material-tailwind/react";
 import { DayPicker } from "react-day-picker";
-import { formatDateString } from "@/utils/helper";
+import { formatDateString, showToast } from "@/utils/helper";
 import { Form, Formik, useFormik } from "formik";
 import { useRouter, useSearchParams } from "next/navigation";
 import { update } from "@/utils/api";
+import * as Yup from "yup";
 
-const StoreSetup = ({ setActiveStep, vendor }) => {
+const StoreSetup = ({ setActiveStep, vendor, licenseNumbers }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const id = vendor ? vendor?.id : searchParams.get("id");
@@ -32,18 +33,63 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
       licence_zip_code: vendor ? vendor.licence_zip_code : "",
       licence_country: vendor ? vendor.licence_country : "",
     },
+
+    validationSchema: Yup.object({
+      license_number: Yup.string()
+        .typeError("License number must be a number")
+        .min(12, "License number must be at least 12 digits")
+        .max(20, "License number must be at least 20 digits")
+        .required("License number is required")
+        .test("unique", "License number already exists", (value) => {
+          if (vendor) {
+            return licenseNumbers
+              .filter(Boolean)
+              .filter(
+                (license) => license?.license_number !== vendor?.license_number
+              )
+              .every((license) => license.license_number !== value);
+          } else {
+            return licenseNumbers
+              .filter(Boolean)
+              .every((license) => license.license_number !== value);
+          }
+        }),
+      issued_at: Yup.string().required("Issued at is required"),
+      issued_date: Yup.date().required("Issued date is required"),
+      expiry_date: Yup.date()
+        .required("Expiry date is required")
+        .min(
+          Yup.ref("issued_date"),
+          "Expiry date must be after the issued date"
+        ),
+      licence_address: Yup.string().required("License address is required"),
+      licence_city: Yup.string().required("License city is required"),
+      licence_state: Yup.string().required("License state is required"),
+      licence_zip_code: Yup.string()
+        .matches(/^[0-9]+$/, "License zip code must be a number")
+        .typeError("License zip code must be a number")
+        .required("License zip code is required"),
+      licence_country: Yup.string().required("License country is required"),
+    }),
     onSubmit: async (values) => {
       try {
         const response = await update(`/api/vendor_registration/${id}`, values);
         if (response.status === 201) {
           if (vendor) {
-            console.log("vendor details updated successfully");
             router.refresh();
+            showToast({
+              message: "Store details updated successfully",
+              variant: "success",
+            });
           } else {
             setActiveStep((curr) => curr + 1);
           }
         }
       } catch (error) {
+        showToast({
+          message: error.message,
+          variant: "error",
+        });
         console.log(error);
       }
     },
@@ -60,7 +106,7 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
 
         <Formik initialValues={formik.initialValues}>
           <Form onSubmit={formik.handleSubmit}>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-6 items-start">
               <div>
                 <Input
                   label="Trade License Number"
@@ -69,7 +115,19 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                   name="license_number"
                   value={formik.values.license_number}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.errors.license_number &&
+                    formik.touched.license_number
+                  }
                 />
+
+                {formik?.errors?.license_number &&
+                  formik?.touched?.license_number && (
+                    <div className="text-red-500 text-xs mt-2 ms-2">
+                      {formik.errors.license_number}
+                    </div>
+                  )}
               </div>
               <div>
                 <Input
@@ -78,8 +136,18 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                   size="lg"
                   name="issued_at"
                   value={formik.values.issued_at}
-                  onChange={formik.handleChange}
+                  onChange={(e) => {
+                    formik.handleChange(e);
+                  }}
+                  onBlur={formik.handleBlur}
+                  error={formik.errors.issued_at && formik.touched.issued_at}
                 />
+
+                {formik?.errors?.issued_at && formik?.touched?.issued_at && (
+                  <div className="text-red-500 text-xs mt-2 ms-2">
+                    {formik.errors.issued_at}
+                  </div>
+                )}
               </div>
               <div>
                 <Popover placement="bottom">
@@ -94,6 +162,10 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                           ? formatDateString(formik.values.issued_date)
                           : ""
                       }
+                      error={
+                        formik.errors.issued_date && formik.touched.issued_date
+                      }
+                      onBlur={formik.handleBlur}
                       icon={
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -119,6 +191,7 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                       onSelect={(value) =>
                         formik.setFieldValue("issued_date", value)
                       }
+                      disabled={(date) => date > new Date()}
                       showOutsideDays
                       className="border-0"
                       classNames={{
@@ -156,6 +229,12 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                     />
                   </PopoverContent>
                 </Popover>
+
+                {formik.errors?.issued_date && formik.touched?.issued_date && (
+                  <div className="text-red-500 text-xs mt-2 ms-2">
+                    {formik.errors.issued_date}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -165,11 +244,15 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                       label="Expiry Date"
                       size="lg"
                       name="expiry_date"
-                      onChange={() => null}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                       value={
                         formik.values.expiry_date
                           ? formatDateString(formik.values.expiry_date)
                           : ""
+                      }
+                      error={
+                        formik.errors.expiry_date && formik.touched.expiry_date
                       }
                       icon={
                         <svg
@@ -222,6 +305,11 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                         day_disabled: "text-gray-500 opacity-50",
                         day_hidden: "invisible",
                       }}
+                      disabled={(date) => {
+                        if (!formik.values.issued_date) return true;
+                        return date < formik.values.issued_date;
+                      }}
+
                       // components={{
                       //   IconLeft: ({ ...props }) => (
                       //     <ChevronLeftIcon {...props} className="h-4 w-4 stroke-2" />
@@ -233,6 +321,12 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                     />
                   </PopoverContent>
                 </Popover>
+
+                {formik.errors?.expiry_date && formik.touched?.expiry_date && (
+                  <div className="text-red-500 text-xs mt-2 ms-2">
+                    {formik.errors.expiry_date}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -248,7 +342,18 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                   name="licence_address"
                   value={formik.values.licence_address}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.errors.licence_address &&
+                    formik.touched.licence_address
+                  }
                 />
+                {formik.errors.licence_address &&
+                  formik.touched.licence_address && (
+                    <div className="text-red-500 text-xs mt-2 ms-2">
+                      {formik.errors.licence_address}
+                    </div>
+                  )}
               </div>
               <div>
                 <Input
@@ -257,8 +362,18 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                   size="lg"
                   name="licence_city"
                   value={formik.values.licence_city}
+                  onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
+                  error={
+                    formik.errors.licence_city && formik.touched.licence_city
+                  }
                 />
+
+                {formik.errors.licence_city && formik.touched.licence_city && (
+                  <div className="text-red-500 text-xs mt-2 ms-2">
+                    {formik.errors.licence_city}
+                  </div>
+                )}
               </div>
               <div>
                 <Select
@@ -269,8 +384,13 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                   onChange={(value) =>
                     formik.setFieldValue("licence_state", value)
                   }
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.errors?.licence_state &&
+                    formik.touched?.licence_state
+                  }
                 >
-                  <Option value="California">California</Option>
+                  {/* <Option value="California">California</Option>
                   <Option value="New York">New York</Option>
                   <Option value="Illinois">Illinois</Option>
                   <Option value="California">California</Option>
@@ -279,8 +399,22 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                   <Option value="Arizona">Arizona</Option>
                   <Option value="Ohio">Ohio</Option>
                   <Option value="Michigan">Michigan</Option>
-                  <Option value="New Jersey">New Jersey</Option>
+                  <Option value="New Jersey">New Jersey</Option> */}
+                  <Option value="Abu Dhabi">Abu Dhabi</Option>
+                  <Option value="Dubai">Dubai</Option>
+                  <Option value="Sharjah">Sharjah</Option>
+                  <Option value="Ajman">Ajman</Option>
+                  <Option value="Umm al-Quwain">Umm al-Quwain</Option>
+                  <Option value="Fujairah">Fujairah</Option>
+                  <Option value="Ras Al Khaimah">Ras Al Khaimah</Option>
                 </Select>
+
+                {formik.errors?.licence_state &&
+                  formik.touched?.licence_state && (
+                    <div className="text-red-500 text-xs mt-2 ms-2">
+                      {formik.errors.licence_state}
+                    </div>
+                  )}
               </div>
               <div>
                 <Input
@@ -290,7 +424,18 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                   name="licence_zip_code"
                   value={formik.values.licence_zip_code}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.errors.licence_zip_code &&
+                    formik.touched.licence_zip_code
+                  }
                 />
+                {formik.errors?.licence_zip_code &&
+                  formik.touched?.licence_zip_code && (
+                    <div className="text-red-500 text-xs mt-2 ms-2">
+                      {formik.errors.licence_zip_code}
+                    </div>
+                  )}
               </div>
               <div>
                 <Select
@@ -301,8 +446,14 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                   onChange={(value) =>
                     formik.setFieldValue("licence_country", value)
                   }
+                  error={
+                    formik.errors.licence_country &&
+                    formik.touched.licence_country
+                  }
+                  onBlur={formik.handleBlur}
                 >
-                  <Option value="AF">Afghanistan</Option>
+                  <Option value="UAE">United Arab Emirates</Option>
+                  {/* <Option value="AF">Afghanistan</Option>
                   <Option value="AL">Albania</Option>
                   <Option value="DZ">Algeria</Option>
                   <Option value="AD">Andorra</Option>
@@ -432,14 +583,27 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                   <Option value="NI">Nicaragua</Option>
                   <Option value="NG">Niger</Option>
                   <Option value="NE">Nigeria</Option>
-                  <Option value="KP">North Korea</Option>
+                  <Option value="KP">North Korea</Option> */}
                 </Select>
+
+                {formik.errors.licence_country &&
+                  formik.touched.licence_country && (
+                    <div className="text-red-500 text-xs mt-2 ms-2">
+                      {formik.errors.licence_country}
+                    </div>
+                  )}
               </div>
 
               {!vendor ? (
                 <>
                   <div>
-                    <Button fullWidth size="lg" type="submit">
+                    <Button
+                      fullWidth
+                      size="lg"
+                      type="submit"
+                      className="flex justify-center items-center"
+                      loading={formik.isSubmitting}
+                    >
                       Next
                     </Button>
                   </div>
@@ -457,7 +621,13 @@ const StoreSetup = ({ setActiveStep, vendor }) => {
                 </>
               ) : (
                 <div className="col-span-2 flex justify-center items-center">
-                  <Button fullWidth size="lg" type="submit">
+                  <Button
+                    fullWidth
+                    size="lg"
+                    type="submit"
+                    loading={formik.isSubmitting}
+                    className="flex justify-center items-center"
+                  >
                     Save
                   </Button>
                 </div>

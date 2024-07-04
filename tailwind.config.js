@@ -40,6 +40,7 @@ export default withMT({
         secondary: {
           100: "#676767",
           200: "#4D4D4D",
+          300: "#1A1A1A",
         },
       },
       fontFamily: {

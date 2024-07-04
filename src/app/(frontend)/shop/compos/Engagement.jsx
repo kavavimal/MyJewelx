@@ -1,6 +1,9 @@
 "use client";
 
-import StarRatings from "@/components/frontend/StarRatings";
+const StarRatings = dynamic(() => import("@/components/frontend/StarRatings"), {
+  ssr: false,
+});
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 const Engagement = ({ variation }) => {

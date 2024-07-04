@@ -82,13 +82,13 @@ const CartSidebar = () => {
           </button>
           {carts && carts?.cartItems?.length > 0 ? (
             <>
-              <ul role="list" class="-my-6 divide-y divide-gray-200">
+              <ul role="list" className="-my-6 divide-y divide-gray-200">
                 {carts?.cartItems?.map((cartItem) => {
                   return (
-                    <li class="flex py-6" key={cartItem.id}>
-                      <div class="ml-4 flex flex-1 flex-col">
+                    <li className="flex py-6" key={cartItem.id}>
+                      <div className="ml-4 flex flex-1 flex-col">
                         <div>
-                          <div class="flex justify-between text-base font-medium text-gray-900">
+                          <div className="flex justify-between text-base font-medium text-gray-900">
                             <h3>
                               <a href="#">
                                 {
@@ -97,17 +97,17 @@ const CartSidebar = () => {
                                 }
                               </a>
                             </h3>
-                            <p class="ml-4 w-1/3 text-right">
+                            <p className="ml-4 w-1/3 text-right">
                               {CURRENCY_SYMBOL} {cartItem.price}
                             </p>
                           </div>
-                          {/* <p class="mt-1 text-sm text-gray-500">vendor</p> */}
+                          {/* <p className="mt-1 text-sm text-gray-500">vendor</p> */}
                         </div>
-                        <div class="flex flex-1 items-end justify-between text-sm">
+                        <div className="flex flex-1 items-end justify-between text-sm">
                           <Quantity cartItem={cartItem} />
-                          {/* <p class="text-gray-500">Qty {cartItem.quantity}</p> */}
+                          {/* <p className="text-gray-500">Qty {cartItem.quantity}</p> */}
 
-                          <div class="flex">
+                          <div className="flex">
                             <RemoveCartItem cartItem={cartItem} />
                           </div>
                         </div>
@@ -116,23 +116,23 @@ const CartSidebar = () => {
                   );
                 })}
               </ul>
-              <div class="border-t border-gray-200 px-4 py-6 sm:px-6">
-                <div class="flex justify-between text-base font-medium text-gray-900">
+              <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
+                <div className="flex justify-between text-base font-medium text-gray-900">
                   <p>Subtotal</p>
                   <p>
                     {CURRENCY_SYMBOL} {totalAmount}
                   </p>
                 </div>
-                <div class="mt-6 flex">
+                <div className="mt-6 flex">
                   <Link
                     href="/cart"
-                    class="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
+                    className="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
                   >
                     View Cart
                   </Link>
                   <Link
                     href="/checkout"
-                    class="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
+                    className="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
                   >
                     Checkout
                   </Link>

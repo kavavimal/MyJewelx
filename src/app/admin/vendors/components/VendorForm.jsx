@@ -14,10 +14,12 @@ import { enqueueSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import * as Yup from "yup";
 import { isCompanyEmail } from "company-email-validator";
-import { post } from "@/utils/api";
+import { post, update } from "@/utils/api";
 import { useCountries } from "use-react-countries";
+import FileUploadIcon from "@/components/FileUploadIcon";
+import { showToast } from "@/utils/helper";
 
-const VendorForm = ({ vendor, storeURLs, emails }) => {
+const VendorForm = ({ vendor, storeURLs, emails, FormHeader = true }) => {
   const { countries } = useCountries();
   const [data, setData] = useState(countries);
   const [open, setOpen] = useState(false);
@@ -26,27 +28,37 @@ const VendorForm = ({ vendor, storeURLs, emails }) => {
     (item) => item.name === country
   );
   const router = useRouter();
+  const [previewURL, setPreviewURL] = useState("");
+  const [file, setFile] = useState("");
 
   const validationSchema = Yup.object().shape({
     firstName: Yup.string().required("First Name is required"),
     lastName: Yup.string().required("Last Name is required"),
     store_name: Yup.string().required("Store Name is required"),
     store_url: Yup.string()
-      .url("Invalid URL")
+      // .url("Invalid URL")
       .required("Store URL is required")
       .test("is-unique-url", "URL already exists", async (value) => {
-        return storeURLs.every((url) => url.store_url !== value);
+        return vendor
+          ? storeURLs
+              .filter((url) => url.store_url !== vendor?.vendor?.store_url)
+              .every((url) => url.store_url !== value)
+          : storeURLs.every((url) => url.store_url !== value);
       }),
     email: Yup.string()
       .email("Invalid email")
       .required("Store Email is required")
-      .test(
-        "is-company-email",
-        "Please enter a valid company email",
-        async (value) => isCompanyEmail(value)
-      )
+      // .test(
+      //   "is-company-email",
+      //   "Please enter a valid company email",
+      //   async (value) => isCompanyEmail(value)
+      // )
       .test("is-unique-email", "Email already exists", async (value) => {
-        return emails.every((email) => email.email !== value);
+        return vendor
+          ? emails
+              .filter((email) => email.email !== vendor?.email)
+              .every((email) => email.email !== value)
+          : emails.every((email) => email.email !== value);
       }),
     phone_number: Yup.number()
       .typeError("Invalid phone number")
@@ -74,11 +86,50 @@ const VendorForm = ({ vendor, storeURLs, emails }) => {
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
-      try {
-        const response = await post("/api/vendor_registration", values);
-        if (response.status === 201) {
-          enqueueSnackbar("Vendor Registration Success", {
+      if (vendor) {
+        const response = await update(`/api/user/${vendor?.id}`, {
+          ...values,
+          phone_number: `${countryCallingCode} ${values?.phone_number}`,
+          file: file,
+        });
+
+        if (response.status === 200) {
+          showToast({
+            message: "Vendor Updated Successfully",
             variant: "success",
+          });
+        }
+      } else {
+        try {
+          const response = await post("/api/vendor_registration", {
+            ...values,
+            phone_number: `${countryCallingCode} ${values?.phone_number}`,
+            file: file,
+          });
+          if (response.status === 201) {
+            enqueueSnackbar("Vendor Registration Success", {
+              variant: "success",
+              preventDuplicates: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            });
+
+            router.push("/admin/vendors");
+          }
+        } catch (error) {
+          enqueueSnackbar(error.response?.data?.error, {
+            variant: "error",
             preventDuplicates: true,
             anchorOrigin: {
               vertical: "top",
@@ -94,27 +145,7 @@ const VendorForm = ({ vendor, storeURLs, emails }) => {
               padding: "0 4px",
             },
           });
-
-          router.push("/admin/vendors");
         }
-      } catch (error) {
-        enqueueSnackbar(error.response?.data?.error, {
-          variant: "error",
-          preventDuplicates: true,
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "right",
-          },
-          autoHideDuration: 3000,
-          style: {
-            background: "white",
-            color: "black",
-            borderRadius: ".5rem",
-            boxShadow:
-              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-            padding: "0 4px",
-          },
-        });
       }
     },
   });
@@ -132,19 +163,34 @@ const VendorForm = ({ vendor, storeURLs, emails }) => {
       );
       console.log(country);
       setCountry(country?.name);
+      if (vendor?.image?.path) {
+        setPreviewURL(vendor?.image?.path);
+      }
     }
   }, [vendor]);
 
+  useEffect(() => {
+    setPreviewURL(file ? URL.createObjectURL(file) : null);
+  }, [file]);
+
+  useEffect(() => {
+    if (vendor && vendor?.image?.path) {
+      setPreviewURL(vendor?.image?.path);
+    }
+  }, []);
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-10">
-        <h4 className="text-2xl font-bold trekking-wide font-emirates">
-          Create Vendor Account
-        </h4>
-        <Button variant="outlined" onClick={() => router.back()}>
-          Back
-        </Button>
-      </div>
+      {FormHeader && (
+        <div className="flex justify-between items-center mb-10">
+          <h4 className="text-2xl font-bold trekking-wide font-emirates">
+            {vendor ? "Vendor Account" : "Create Vendor Account"}
+          </h4>
+          <Button variant="outlined" onClick={() => router.back()}>
+            Back
+          </Button>
+        </div>
+      )}
       <div className="flex items-start justify-center">
         <div className="bg-white p-7 shadow-3xl rounded-2xl w-full">
           <Formik initialValues={formik.initialValues}>
@@ -211,7 +257,6 @@ const VendorForm = ({ vendor, storeURLs, emails }) => {
                     label="Store URL"
                     size="lg"
                     name="store_url"
-                    type="url"
                     value={formik.values.store_url}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
@@ -234,6 +279,7 @@ const VendorForm = ({ vendor, storeURLs, emails }) => {
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                     error={formik.errors.email && formik.touched.email}
+                    readOnly={vendor}
                   />
 
                   {formik.errors.email && formik.touched.email && (
@@ -367,7 +413,7 @@ const VendorForm = ({ vendor, storeURLs, emails }) => {
                                 viewBox="0 0 24 24"
                                 strokeWidth="1.5"
                                 stroke="currentColor"
-                                class="size-5"
+                                className="size-5"
                               >
                                 <path
                                   stroke-linecap="round"
@@ -438,6 +484,37 @@ const VendorForm = ({ vendor, storeURLs, emails }) => {
                     </div>
                   </>
                 )}
+
+                <div className="col-span-2">
+                  <label
+                    htmlFor={`vendor-image`}
+                    className={`flex h-28 w-28 flex-col items-center rounded-full justify-center border-2 ${
+                      formik.errors.file && formik.touched.file
+                        ? "border-red-500"
+                        : "border-blueGray-100"
+                    } border-dashed cursor-pointer bg-gray-50 dark:hover :bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600`}
+                  >
+                    {previewURL ? (
+                      <div className="flex justify-center items-center h-full">
+                        <img
+                          className="object-cover w-full h-full rounded-full"
+                          src={previewURL}
+                          alt="Preview"
+                        />
+                      </div>
+                    ) : (
+                      <FileUploadIcon />
+                    )}
+                    <input
+                      id={`vendor-image`}
+                      type="file"
+                      name="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(e) => setFile(e.target.files[0])}
+                    />
+                  </label>
+                </div>
                 <div>
                   <Button
                     fullWidth

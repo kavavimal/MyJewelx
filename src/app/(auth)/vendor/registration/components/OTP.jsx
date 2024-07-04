@@ -10,7 +10,7 @@ import { post } from "@/utils/api";
 import LoadingDots from "@/components/loading-dots";
 import { showToast } from "@/utils/helper";
 
-const OTP = ({setShowOtp, onOTPVerified, email}) => {
+const OTP = ({ setShowOtp, onOTPVerified, email }) => {
   const router = useRouter();
   const [remainingTime, setRemainingTime] = useState(60);
   const [isCounting, setIsCounting] = useState(true);
@@ -53,14 +53,17 @@ const OTP = ({setShowOtp, onOTPVerified, email}) => {
         });
 
         if (response.status === 201) {
-          showToast({message: "OTP Verified successfully, processing your registration", variant: "success"});
-          if(onOTPVerified) {
+          showToast({
+            message: "OTP Verified successfully, processing your registration",
+            variant: "success",
+          });
+          if (onOTPVerified) {
             onOTPVerified();
           }
         } else if (response.status === 500) {
-          showToast({message: "Failed to verify OTP", variant: "error"});
+          showToast({ message: "Failed to verify OTP", variant: "error" });
         } else if (response.status === 400) {
-          showToast({message:"Invalid OTP", variant: "error"});
+          showToast({ message: "Invalid OTP", variant: "error" });
         }
         setIsLoading(false);
       } catch (error) {
@@ -94,10 +97,13 @@ const OTP = ({setShowOtp, onOTPVerified, email}) => {
 
   return (
     <div className="relative shadow-3xl p-10 bg-white max-w-md w-full rounded border-t-2 border-primary-200">
-      {
-        isLoading && <div className="absolute -top-1 -left-1 bg-white bg-opacity-60 z-10 h-full w-full flex items-center justify-center">
-          <div class="flex items-center"><LoadingDots /></div></div>
-      }
+      {isLoading && (
+        <div className="absolute -top-1 -left-1 bg-white bg-opacity-60 z-10 h-full w-full flex items-center justify-center">
+          <div className="flex items-center">
+            <LoadingDots />
+          </div>
+        </div>
+      )}
       <div className="mb-10">
         <h4 className="text-2xl font-bold trekking-wide font-emirates mb-6">
           OTP

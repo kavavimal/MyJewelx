@@ -23,6 +23,7 @@ export const checkUserSession = async () => {
           },
         },
         vendor: true,
+        image: true,
       },
     });
     return user;

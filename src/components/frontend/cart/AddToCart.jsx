@@ -39,7 +39,7 @@ export default function AddToCart({ variation }) {
   }
   return (
     <button
-      class="flex text-black weight-700 bg-[#F0AE11] border-0 py-2 flex-1 px-3 mr-2 focus:outline-none hover:bg-yellow-600 rounded"
+      className="flex text-black weight-700 bg-[#F0AE11] border-0 py-2 flex-1 px-3 mr-2 focus:outline-none hover:bg-yellow-600 rounded"
       onClick={onAddtoCart}
     >
       Add to Cart

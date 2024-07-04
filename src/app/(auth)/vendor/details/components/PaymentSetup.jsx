@@ -10,8 +10,10 @@ import {
 import { Form, Formik, useFormik } from "formik";
 import { useRouter, useSearchParams } from "next/navigation";
 import { update } from "@/utils/api";
+import * as Yup from "yup";
+import { showToast } from "@/utils/helper";
 
-const PaymentSetup = ({ setActiveStep, vendor }) => {
+const PaymentSetup = ({ setActiveStep, vendor, accountNumbers }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const id = vendor ? vendor?.id : searchParams.get("id");
@@ -20,6 +22,7 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
       account_name: vendor ? vendor.account_name : "",
       account_number: vendor ? vendor.account_number : "",
       bank_name: vendor ? vendor.bank_name : "",
+      routing_number: vendor ? vendor.routing_number : "",
       bank_iban: vendor ? vendor.bank_iban : "",
       bank_swift_code: vendor ? vendor.bank_swift_code : "",
       bank_address: vendor ? vendor.bank_address : "",
@@ -29,18 +32,59 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
       bank_country: vendor ? vendor.bank_country : "",
       routing_number: vendor ? vendor.routing_number : "",
     },
+
+    validationSchema: Yup.object({
+      account_name: Yup.string().required("Account name is required"),
+      account_number: Yup.string()
+        .min(8, "Account name must be at least 8 digits")
+        .required("Account name is required")
+        .matches(/^[0-9]+$/, "Account name must be a number")
+        .test("unique", "Account number already exists", (value) => {
+          if (vendor) {
+            return accountNumbers
+              .filter(Boolean)
+              .filter(
+                (account) => account?.account_number !== vendor?.account_number
+              )
+              .every((account) => account.account_number !== value);
+          } else {
+            return accountNumbers
+              .filter(Boolean)
+              .every((account) => account.account_number !== value);
+          }
+        }),
+      routing_number: Yup.string().required("Routing number is required"),
+      bank_name: Yup.string().required("Bank name is required"),
+      bank_iban: Yup.string().required("IBAN is required"),
+      bank_swift_code: Yup.string().required("Swift code is required"),
+      bank_address: Yup.string().required("Bank address is required"),
+      bank_city: Yup.string().required("Bank city is required"),
+      bank_state: Yup.string().required("Bank state is required"),
+      bank_zip_code: Yup.string()
+        .typeError("Zip code must be a number")
+        .required("Zip code is required")
+        .matches(/^[0-9]+$/, "Zip code must be a number"),
+      bank_country: Yup.string().required("Bank country is required"),
+    }),
     onSubmit: async (values) => {
       try {
         const response = await update(`/api/vendor_registration/${id}`, values);
         if (response.status === 201) {
           if (vendor) {
-            console.log("vendor details updated successfully");
+            showToast({
+              message: "Payment details updated successfully",
+              variant: "success",
+            });
             router.refresh();
           } else {
             setActiveStep((curr) => curr + 1);
           }
         }
       } catch (error) {
+        showToast({
+          message: error.message,
+          variant: "error",
+        });
         console.log(error);
       }
     },
@@ -63,10 +107,21 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
                   label="Account Name"
                   type="text"
                   size="lg"
+                  name="account_name"
+                  error={
+                    formik.errors?.account_name && formik.touched?.account_name
+                  }
                   value={formik.values.account_name}
                   onChange={formik.handleChange}
-                  name="account_name"
+                  onBlur={formik.handleBlur}
                 />
+
+                {formik?.errors?.account_name &&
+                  formik?.touched?.account_name && (
+                    <p className="text-red-500 text-xs mt-2 ms-2">
+                      {formik?.errors?.account_name}
+                    </p>
+                  )}
               </div>
               <div>
                 <Input
@@ -75,8 +130,20 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
                   size="lg"
                   value={formik.values.account_number}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   name="account_number"
+                  error={
+                    formik.errors?.account_number &&
+                    formik.touched?.account_number
+                  }
                 />
+
+                {formik?.errors?.account_number &&
+                  formik?.touched?.account_number && (
+                    <p className="text-red-500 text-xs mt-2 ms-2">
+                      {formik?.errors?.account_number}
+                    </p>
+                  )}
               </div>
               <div>
                 <Input
@@ -85,8 +152,16 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
                   size="lg"
                   name="bank_name"
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   value={formik.values.bank_name}
+                  error={formik.errors?.bank_name && formik.touched?.bank_name}
                 />
+
+                {formik?.errors?.bank_name && formik?.touched?.bank_name && (
+                  <p className="text-red-500 text-xs mt-2 ms-2">
+                    {formik?.errors?.bank_name}
+                  </p>
+                )}
               </div>
               <div>
                 <Input
@@ -94,9 +169,21 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
                   type="text"
                   size="lg"
                   name="routing_number"
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.errors?.routing_number &&
+                    formik.touched?.routing_number
+                  }
                   onChange={formik.handleChange}
                   value={formik.values.routing_number}
                 />
+
+                {formik?.errors?.routing_number &&
+                  formik?.touched?.routing_number && (
+                    <p className="text-red-500 text-xs mt-2 ms-2">
+                      {formik?.errors?.routing_number}
+                    </p>
+                  )}
               </div>
               <div>
                 <Input
@@ -105,8 +192,16 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
                   size="lg"
                   name="bank_iban"
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   value={formik.values.bank_iban}
+                  error={formik.errors?.bank_iban && formik.touched?.bank_iban}
                 />
+
+                {formik?.errors?.bank_iban && formik?.touched?.bank_iban && (
+                  <p className="text-red-500 text-xs mt-2 ms-2">
+                    {formik?.errors?.bank_iban}
+                  </p>
+                )}
               </div>
               <div>
                 <Input
@@ -115,8 +210,20 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
                   size="lg"
                   name="bank_swift_code"
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   value={formik.values.bank_swift_code}
+                  error={
+                    formik.errors?.bank_swift_code &&
+                    formik.touched?.bank_swift_code
+                  }
                 />
+
+                {formik?.errors?.bank_swift_code &&
+                  formik?.touched?.bank_swift_code && (
+                    <p className="text-red-500 text-xs mt-2 ms-2">
+                      {formik?.errors?.bank_swift_code}
+                    </p>
+                  )}
               </div>
             </div>
 
@@ -132,7 +239,18 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
                   name="bank_address"
                   value={formik.values.bank_address ?? ""}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.errors?.bank_address && formik.touched?.bank_address
+                  }
                 />
+
+                {formik?.errors?.bank_address &&
+                  formik?.touched?.bank_address && (
+                    <p className="text-red-500 text-xs mt-2 ms-2">
+                      {formik?.errors?.bank_address}
+                    </p>
+                  )}
               </div>
               <div>
                 <Input
@@ -142,7 +260,15 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
                   name="bank_city"
                   value={formik.values.bank_city ?? ""}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.errors?.bank_city && formik.touched?.bank_city}
                 />
+
+                {formik?.errors?.bank_city && formik?.touched?.bank_city && (
+                  <p className="text-red-500 text-xs mt-2 ms-2">
+                    {formik?.errors?.bank_city}
+                  </p>
+                )}
               </div>
               <div>
                 <Select
@@ -150,9 +276,15 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
                   size="lg"
                   name="bank_state"
                   value={formik.values.bank_state ?? ""}
-                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  onChange={(value) =>
+                    formik.setFieldValue("bank_state", value)
+                  }
+                  error={
+                    formik.errors?.bank_state && formik.touched?.bank_state
+                  }
                 >
-                  <Option value="California">California</Option>
+                  {/* <Option value="California">California</Option>
                   <Option value="New York">New York</Option>
                   <Option value="Illinois">Illinois</Option>
                   <Option value="Texas">Texas</Option>
@@ -160,8 +292,21 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
                   <Option value="Arizona">Arizona</Option>
                   <Option value="Ohio">Ohio</Option>
                   <Option value="Michigan">Michigan</Option>
-                  <Option value="New Jersey">New Jersey</Option>
+                  <Option value="New Jersey">New Jersey</Option> */}
+                  <Option value="Abu Dhabi">Abu Dhabi</Option>
+                  <Option value="Dubai">Dubai</Option>
+                  <Option value="Sharjah">Sharjah</Option>
+                  <Option value="Ajman">Ajman</Option>
+                  <Option value="Umm al-Quwain">Umm al-Quwain</Option>
+                  <Option value="Fujairah">Fujairah</Option>
+                  <Option value="Ras Al Khaimah">Ras Al Khaimah</Option>
                 </Select>
+
+                {formik?.errors?.bank_state && formik?.touched?.bank_state && (
+                  <p className="text-red-500 text-xs mt-2 ms-2">
+                    {formik?.errors?.bank_state}
+                  </p>
+                )}
               </div>
               <div>
                 <Input
@@ -171,7 +316,19 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
                   name="bank_zip_code"
                   value={formik.values.bank_zip_code ?? ""}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.errors?.bank_zip_code &&
+                    formik.touched?.bank_zip_code
+                  }
                 />
+
+                {formik?.errors?.bank_zip_code &&
+                  formik?.touched?.bank_zip_code && (
+                    <p className="text-red-500 text-xs mt-2 ms-2">
+                      {formik?.errors?.bank_zip_code}
+                    </p>
+                  )}
               </div>
               <div>
                 <Select
@@ -182,8 +339,13 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
                   onChange={(value) =>
                     formik.setFieldValue("bank_country", value)
                   }
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.errors?.bank_country && formik.touched?.bank_country
+                  }
                 >
-                  <Option value="AF">Afghanistan</Option>
+                  <Option value="UAE">United Arab Emirates</Option>
+                  {/* <Option value="AF">Afghanistan</Option>
                   <Option value="AL">Albania</Option>
                   <Option value="DZ">Algeria</Option>
                   <Option value="AD">Andorra</Option>
@@ -313,8 +475,14 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
                   <Option value="NI">Nicaragua</Option>
                   <Option value="NG">Niger</Option>
                   <Option value="NE">Nigeria</Option>
-                  <Option value="KP">North Korea</Option>
+                  <Option value="KP">North Korea</Option> */}
                 </Select>
+
+                {formik.touched.bank_country && formik.errors.bank_country && (
+                  <p className="text-red-500 text-xs mt-2 ms-2">
+                    {formik.errors.bank_country}
+                  </p>
+                )}
               </div>
 
               {!vendor ? (
@@ -338,7 +506,13 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
                 </>
               ) : (
                 <div className="col-span-2 flex justify-center items-center">
-                  <Button fullWidth size="lg" type="submit">
+                  <Button
+                    fullWidth
+                    size="lg"
+                    type="submit"
+                    loading={formik.isSubmitting}
+                    className="flex justify-center items-center"
+                  >
                     Save
                   </Button>
                 </div>
@@ -352,3 +526,26 @@ const PaymentSetup = ({ setActiveStep, vendor }) => {
 };
 
 export default PaymentSetup;
+
+export async function getServerSideProps() {
+  // try {
+  //   const accountNumbers = await getAccountNumbers();
+  //   return {
+  //     props: {
+  //       accountNumbers,
+  //     },
+  //   };
+  // } catch (error) {
+  //   return {
+  //     props: {
+  //       accountNumbers: [],
+  //       error: "Failed to fetch account numbers",
+  //     },
+  //   };
+  // }
+  return {
+    props: {
+      accountNumbers: [],
+    },
+  };
+}

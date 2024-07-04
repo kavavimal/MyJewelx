@@ -16,14 +16,16 @@ const getVendors = () =>
             vendor: true,
         },
     });
+const homeSlider = () => prisma.homeSlider.findMany({});
 
 export default async function Home() {
     const categories = await getCategories();
     const vendors = await getVendors();
+    const homeSlide = await homeSlider();
     return (
         <>
             <FrontendHeader />
-            <Hero categories={categories} />
+            <Hero categories={categories} homeSlide={homeSlide} />
             <main className="flex ">
                 <section className="bg-white dark:bg-gray-900">
                     <div className="">

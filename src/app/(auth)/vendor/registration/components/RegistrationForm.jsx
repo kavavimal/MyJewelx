@@ -12,7 +12,7 @@ import {
 import { Form, Formik, useFormik } from "formik";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {showToast} from '@/utils/helper';
+import { showToast } from "@/utils/helper";
 import React, { useEffect, useState } from "react";
 import * as Yup from "yup";
 import OTP from "./OTP";
@@ -35,14 +35,13 @@ const RegistrationForm = ({ storeURLs, emails }) => {
   );
 
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const validationSchema = Yup.object().shape({
     firstName: Yup.string().required("First Name is required"),
     lastName: Yup.string().required("Last Name is required"),
     store_name: Yup.string().required("Store Name is required"),
     store_url: Yup.string()
-      .url("Invalid URL")
+      // .url("Invalid URL")
       .required("Store URL is required")
       .test("is-unique-url", "URL already exists", async (value) => {
         return storeURLs.every((url) => url.store_url !== value);
@@ -50,11 +49,11 @@ const RegistrationForm = ({ storeURLs, emails }) => {
     email: Yup.string()
       .email("Invalid email")
       .required("Store Email is required")
-      .test(
-        "is-company-email",
-        "Please enter a valid company email",
-        async (value) => isCompanyEmail(value)
-      )
+      // .test(
+      //   "is-company-email",
+      //   "Please enter a valid company email",
+      //   async (value) => isCompanyEmail(value)
+      // )
       .test("is-unique-email", "Email already exists", async (value) => {
         return emails.every((email) => email.email !== value);
       }),
@@ -102,14 +101,17 @@ const RegistrationForm = ({ storeURLs, emails }) => {
           }),
         });
         if (response.status === 201) {
-          showToast({message: "Otp Is Send To Your Mail", variant: "success"});
+          showToast({
+            message: "Otp Is Send To Your Mail",
+            variant: "success",
+          });
           setShowOtp(true);
           // router.push(`?email=${values?.email}`);
         } else if (response.status === 400) {
-          showToast({message: "Email is Already Exist", variant: "error"});
+          showToast({ message: "Email is Already Exist", variant: "error" });
         }
       } catch (error) {
-        showToast({message: error.message, variant: "error"});
+        showToast({ message: error.message, variant: "error" });
       }
     },
   });
@@ -122,7 +124,10 @@ const RegistrationForm = ({ storeURLs, emails }) => {
     });
 
     if (registration.status === 201) {
-      showToast({ message: "Vendor Registration Success, Please complete your profile", variant: "success" });
+      showToast({
+        message: "Vendor Registration Success, Please complete your profile",
+        variant: "success",
+      });
     }
 
     router.push(`/vendor/details?id=${registration.data?.vendor?.id}`);
@@ -222,7 +227,6 @@ const RegistrationForm = ({ storeURLs, emails }) => {
                       label="Store URL"
                       size="lg"
                       name="store_url"
-                      type="url"
                       value={formik.values.store_url}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
@@ -380,7 +384,7 @@ const RegistrationForm = ({ storeURLs, emails }) => {
                                 viewBox="0 0 24 24"
                                 strokeWidth="1.5"
                                 stroke="currentColor"
-                                class="size-5"
+                                className="size-5"
                               >
                                 <path
                                   stroke-linecap="round"

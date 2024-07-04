@@ -1,17 +1,23 @@
 "useClient";
 
-const { default: ProductCard } = require("./ProductCard");
+import FilterProduct from "./FilterProduct";
+import ProductCard from "./ProductCard";
 
 const ShopComponent = ({ products }) => {
   return (
-    <div>
+    <section className="container">
       <h1>Shop</h1>
-      <div className="flex flex-wrap">
-        {products.map((product) => (
-          <ProductCard key={product.product_id} product={product} />
-        ))}
+      <div className="flex items-start">
+        <div className="w-2/12">
+          <FilterProduct />
+        </div>
+        <div className="flex-1 flex flex-wrap">
+          {products.map((product) => (
+            <ProductCard key={product.product_id} product={product} />
+          ))}
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 

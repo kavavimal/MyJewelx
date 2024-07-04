@@ -14,7 +14,7 @@ import StoreSetup from "./StoreSetup";
 import PaymentSetup from "./PaymentSetup";
 import { useRouter } from "next/navigation";
 
-const DetailsForm = () => {
+const DetailsForm = ({ accountNumbers, licenseNumbers }) => {
   const router = useRouter();
   const [activeStep, setActiveStep] = useState(null);
   const [isLastStep, setIsLastStep] = useState(false);
@@ -117,9 +117,19 @@ const DetailsForm = () => {
               </div>
             </div>
           )}
-          {activeStep === 0 && <StoreSetup setActiveStep={setActiveStep} />}
+          {activeStep === 0 && (
+            <StoreSetup
+              setActiveStep={setActiveStep}
+              licenseNumbers={licenseNumbers}
+            />
+          )}
 
-          {activeStep === 1 && <PaymentSetup setActiveStep={setActiveStep} />}
+          {activeStep === 1 && (
+            <PaymentSetup
+              setActiveStep={setActiveStep}
+              accountNumbers={accountNumbers}
+            />
+          )}
 
           {activeStep === 2 && (
             <div className="shadow-3xl p-10 bg-white max-w-3xl w-full rounded border-t-2 border-primary-200">

@@ -464,3 +464,27 @@ enum CharsType {
 	THEME
 	TREND
 }
+
+model HomeSlider {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  image_url   String
+  link_url    String
+  createdAt   DateTime @default(now())
+}
+
+model Promotional {
+	ads_id		  Int		  @id @default(autoincrement())
+	ads_title		String
+  ads_desc		String
+  ads_link		String
+  ads_img_url	String
+	ads_type	  adsType
+  createdAt   DateTime @default(now())
+}
+
+enum adsType {
+	HOME
+	POD
+}

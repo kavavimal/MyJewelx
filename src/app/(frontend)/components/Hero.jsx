@@ -2,9 +2,10 @@
 import Image from 'next/image';
 import React from 'react';
 import Link from 'next/link';
+import prisma from '@/lib/prisma';
 import { Carousel, Typography, Button } from '@material-tailwind/react';
 
-const Hero = ({ categories }) => {
+const Hero = ({ categories, homeSlide }) => {
     return (
         <>
             <section className="bg-primary-250 py-5">
@@ -58,111 +59,46 @@ const Hero = ({ categories }) => {
                         </div>
                         <div className="w-[800]">
                             <Carousel className="rounded">
-                                <div className="relative ">
-                                    <img
-                                        src="/assets/images/banner.png"
-                                        alt="image 2"
-                                        className="h-full w-full object-cover"
-                                    />
-                                    <div className="absolute inset-0 grid items-center">
-                                        <div className="w-2/3 pl-24">
-                                            <Typography
-                                                variant="h1"
-                                                color="black"
-                                                className="mb-4 text-3xl  font-playfairdisplay"
-                                            >
-                                                WHITE GOLD RINGS
-                                            </Typography>
-                                            <Typography
-                                                variant="lead"
-                                                className="mb-6 opacity-80 text-secondary-200 font-emirates"
-                                            >
-                                                Discover the elegance of our
-                                                exquisite gold earrings
-                                                collection.
-                                            </Typography>
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    size="lg"
-                                                    color="white"
-                                                    className="normal-case bg-primary-200 font-emirates font-bold"
-                                                >
-                                                    Shop now
-                                                </Button>
+                                {homeSlide.map((slide) => {
+                                    return (
+                                        <div className="relative ">
+                                            <img
+                                                src={slide.image_url}
+                                                alt="image 2"
+                                                className="h-full w-full object-cover"
+                                            />
+                                            <div className="absolute inset-0 grid items-center">
+                                                <div className="w-2/3 pl-24">
+                                                    <Typography
+                                                        variant="h1"
+                                                        color="black"
+                                                        className="mb-4 text-3xl  font-playfairdisplay"
+                                                    >
+                                                        {slide.title}
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="lead"
+                                                        className="mb-6 opacity-80 text-secondary-200 font-emirates"
+                                                    >
+                                                        {slide.description}
+                                                    </Typography>
+                                                    <div className="flex gap-2">
+                                                        <Link
+                                                            size="lg"
+                                                            color="white"
+                                                            className="normal-case bg-primary-200 font-emirates font-bold"
+                                                            href={
+                                                                slide.link_url
+                                                            }
+                                                        >
+                                                            Shop now
+                                                        </Link>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div className="relative ">
-                                    <img
-                                        src="/assets/images/banner.png"
-                                        alt="image 2"
-                                        className="h-full w-full object-cover"
-                                    />
-                                    <div className="absolute inset-0 grid items-center">
-                                        <div className="w-2/3 pl-24">
-                                            <Typography
-                                                variant="h1"
-                                                color="black"
-                                                className="mb-4 text-3xl  font-playfairdisplay"
-                                            >
-                                                WHITE GOLD RINGS
-                                            </Typography>
-                                            <Typography
-                                                variant="lead"
-                                                className="mb-6 opacity-80 text-secondary-200 font-emirates"
-                                            >
-                                                Discover the elegance of our
-                                                exquisite gold earrings
-                                                collection.
-                                            </Typography>
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    size="lg"
-                                                    color="white"
-                                                    className="normal-case bg-primary-200 font-emirates font-bold"
-                                                >
-                                                    Shop now
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="relative ">
-                                    <img
-                                        src="/assets/images/banner.png"
-                                        alt="image 2"
-                                        className="h-full w-full object-cover"
-                                    />
-                                    <div className="absolute inset-0 grid items-center">
-                                        <div className="w-2/3 pl-24">
-                                            <Typography
-                                                variant="h1"
-                                                color="black"
-                                                className="mb-4 text-3xl  font-playfairdisplay"
-                                            >
-                                                WHITE GOLD RINGS
-                                            </Typography>
-                                            <Typography
-                                                variant="lead"
-                                                className="mb-6 opacity-80 text-secondary-200 font-emirates"
-                                            >
-                                                Discover the elegance of our
-                                                exquisite gold earrings
-                                                collection.
-                                            </Typography>
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    size="lg"
-                                                    color="white"
-                                                    className="normal-case bg-primary-200 font-emirates font-bold"
-                                                >
-                                                    Shop now
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                    );
+                                })}
                             </Carousel>
                         </div>
                         <div className="w-[220]">

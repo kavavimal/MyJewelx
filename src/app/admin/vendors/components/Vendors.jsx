@@ -1,17 +1,11 @@
 "use client";
-import { changeVendorStatus } from "@/actions/vendor";
-import {
-  Button,
-  Chip,
-  IconButton,
-  Option,
-  Switch,
-} from "@material-tailwind/react";
+import { Button, IconButton } from "@material-tailwind/react";
 import { UserStatus } from "@prisma/client";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import React from "react";
 import DeleteUser from "../../users/components/DeleteUser";
+import VendorStatus from "./VendorStatus";
 const DataTable = dynamic(() => import("react-data-table-component"), {
   ssr: false,
 });
@@ -38,20 +32,7 @@ const Vendors = ({ vendors }) => {
       name: "Status",
       cell: (row) => {
         const isActive = row.status === UserStatus.ACTIVE;
-        return (
-          <Switch
-            value={row.status}
-            checked={isActive}
-            label={row.status}
-            ripple={false}
-            onChange={() =>
-              changeVendorStatus(
-                row.id,
-                isActive ? UserStatus.DISABLED : UserStatus.ACTIVE
-              )
-            }
-          />
-        );
+        return <VendorStatus row={row} isActive={isActive} />;
       },
     },
     {
@@ -103,7 +84,7 @@ const Vendors = ({ vendors }) => {
                 d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
               ></path>
             </svg>
-            Add New Users
+            Add New Vender
           </Button>
         </Link>
       </div>
