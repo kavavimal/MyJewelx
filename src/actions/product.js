@@ -171,3 +171,101 @@ export const createProduct = async (formData) => {
     };
   }
 };
+
+export const searchProducts = async (data) => {
+  const firstNames =
+    data?.vendors &&
+    data.vendors.length > 0 &&
+    data.vendors.map((vendor) => vendor.split(" ")[0]);
+  const lastName =
+    data?.vendors &&
+    data.vendors.length > 0 &&
+    data.vendors.map((vendor) => vendor.split(" ")[1]);
+  try {
+    const products = prisma.product.findMany({
+      where: {
+        status: "PUBLISHED",
+        ...(data.categories &&
+          data.categories.length > 0 && {
+            categoryId: {
+              in: data.categories,
+            },
+          }),
+        ...(data.vendors &&
+          data.vendors.length > 0 && {
+            user: {
+              AND: [
+                {
+                  firstName: {
+                    in: firstNames,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  lastName: {
+                    in: lastName,
+                    mode: "insensitive",
+                  },
+                },
+              ],
+            },
+          }),
+
+        ...(data.metals &&
+          data.metals.length > 0 && {
+            ProductAttributeValue: {
+              some: {
+                attributeValue_id: {
+                  in: data.metals,
+                },
+              },
+            },
+          }),
+
+        ...(data.patterns &&
+          data.patterns.length > 0 && {
+            patterns: {
+              some: {
+                pattern_id: {
+                  in: data.patterns,
+                },
+              },
+            },
+          }),
+      },
+      include: {
+        variations: {
+          include: { image: true },
+        },
+        user: true,
+      },
+    });
+
+    return products;
+  } catch (error) {
+    return [];
+  }
+};
+
+export const getVendors = async () => {
+  return await prisma.user.findMany({
+    where: {
+      role_id: 2,
+    },
+    include: {
+      vendor: true,
+    },
+  });
+};
+
+export const getMetals = async () => {
+  return await prisma.attributeValue.findMany({
+    where: {
+      attribute_id: 5,
+    },
+  });
+};
+
+export const getPatterns = async () => {
+  return await prisma.pattern.findMany();
+};

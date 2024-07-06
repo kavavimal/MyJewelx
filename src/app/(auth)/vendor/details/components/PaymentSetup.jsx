@@ -526,26 +526,3 @@ const PaymentSetup = ({ setActiveStep, vendor, accountNumbers }) => {
 };
 
 export default PaymentSetup;
-
-export async function getServerSideProps() {
-  // try {
-  //   const accountNumbers = await getAccountNumbers();
-  //   return {
-  //     props: {
-  //       accountNumbers,
-  //     },
-  //   };
-  // } catch (error) {
-  //   return {
-  //     props: {
-  //       accountNumbers: [],
-  //       error: "Failed to fetch account numbers",
-  //     },
-  //   };
-  // }
-  return {
-    props: {
-      accountNumbers: [],
-    },
-  };
-}

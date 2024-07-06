@@ -59,7 +59,7 @@ export async function PUT(request, { params }) {
         }
       }
 
-      if (user_image) {
+      if (existingUser.image ) {
         updateData.image = {
           update: {
             path: user_image,

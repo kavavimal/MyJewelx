@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import ShopComponent from "./compos/ShopComponent";
+import { getCategories } from "@/actions/category";
 const getProducts = async () => {
   return await prisma.product.findMany({
     where: { status: "PUBLISHED" },
@@ -15,5 +16,6 @@ const getProducts = async () => {
 
 export default async function Shop() {
   const products = await getProducts();
-  return <ShopComponent products={products} />;
+  const categories = await getCategories();
+  return <ShopComponent products={products} categories={categories} />;
 }

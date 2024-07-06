@@ -11,7 +11,7 @@ const Hero = ({ categories, homeSlide }) => {
             <section className="bg-primary-250 py-5">
                 <div className="max-w-screen-xl mx-auto">
                     <div className="flex items-center justify-between gap-5">
-                        <div className="w-[220]">
+                        <div className="w-[220px]">
                             <ul className="border border-primary-200 rounded-sm	">
                                 <li className="flex items-center gap-2 h-9 p-5 border-b">
                                     <svg
@@ -31,37 +31,42 @@ const Hero = ({ categories, homeSlide }) => {
                                     </svg>{' '}
                                     <p className="text-sm">All Categories</p>
                                 </li>
-                                {categories.slice(0, 9).map((category) => {
-                                    return (
-                                        <li className="flex items-center gap-2 h-9 p-5 bg-white border-b">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                width="1em"
-                                                height="1em"
-                                                viewBox="0 0 24 24"
+                                {categories
+                                    .slice(0, 9)
+                                    .map((category, index) => {
+                                        return (
+                                            <li
+                                                key={index}
+                                                className="flex items-center gap-2 h-9 p-5 bg-white border-b"
                                             >
-                                                <path
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 3a3 3 0 1 0 6 0a3 3 0 1 0-6 0"
-                                                ></path>
-                                            </svg>
-                                            <p className="text-sm">
-                                                {category.name}
-                                            </p>
-                                        </li>
-                                    );
-                                })}
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="1em"
+                                                    height="1em"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 3a3 3 0 1 0 6 0a3 3 0 1 0-6 0"
+                                                    ></path>
+                                                </svg>
+                                                <p className="text-sm">
+                                                    {category.name}
+                                                </p>
+                                            </li>
+                                        );
+                                    })}
                             </ul>
                         </div>
-                        <div className="w-[800]">
+                        <div className="w-[800px]">
                             <Carousel className="rounded">
-                                {homeSlide.map((slide) => {
+                                {homeSlide.map((slide, index) => {
                                     return (
-                                        <div className="relative ">
+                                        <div className="relative" key={index}>
                                             <img
                                                 src={slide.image_url}
                                                 alt="image 2"
@@ -101,13 +106,13 @@ const Hero = ({ categories, homeSlide }) => {
                                 })}
                             </Carousel>
                         </div>
-                        <div className="w-[220]">
+                        <div className="w-[220px]">
                             <div className="relative flex flex-col gap-4">
                                 <Image
                                     src="/assets/images/dimond.jfif"
                                     width={100}
-                                    height={182}
-                                    className="w-full h-[182] object-cover mb-5"
+                                    height={100}
+                                    className="w-full h-[182px] object-cover mb-5"
                                 />
                                 <div className="absolute top-6 left-6">
                                     <p className="text-base font-playfairdisplay font-semibold w-4/5 ">

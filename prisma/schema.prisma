@@ -27,24 +27,27 @@ model Account {
 }
 
 model User {
-  id           String     @id @default(cuid())
-  email        String     @unique
+  id           String                @id @default(cuid())
+  email        String                @unique
   password     String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  // image        String?
-  account_type AcountType @default(CUSTOMER)
-  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  account_type AcountType            @default(CUSTOMER)
+  status       UserStatus            @default(ACTIVE)
   role_id      Int
   phone_number String?
   otp          String?
   firstName    String
   lastName     String
   products     Product[]
-  role         Role       @relation(fields: [role_id], references: [role_id])
+  role         Role                  @relation(fields: [role_id], references: [role_id])
   vendor       Vendor?
   accounts     Account[]
-  image		      Image?
+  image        Image?
+  carts        Cart?
+  reviews      Review[]
+  orders       Order[]               @relation("buyerOrders")
+  sellerOrders OrderSellerRelation[]
 }
 
 model Role {
@@ -79,7 +82,7 @@ model Product {
   product_name          String
   isOnlineBuyable       Boolean                 @default(false)
   country_id            Int?
-  country               Country?                 @relation(fields: [country_id], references: [country_id])
+  country               Country?                @relation(fields: [country_id], references: [country_id])
   user                  User                    @relation(fields: [user_id], references: [id])
   attributes            ProductAttribute[]
   ProductAttributeValue ProductAttributeValue[]
@@ -91,16 +94,17 @@ model Product {
   purchase_note         String?
 
   // Define relations to Category
-  category    Category @relation("CategoryProducts", fields: [categoryId], references: [category_id])
+  category    Category  @relation("CategoryProducts", fields: [categoryId], references: [category_id])
   subcategory Category? @relation("SubCategoryProducts", fields: [subCategoryId], references: [category_id])
 
-  collections ProductCollection[]
-  genders     ProductGender[]
-  patterns    ProductPatten[]
-  states      ProductState[]
-  tags        ProductTag[]
-  variations  ProductVariation[]
-  productChars	ProductChars[]
+  collections  ProductCollection[]
+  genders      ProductGender[]
+  patterns     ProductPatten[]
+  states       ProductState[]
+  tags         ProductTag[]
+  variations   ProductVariation[]
+  productChars ProductChars[]
+  reviews      Review[]
 }
 
 model Vendor {
@@ -125,6 +129,7 @@ model Vendor {
   bank_swift_code  String?
   bank_address     String?
   bank_city        String?
+  bank_state       String?
   bank_zip_code    String?
   bank_country     String?
   user             User      @relation(fields: [user_id], references: [id])
@@ -141,17 +146,8 @@ model Category {
 
   products            Product[] @relation("CategoryProducts")
   subCategoryProducts Product[] @relation("SubCategoryProducts")
-  image		      Image?
+  image               Image?
 }
-
-// model ProductCategory {
-//   category_id Int
-//   product_id  Int
-//   category    Category @relation(fields: [category_id], references: [category_id])
-//   product     Product  @relation(fields: [product_id], references: [product_id])
-
-//   @@id([category_id, product_id])
-// }
 
 model Country {
   country_id Int       @id @default(autoincrement())
@@ -168,7 +164,7 @@ model Tag {
   name        String       @unique
   description String?
   created_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
+  updated_at  DateTime     @default(now())
   products    ProductTag[]
 }
 
@@ -196,14 +192,14 @@ model Attribute {
 }
 
 model AttributeValue {
-  id                    Int                     @id @default(autoincrement())
-  name                  String
-  attribute_id          Int
-  created_at            DateTime                @default(now())
-  updated_at            DateTime                @updatedAt
-  attribute             Attribute               @relation(fields: [attribute_id], references: [attribute_id])
-  ProductAttributeValue ProductAttributeValue[]
-  attributeValuePricings	attributeValuePricing[]
+  id                     Int                     @id @default(autoincrement())
+  name                   String
+  attribute_id           Int
+  created_at             DateTime                @default(now())
+  updated_at             DateTime                @updatedAt
+  attribute              Attribute               @relation(fields: [attribute_id], references: [attribute_id])
+  ProductAttributeValue  ProductAttributeValue[]
+  attributeValuePricings attributeValuePricing[]
 }
 
 model ProductAttribute {
@@ -227,31 +223,31 @@ model ProductAttributeValue {
 }
 
 model attributeValuePricing {
-	pricing_id			        Int		          @id @default(autoincrement())
-	name			              String		      @unique
-	attributeValue_id	      Int
-	attributeValue		      AttributeValue	@relation(fields: attributeValue_id, references:id)
-	price			              Float
-	base_q			            Float
-	unit			              String
-	purity			            String?
+  pricing_id        Int            @id @default(autoincrement())
+  name              String         @unique
+  attributeValue_id Int
+  attributeValue    AttributeValue @relation(fields: [attributeValue_id], references: [id])
+  price             Float
+  base_q            Float
+  unit              String
+  purity            String?
 }
 
 model PricingHistory {
-	pricingHistory_id		  Int		            @id @default(autoincrement())
-	date				          String	          @unique
-	karat24				        Float
-	karat22				        Float
-	karat21				        Float
-  karat18				        Float
-	karat14				        Float
-	karat09				        Float
-	silver				        Float
-	platinum			        Float
-	palladium			        Float
+  pricingHistory_id Int    @id @default(autoincrement())
+  date              String @unique
+  karat24           Float
+  karat22           Float
+  karat21           Float
+  karat18           Float
+  karat14           Float
+  karat09           Float
+  silver            Float
+  platinum          Float
+  palladium         Float
 
-	created_at            DateTime          @default(now())
-	updated_at            DateTime          @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Collection {
@@ -319,22 +315,21 @@ model ProductGender {
 }
 
 model Characteristic {
-	chars_id		  Int		                     @id @default(autoincrement())
-	name		      String
-	chars_type	  CharsType
-	productChars	ProductChars[]
+  chars_id     Int            @id @default(autoincrement())
+  name         String
+  chars_type   CharsType
+  productChars ProductChars[]
 }
 
 model ProductChars {
-	chars_id		Int	
-	product_id		Int
-	
-	product    		        Product 		        @relation(fields: [product_id], references: [product_id])
-	characteristic       	Characteristic     	@relation(fields: [chars_id], references: [chars_id])
+  chars_id   Int
+  product_id Int
 
-	@@id([chars_id, product_id])
+  product        Product        @relation(fields: [product_id], references: [product_id])
+  characteristic Characteristic @relation(fields: [chars_id], references: [chars_id])
+
+  @@id([chars_id, product_id])
 }
-
 
 model ProductVariation {
   variation_id              Int                         @id @default(autoincrement())
@@ -364,21 +359,23 @@ model ProductVariation {
   product                   Product                     @relation(fields: [product_id], references: [product_id], onDelete: Cascade)
   productAttributeValues    ProductVariationAttribute[]
   cartItems                 CartItem[]
+  orderItems                OrderItem[]
   gemstoneProductVariations GemstoneProductVariation[]
   image                     Image[]
 }
 
 model Image {
-	image_id		      Int			          @id @default(autoincrement())
-	path			        String			
-	image_type		    String
-	variation_id		  Int?
-	user_id			      String?           @unique
-	category_id		    Int?              @unique
-	productvariation	ProductVariation?	@relation(fields: [variation_id], references: [variation_id], onDelete: Cascade)
-	category		      Category?		      @relation(fields: [category_id], references: [category_id], onDelete: Cascade)
-	user			        User?			      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  image_id         Int               @id @default(autoincrement())
+  path             String
+  image_type       String
+  variation_id     Int?
+  user_id          String?           @unique
+  category_id      Int?              @unique
+  productvariation ProductVariation? @relation(fields: [variation_id], references: [variation_id], onDelete: Cascade)
+  category         Category?         @relation(fields: [category_id], references: [category_id], onDelete: Cascade)
+  user             User?             @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
+
 model Gemstone {
   gemstone_id               Int                        @id @default(autoincrement())
   name                      String                     @unique
@@ -407,7 +404,9 @@ model ProductVariationAttribute {
 model Cart {
   cart_id Int @id @default(autoincrement())
 
-  user_id    String @unique
+  user_id String @unique
+  user    User   @relation(fields: [user_id], references: [id])
+
   cart_total Float
 
   discount      Float
@@ -442,27 +441,98 @@ model OtpVerification {
   @@unique([email, phone_number])
 }
 
+// Define the data model for orders
+model Order {
+  id              Int    @id @default(autoincrement())
+  shippingAddress String
+  billingAddress  String
+  paymentMethod   String
+
+  status     OrderStatus           @default(PENDING)
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+  seller     OrderSellerRelation[]
+  user       User                  @relation(fields: [userId], references: [id], "buyerOrders")
+  userId     String
+  orderItems OrderItem[]
+}
+
+model OrderSellerRelation {
+  order_id Int
+  user_id  String
+  order    Order  @relation(fields: [order_id], references: [id])
+  user     User   @relation(fields: [user_id], references: [id])
+
+  @@id([order_id, user_id])
+}
+
+model OrderItem {
+  id                 Int              @id @default(autoincrement())
+  name               String
+  quantity           Int
+  price              Float
+  variationData      String
+  // Relationships
+  order              Order            @relation(fields: [orderId], references: [id])
+  orderId            Int
+  productVariation   ProductVariation @relation(fields: [productVariationId], references: [variation_id])
+  productVariationId Int
+}
+
+// Define the data model for reviews
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int // 1 to 5 stars
+  text      String?
+  createdAt DateTime @default(now())
+  // Relationships
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  product   Product  @relation(fields: [productId], references: [product_id])
+  productId Int
+}
+
 enum AcountType {
   CUSTOMER
   ADMIN
   VENDOR
 }
 
+enum OrderStatus {
+  PENDING
+  OUTOFSTOCK
+  USERCANCELLED
+  SELLERCANCELLED
+  PROCESSING
+  PACKED
+  SHIPPED
+  OUTFORDELIVERY
+  DELIVERED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
 enum UserStatus {
   ACTIVE
   DISABLED
+  SUSPENDED
 }
 
 enum ProductStatus {
   DRAFT
   PUBLISHED
+  ARCHIVED
 }
 
 enum CharsType {
-	BRAND
-	STYLE
-	THEME
-	TREND
+  BRAND
+  STYLE
+  THEME
+  TREND
 }
 
 model HomeSlider {

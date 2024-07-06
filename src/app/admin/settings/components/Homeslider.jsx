@@ -11,16 +11,17 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import DeleteSlide from './DeleteSlide';
+import Image from 'next/image';
 const Homeslider = ({ homeslider }) => {
     const columns = [
-        // {
-        //     name: 'Image',
-        //     selector: (row) => (
-        //         <>
-        //             <Image src={row?.image_url} width={50} height={50} />
-        //         </>
-        //     ),
-        // },
+        {
+            name: 'Image',
+            selector: (row) => (
+                <>
+                    <Image src={row?.image_url} width={50} height={50} />
+                </>
+            ),
+        },
         {
             name: 'Title',
             selector: (row) => row?.title,
@@ -140,16 +141,6 @@ const Homeslider = ({ homeslider }) => {
                                         type="text"
                                         name="link_url"
                                         value={formik.values?.link_url || ''}
-                                        onChange={formik.handleChange}
-                                    />
-                                </div>
-                                <div className="mb-2 w-1/2">
-                                    <Input
-                                        label="Description"
-                                        type="file"
-                                        id="description"
-                                        value={formik.values?.description || ''}
-                                        name="description"
                                         onChange={formik.handleChange}
                                     />
                                 </div>

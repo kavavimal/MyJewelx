@@ -4,14 +4,19 @@ import Link from "next/link";
 
 const ProductCard = ({ product }) => {
   return (
-    <div className="w-[245px] font-emirates border rounded m-2 p-3">
+    <div className="w-auto font-emirates border rounded m-2 p-3">
       <div>
         <Link href={`/product/${product?.product_id}`}>
           <Image
-            src={product?.variations[0]?.image[0].path}
+            src={
+              product?.variations &&
+              product?.variations.length > 0 &&
+              product?.variations[0]?.image[0].path
+            }
             alt="image for design"
             width="300"
             height="300"
+            className="w-[200px] h-[200px] object-cover rounded"
           />
         </Link>
       </div>
@@ -26,7 +31,13 @@ const ProductCard = ({ product }) => {
           <p>some specs(grade)</p>
           <p>10 gram</p>
         </div>
-        <Engagement variation={product?.variations[0]} />
+        <Engagement
+          variation={
+            product?.variations &&
+            product?.variations.length > 0 &&
+            product?.variations[0]
+          }
+        />
         {product?.user && (
           <p className="font-light leading-[19.6px] text-left my-1">
             Seller: {product?.user?.firstName + " " + product?.user?.lastName}

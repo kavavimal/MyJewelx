@@ -12,7 +12,7 @@ const TopVendors = ({ vendors }) => {
         speed: 500,
         slidesToShow: 5,
         slidesToScroll: 1,
-        initialSlide: 5,
+        initialSlide: 0,
         responsive: [
             {
                 breakpoint: 1024,
@@ -58,6 +58,7 @@ const TopVendors = ({ vendors }) => {
                                                 className="text-center"
                                                 key={index}
                                             >
+                                                {console.log(vendor.firstName)}
                                                 <Link href="/">
                                                     <Image
                                                         src="/assets/images/latest-product.png"

@@ -26,6 +26,7 @@ const vendorPaymentInfoSchema = z.object({
   bank_city: z.string().min(1, "License Issued date required"),
   bank_zip_code: z.string().min(1, "License Issued date required"),
   bank_country: z.string().min(1, "License Issued date required"),
+  bank_state: z.string().min(1, "License Issued date required"),
 });
 
 export async function PUT(request, { params }) {
@@ -53,6 +54,7 @@ export async function PUT(request, { params }) {
     const bank_city = res.get("bank_city");
     const bank_zip_code = res.get("bank_zip_code");
     const bank_country = res.get("bank_country");
+    const bank_state = res.get("bank_state");
 
     let vendorUpdateData = {};
     if (license_number) {
@@ -77,6 +79,7 @@ export async function PUT(request, { params }) {
         bank_swift_code,
         bank_address,
         bank_city,
+        bank_state,
         bank_zip_code,
         bank_country,
       });

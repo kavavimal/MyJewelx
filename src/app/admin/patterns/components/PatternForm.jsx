@@ -156,7 +156,9 @@ const PatternForm = ({ patterns }) => {
   return (
     <>
       <div className="flex items-center justify-between mb-10 intro-y">
-        <h2 className="text-2xl font-semibold">Product Attributes</h2>
+        <h2 className="text-2xl font-semibold">
+          {pattern ? "Edit" : "Add"} Pattern
+        </h2>
         <Button
           size="md"
           className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
@@ -173,7 +175,7 @@ const PatternForm = ({ patterns }) => {
               d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
             ></path>
           </svg>
-          Add Attribute
+          Add Pattern
         </Button>
       </div>
 

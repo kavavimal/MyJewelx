@@ -215,7 +215,7 @@ const authOptions = {
           role: existingUser.role.role_name,
           roles: existingUser.role,
           permissions: permissions,
-          status : existingUser.status
+          status: existingUser.status,
         };
       },
     }),
@@ -245,7 +245,7 @@ const authOptions = {
           image: token.image,
           account_type: token.account_type,
           role: token.role,
-          status : token.status
+          status: token.status,
         },
       };
     },

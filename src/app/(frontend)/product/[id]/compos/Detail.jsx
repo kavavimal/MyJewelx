@@ -413,19 +413,22 @@ const Detail = ({ product }) => {
                 </p>
               </div>
               <div className="flex mt-6 items-center border-b-1 border-gray-100">
-                <div className="flex">
-                  <span className="mr-3">Color</span>
-                  <button className="border-2 border-gray-300 rounded-full w-6 h-6 focus:outline-none"></button>
-                  <button className="border-2 border-gray-300 ml-1 bg-gray-700 rounded-full w-6 h-6 focus:outline-none"></button>
-                  <button className="border-2 border-gray-300 ml-1 bg-yellow-500 rounded-full w-6 h-6 focus:outline-none"></button>
-                </div>
-                {sizes.length > 0 && (
-                  <div className="flex ml-6 items-center">
-                    <span className="mr-3">Size</span>
+                {product?.variations.length > 0 && (
+                  <div className="flex mb-4 items-center">
+                    <span className="mr-3">Variation</span>
                     <div className="relative">
-                      <select className="rounded border appearance-none border-gray-300 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:border-yellow-500 text-base pl-3 pr-10">
-                        {sizes?.map((size, index) => (
-                          <option key={index}>{size}</option>
+                      <select
+                        className="rounded border appearance-none border-gray-300 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:border-yellow-500 text-base pl-3 pr-10"
+                        onChange={(e) => {
+                          const vid = e.target.value;
+                          const variationnew = product.variations.find((v) => Number(v.variation_id) === Number(vid));
+                          setVariation(variationnew);
+                        }}
+                      >
+                        {product?.variations?.map((v, index) => (
+                          <option key={index} value={v.variation_id}>
+                            {v.variation_name}
+                          </option>
                         ))}
                       </select>
                       <span className="absolute right-0 top-0 h-full w-10 text-center text-gray-600 pointer-events-none flex items-center justify-center">

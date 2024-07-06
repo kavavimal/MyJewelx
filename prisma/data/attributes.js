@@ -87,7 +87,6 @@ module.exports = [
       { name: "Karat 18", description: "" },
       { name: "Karat 14", description: "" },
       { name: "Karat 09", description: "" },
-      { name: "Palladium", description: "" },
     ],
   },
 ];

@@ -95,6 +95,7 @@ const CartSidebar = () => {
                                   cartItem.productVariation?.product
                                     ?.product_name
                                 }
+                                :{cartItem.productVariation.variation_name}
                               </a>
                             </h3>
                             <p className="ml-4 w-1/3 text-right">
@@ -126,13 +127,13 @@ const CartSidebar = () => {
                 <div className="mt-6 flex">
                   <Link
                     href="/cart"
-                    className="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
+                    className="flex items-center justify-center text-center text-[#F0AE11] bg-white border py-2 px-4 border-[#F0AE11] focus:outline-none hover:bg-yellow-600 hover:text-white rounded"
                   >
                     View Cart
                   </Link>
                   <Link
                     href="/checkout"
-                    className="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
+                    className="flex items-center justify-center text-center text-[#F0AE11] bg-white border py-2 px-4 border-[#F0AE11] focus:outline-none hover:bg-yellow-600 hover:text-white rounded"
                   >
                     Checkout
                   </Link>

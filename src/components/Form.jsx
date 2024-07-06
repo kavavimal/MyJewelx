@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import { signIn, useSession } from "next-auth/react";
-import LoadingDots from "@/components/loading-dots";
-// import toast from "react-hot-toast";
 import Link from "next/link";
 import { redirect, useRouter } from "next/navigation";
-import { USER_ROLES } from "@/lib/constants";
 import { Button, Checkbox, Input, Typography } from "@material-tailwind/react";
 import { enqueueSnackbar } from "notistack";
 import { AcountType } from "@prisma/client";
@@ -505,7 +502,7 @@ export default function Form({ type }) {
                 type="button"
                 variant="outlined"
                 className="rounded w-full border-secondary-200 text-secondary-200 font-emirates normal-case text-base font-normal"
-                onClick={() => signIn("google")}
+                onClick={() => socialLogin("google")}
               >
                 <span className="flex gap-5 items-center justify-center">
                   <svg

@@ -66,6 +66,15 @@ const RegistrationForm = ({ storeURLs, emails }) => {
     confirm_password: Yup.string()
       .oneOf([Yup.ref("password"), null], "Passwords do not match")
       .required("Confirm Password is required"),
+    file: Yup.mixed()
+      .test(
+        "is-image",
+        "Image should be png, jpg or jpeg",
+        (value) =>
+          !value ||
+          ["image/png", "image/jpg", "image/jpeg"].includes(value.type)
+      )
+      .required("Please upload an image"),
   });
 
   const handleFileChange = (e) => {
@@ -483,7 +492,7 @@ const RegistrationForm = ({ storeURLs, emails }) => {
                       />
                     </label>
 
-                    {formik?.errors?.file && (
+                    {formik?.errors?.file && formik?.touched?.file && (
                       <div className="text-red-500 text-xs mt-2 ms-2">
                         {formik.errors.file}
                       </div>

@@ -1,6 +1,7 @@
 "use client";
 import { useCartStore } from "@/contexts/cartStore";
 import { CURRENCY_SYMBOL } from "@/utils/constants";
+import Link from "next/link";
 import React from "react";
 
 export default function CartSummary() {
@@ -49,7 +50,7 @@ export default function CartSummary() {
                 $799
               </dd>
             </dl>*/}
-          </div> 
+          </div>
 
           <dl className="flex items-center justify-between gap-4 border-t border-gray-200 pt-2 dark:border-gray-700">
             <dt className="text-base font-bold text-gray-900 dark:text-white">
@@ -61,12 +62,12 @@ export default function CartSummary() {
           </dl>
         </div>
 
-        <a
-          href="#"
-          className="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+        <Link
+          href="/checkout"
+          className="block text-center text-[#F0AE11] bg-white border py-2 px-4 border-[#F0AE11] focus:outline-none hover:bg-yellow-600 hover:text-white rounded"
         >
           Proceed to Checkout
-        </a>
+        </Link>
 
         <div className="flex items-center justify-center gap-2">
           <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
