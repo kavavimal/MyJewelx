@@ -1,5 +1,14 @@
 import moment from "moment";
 import { enqueueSnackbar } from "notistack";
+import { CURRENCY_SYMBOL } from "./constants";
+
+export function printPrice(price = "") {
+  if (price === "") {
+    return "";
+  } else {
+    return `${CURRENCY_SYMBOL} ${Number(price).toFixed(2)}`;
+  }
+}
 
 export function checkPermission(userPermissions = [], allowPermission = "") {
   return (
@@ -34,10 +43,13 @@ export function generatePass() {
   return pass;
 }
 
-export const transformAttributeName = (name) => {
+export const transformAttributeName = (name, short = false) => {
   const karatMatch = name.match(/(Karat\s\d+)/i);
   if (karatMatch) {
     const parts = karatMatch[0].split(" ");
+    if (short) {
+      return `${parts[1]}K`;
+    }
     return `${parts[1]} ${parts[0]}`;
   }
   return name;
@@ -85,3 +97,7 @@ export function showToast(data) {
     },
   });
 }
+
+export const truncate = (string, n) => {
+  return string?.length > n ? string.substr(0, n - 1) + "..." : string;
+};

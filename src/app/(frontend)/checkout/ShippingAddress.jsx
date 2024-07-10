@@ -22,7 +22,7 @@ export default function ShippingAddress({
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-        Shipping Address
+        Shipping Information
       </h2>
 
       {!editAddress ? (
@@ -43,27 +43,112 @@ export default function ShippingAddress({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
+        <div className="border p-2 flex flex-wrap items-center justify-start">
+          <div className="w-1/2 p-4">
             <label
-              for="your_name"
+              for="firstName"
               className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
             >
-              Your name{" "}
+              First Name
             </label>
             <input
               type="text"
-              id="your_name"
-              name="name"
+              id="firstName"
+              name="firstName"
               className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
-              placeholder="Bonnie Green"
+              placeholder="First Name"
               required
-              value={address.name}
+              value={address.firstName}
               onChange={handleInputChange}
             />
           </div>
 
-          <div>
+          <div className="w-1/2 p-4">
+            <label
+              for="lastName"
+              className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+            >
+              Last Name
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
+              placeholder="Last Name"
+              required
+              value={address.lastName}
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="w-1/2 p-4">
+            <label
+              for="email"
+              className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+            >
+              Email
+            </label>
+            <div className="flex items-center">
+              <div className="relative w-full">
+                <input
+                  type="email"
+                  id="email"
+                  className="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:border-s-gray-700  dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500"
+                  placeholder="Email"
+                  name="email"
+                  value={address.email}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            </div>
+          </div>
+          <div className="w-1/2 p-4">
+            <label
+              for="phone-input-3"
+              className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+            >
+              Phone Number*{" "}
+            </label>
+            <div className="flex items-center">
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  id="phone-input"
+                  className="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:border-s-gray-700  dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500"
+                  pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                  placeholder="123-456-7890"
+                  name="phone"
+                  value={address.phone}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            </div>
+          </div>
+          <div className="w-full p-4">
+            <label
+              for="address-input"
+              className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+            >
+              Address *
+            </label>
+            <div className="flex items-center">
+              <div className="relative w-full">
+                <textarea
+                  id="address-input"
+                  className="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:border-s-gray-700  dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500"
+                  placeholder="address"
+                  name="address"
+                  onChange={handleInputChange}
+                  required
+                >
+                  {address.address}
+                </textarea>
+              </div>
+            </div>
+          </div>
+          <div className="w-1/2 p-4">
             <div className="mb-2 flex items-center gap-2">
               <label
                 for="select-country-input-3"
@@ -88,7 +173,7 @@ export default function ShippingAddress({
             </select>
           </div>
 
-          <div>
+          <div className="w-1/2 p-4">
             <div className="mb-2 flex items-center gap-2">
               <label
                 for="select-city-input-3"
@@ -112,30 +197,7 @@ export default function ShippingAddress({
             </select>
           </div>
 
-          <div>
-            <label
-              for="address-input"
-              className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Address *
-            </label>
-            <div className="flex items-center">
-              <div className="relative w-full">
-                <input
-                  type="text"
-                  id="address-input"
-                  className="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:border-s-gray-700  dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500"
-                  placeholder="address"
-                  name="address"
-                  value={address.address}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          <div>
+          <div className="w-1/2 p-4">
             <label
               for="zipcode-input"
               className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
@@ -156,35 +218,11 @@ export default function ShippingAddress({
                 />
               </div>
             </div>
-          </div>
-          <div>
-            <label
-              for="phone-input-3"
-              className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Phone Number*{" "}
-            </label>
-            <div className="flex items-center">
-              <div className="relative w-full">
-                <input
-                  type="text"
-                  id="phone-input"
-                  className="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:border-s-gray-700  dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500"
-                  pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
-                  placeholder="123-456-7890"
-                  name="phone"
-                  value={address.phone}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
+            <div className="w-full mt-5">
+              <ButtonComponent onClick={() => saveAddress()}>
+                Save
+              </ButtonComponent>
             </div>
-          </div>
-
-          <div className="sm:col-span-2">
-            <ButtonComponent onClick={() => saveAddress()}>
-              Save Shipping Address
-            </ButtonComponent>
           </div>
         </div>
       )}

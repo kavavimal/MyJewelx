@@ -6,6 +6,7 @@ import LoadingDots from "@/components/loading-dots";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import FrontendHeader from "@/components/frontend/common/Header";
+import Footer from "@/components/frontend/common/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,22 +31,21 @@ export const checkUserSession = async () => {
   }
   return false;
 };
+const getCategories = () => prisma.category.findMany({});
 
 export default async function RootLayout({ children }) {
-  const user = await checkUserSession();
-
+  const categories = await getCategories();
   return (
     <Suspense
       fallback={
-        <div className="fixed h-full w-full flex item-center justify-center bg-gray-400/[.5]  top-0 left-0 z-40">
-          <LoadingDots color="#808080" size="15px" />
+        <div className="h-screen w-full flex items-center justify-center z-40">
+          <LoadingDots size={20} />
         </div>
       }
     >
-      <FrontendHeader />
-      {/* <Header user={user} /> */}
+      <FrontendHeader categories={categories} />
       {children}
-      {/* <Footer /> */}
+      <Footer />
     </Suspense>
   );
 }

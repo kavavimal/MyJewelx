@@ -703,7 +703,7 @@ const ProductForm = ({
     if (product) {
       let themes = [];
       let styles = [];
-      let brands = [];
+      let brands = "";
       let trends = [];
       let variation = [];
       variation = product.variations;
@@ -720,7 +720,7 @@ const ProductForm = ({
           }
 
           if (element.characteristic?.chars_type === CharsType.BRAND) {
-            brands.push(element.chars_id);
+            brands = element.chars_id;
           }
 
           if (element.characteristic?.chars_type === CharsType.TREND) {
@@ -1355,17 +1355,14 @@ const ProductForm = ({
                   <div>
                     <Typography>Brand</Typography>
                     <ReactSelect
-                      isMulti
                       placeholder="Brand"
                       name="brand"
                       options={brandsOptions}
                       styles={style}
-                      value={brandsOptions.filter((option) =>
-                        productBrand.includes(option.value)
-                      )}
-                      onChange={(options) =>
-                        setProductBrand(options.map((option) => option.value))
-                      }
+                      value={brandsOptions.find((option) => {
+                        return productBrand === option.value;
+                      })}
+                      onChange={({ value }) => setProductBrand(value)}
                     />
                   </div>
 

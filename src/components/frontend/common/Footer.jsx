@@ -1,7 +1,8 @@
+"use client";
 import Link from "next/link";
 import React from "react";
-import ProfileMenu from "../ProfileMenu";
 import Image from "next/image";
+import { Button, IconButton } from "@material-tailwind/react";
 
 export default function Footer() {
   return (
@@ -10,94 +11,107 @@ export default function Footer() {
         <div className="footer-bar pb-4">
           <div className="container">
             <div className="flex items-start justify-between">
-              <div className="w-1/3">
+              <div className="w-1/4 flex flex-col gap-5">
                 <Link
                   href="/"
                   className="flex items-center space-x-3 rtl:space-x-reverse"
                 >
-                  <Image width={160} height={160} src="/logo.png" alt="logo" />
+                  <Image
+                    width={160}
+                    height={160}
+                    src="/assets/images/logo.svg"
+                    alt="logo"
+                  />
                 </Link>
-                <p>
+                <p className="text-secondary-50 tracking-wide">
                   Lorem Ipsum is simply dummy text of the printing and
                   typesetting industry. Lorem Ipsum has been the industry.
                 </p>
-                <div className="">
-                  <form action="POST">
+                <div>
+                  <form className="flex">
                     <input
                       type="text"
-                      name=""
-                      id=""
+                      name="search"
+                      className="h-10 rounded-s border-[#E6E6E6] border-s-[1.5px] border-y-[1.5px] focus:outline-none px-3 placeholder:text-secondary-100 text-secondary-100"
                       placeholder="Your Email Address"
                     />
-                    <input type="button" value="Subscribe" />
+                    <Button className="hover:shadow-none shadow-none outline-none rounded-s-none rounded-e focus:outline-none active:outline-none">
+                      Subscribe
+                    </Button>
                   </form>
                 </div>
               </div>
               <div>
-                <h3 className="text-base font-semibold">Company</h3>
+                <h3 className="text-lg font-semibold font-playfairdisplay mb-3">
+                  Company
+                </h3>
                 <ul>
                   <li>
-                    <Link href="/" className="text-xs">
+                    <Link href="/" className="text-sm text-secondary-50">
                       About us
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-xs">
+                    <Link href="/" className="text-sm text-secondary-50">
                       Contact us
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-xs">
+                    <Link href="/" className="text-sm text-secondary-50">
                       How it works
                     </Link>
                   </li>
                 </ul>
               </div>
               <div>
-                <h3 className="text-base font-semibold">Help and Support</h3>
+                <h3 className="text-lg font-semibold font-playfairdisplay mb-3">
+                  Help and Support
+                </h3>
                 <ul>
                   <li>
-                    <Link href="/" className="text-xs">
+                    <Link href="/" className="text-sm text-secondary-50">
                       Shipping info
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-xs">
+                    <Link href="/" className="text-sm text-secondary-50">
                       Returns
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-xs">
+                    <Link href="/" className="text-sm text-secondary-50">
                       How to order
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-xs">
+                    <Link href="/" className="text-sm text-secondary-50">
                       How to track
                     </Link>
                   </li>
                 </ul>
               </div>
               <div>
-                <h3 className="text-base font-semibold">Customer Service</h3>
+                <h3 className="text-lg font-semibold font-playfairdisplay mb-3">
+                  Customer Service
+                </h3>
                 <ul>
                   <li>
-                    <Link href="/" className="text-xs">
+                    <Link href="/" className="text-sm text-secondary-50">
                       Customer Service
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-xs">
+                    <Link href="/" className="text-sm text-secondary-50">
                       Terms and Condition
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-xs">
+                    <Link href="/" className="text-sm text-secondary-50">
                       Transaction
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-xs">
+                    <Link href="/" className="text-sm text-secondary-50">
                       Take our feedback survey
                     </Link>
                   </li>
@@ -286,23 +300,25 @@ export default function Footer() {
                 <p>2024 my jewlex All right reserved </p>
               </div>
               <div>
-                <ul className="flex gap-4">
-                  <li>
+                <div className="flex gap-3 items-center">
+                  <div>
                     <Link href="/" className="text-xs text-[#808080;]">
                       Privacy Policy
                     </Link>
-                  </li>
-                  <li>
+                  </div>
+                  <div class="border-t sm:border-t-0 sm:border-s h-3 border-secondary-50 border"></div>
+                  <div>
                     <Link href="/" className="text-xs text-[#808080;]">
                       Cookie Policy
                     </Link>
-                  </li>
-                  <li>
+                  </div>
+                  <div class="border-t sm:border-t-0 sm:border-s h-3 border-secondary-50 border"></div>
+                  <div>
                     <Link href="/" className="text-xs text-[#808080;]">
                       Terms and Conditions
                     </Link>
-                  </li>
-                </ul>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

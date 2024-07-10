@@ -15,6 +15,13 @@ export const useCartStore = create()(
     (set, get) => ({
       cartItems: [],
       loading: false,
+      findItem: (item_id) => {
+        const { cartItems } = get();
+        if (!cartItems.length > 0) {
+          return false;
+        }
+        return cartItems.find((item) => item.cartItem_id === item_id);
+      },
       count: () => {
         const { cartItems } = get();
         if (cartItems.length)
@@ -52,7 +59,6 @@ export const useCartStore = create()(
         let newCartItems = [...cartItems];
         const itemres = await addToCart(item);
         if (itemres.status === "success") {
-          console.log("item res", itemres);
           newCartItems = [...newCartItems, itemres.cartItem];
           set({ cartItems: newCartItems, loading: false });
         } else {

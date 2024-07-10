@@ -5,7 +5,7 @@ import Button from "@/components/Button";
 
 export default async function Login() {
   return (
-    <div className="h-screen bg-[#FFFCF5] w-full overflow-auto">
+    <div className="py-10 bg-[#FFFCF5] w-full overflow-auto">
       <div className="h-full flex items-center justify-center">
         <div className="shadow-3xl p-10 bg-white max-w-md w-full rounded border-t-2 border-primary-200">
           <div className="flex justify-between items-center mb-5">

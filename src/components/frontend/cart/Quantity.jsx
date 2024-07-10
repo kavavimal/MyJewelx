@@ -1,46 +1,57 @@
-// import { removeFromCart, updateCartQuantity } from "@/actions/cart";
-import { showToast } from "@/utils/helper";
-import { useEffect, useState } from "react";
-import { useCartStore } from "@/contexts/cartStore";
+"use client";
 import LoadingDots from "@/components/loading-dots";
+import { useCartStore } from "@/contexts/cartStore";
+import { useEffect, useState } from "react";
 
 const Quantity = ({ cartItem }) => {
-  const loading = useCartStore((state) => state.loading);
+  const cartItems = useCartStore((state) => state.cartItems);
+  const findItem = useCartStore((state) => state.findItem);
   const updateQanity = useCartStore((state) => state.updateCartQantity);
   const removeFromCart = useCartStore((state) => state.removeFromCart);
+  const [localLoading, setLocalLoading] = useState(false);
+  const [q, setQ] = useState(cartItem.quantity);
 
-  const quantityChange = (type) => {
-    let newQ = cartItem?.quantity;
+  useEffect(() => {
+    let cartI = findItem(cartItem.cartItem_id);
+    if (cartI.quantity !== q) {
+      setQ(cartI.quantity);
+    }
+  }, [cartItems]);
+  const quantityChange = async (type) => {
+    setLocalLoading(true);
+    let cartI = findItem(cartItem.cartItem_id);
+    let newQ = cartI?.quantity;
     if (type === "increment") {
       newQ = parseInt(newQ) + 1;
       // setQuantity((prevQuantity) => prevQuantity + 1);
     } else if (type === "decrement" && cartItem?.quantity === 1) {
-      removeFromCart(cartItem.cartItem_id);
+      await removeFromCart(cartItem.cartItem_id);
     } else if (type === "decrement" && cartItem?.quantity > 1) {
       newQ = parseInt(newQ) - 1;
       // setQuantity((prevQuantity) => prevQuantity - 1);
     }
-    updateQanity(cartItem.cartItem_id, newQ);
+    await updateQanity(cartItem.cartItem_id, newQ);
+    setLocalLoading(false);
   };
 
   return (
     <>
-      {loading && <LoadingDots />}
-      <div className="flex items-center">
+      {localLoading === true && <LoadingDots />}
+      <div className="flex items-center border rounded-sm text-md pointer">
         <button
           type="button"
-          disabled={cartItem?.quantity === 1}
+          disabled={q === 1}
           id="decrement-button"
           data-input-counter-decrement="counter-input"
-          className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+          className="inline-flex h-7 w-7 items-center justify-center  border-r"
           onClick={() => quantityChange("decrement")}
         >
           <svg
-            className="h-2.5 w-2.5 text-gray-900 dark:text-white"
+            className="mt-1 h-2 w-4 text-gray-900"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
-            viewBox="0 0 18 2"
+            viewBox="0 0 18 18"
           >
             <path
               stroke="currentColor"
@@ -54,22 +65,21 @@ const Quantity = ({ cartItem }) => {
         <input
           type="text"
           id="counter-input"
-          disabled={loading}
           data-input-counter
-          className="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white"
+          className="w-10 border-0 bg-transparent text-center font-medium focus:outline-0"
           placeholder=""
-          value={cartItem?.quantity}
+          value={q < 9 ? "0" + q : q}
           required
         />
         <button
           type="button"
           id="increment-button"
           data-input-counter-increment="counter-input"
-          className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+          className="inline-flex h-7 w-7 items-center justify-center border-l"
           onClick={() => quantityChange("increment")}
         >
           <svg
-            className="h-2.5 w-2.5 text-gray-900 dark:text-white"
+            className="h-2.5 w-2.5 text-gray-900"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

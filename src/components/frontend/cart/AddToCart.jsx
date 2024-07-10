@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { usePathname, useRouter } from "next/navigation";
 import Quantity from "./Quantity";
 import LoadingDots from "@/components/loading-dots";
+import ButtonComponent from "../ButtonComponent";
 
 export default function AddToCart({ variation }) {
   const Router = useRouter();
@@ -38,12 +39,13 @@ export default function AddToCart({ variation }) {
     }
   }
   return (
-    <button
-      class="flex text-center text-black weight-700 bg-[#F0AE11] border-0 py-2 flex-1 px-3 mr-2 focus:outline-none hover:bg-yellow-600 rounded"
-      onClick={onAddtoCart}
-    >
+    <ButtonComponent onClick={onAddtoCart}>
+      {loading === true && (
+        <span className="px-2">
+          <LoadingDots />
+        </span>
+      )}
       Add to Cart
-      {loading === true && <LoadingDots />}
-    </button>
+    </ButtonComponent>
   );
 }

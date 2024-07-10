@@ -47,10 +47,12 @@ export const registrationValidationSchema = Yup.object({
   firstName: Yup.string().required("FirstName is required"),
   lastName: Yup.string().required("LastName is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
-  password: Yup.string().required("Password is required"),
-  confirm_password: Yup.string()
-    .required("Confirm password is required")
-    .oneOf([Yup.ref("password"), null], "Password must match"),
+  password: Yup.string()
+    .required("Password is required")
+    .max(8, "Password must have 8 characters"),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password")], "Passwords must match")
+    .required("Confirm password is required"),
 });
 
 export const productAttributeValidationSchema = Yup.object({
@@ -92,68 +94,3 @@ export const additionalValidationSchema = Yup.object().shape({
   return_policy: Yup.string().required("Return policy is required"),
   delivery_includes: Yup.string().required("Delivery includes is required"),
 });
-
-export const variationValidationSchema = (isVariation) => {
-  const baseSchema = {
-    description: z
-      .string()
-      .min(1, "Description is required")
-      .max(200, "Description must be less than 200 characters"),
-    length: z.number().min(0, "Length is required"),
-    width: z.number().min(0, "Width is required"),
-    height: z.number().min(0, "Height is required"),
-    thickness: z.number().min(0, "Thickness is required"),
-    sku: z
-      .string()
-      .min(1, "SKU is required")
-      .max(20, "SKU must be less than 20 characters"),
-    stock_management: z.boolean().optional(),
-    stock_status: z.enum(
-      ["in_stock", "out_of_stock"],
-      "Stock status is required"
-    ),
-    weight_unit: z
-      .string()
-      .min(1, "Weight unit is required")
-      .max(20, "Weight unit must be less than 20 characters"),
-    net_weight: z.number().min(0, "Net weight is required"),
-    gross_weight: z
-      .number()
-      .min(0, "Gross weight should be greater than zero")
-      .refine((val, ctx) => val >= ctx.parent.net_weight, {
-        message: "Gross weight should be more than net weight",
-      }),
-    isPriceFixed: z.boolean(),
-    regular_price: z
-      .number()
-      .optional()
-      .refine(
-        (val, ctx) => {
-          if (ctx.parent.isPriceFixed && val === undefined) {
-            return false;
-          }
-          return true;
-        },
-        { message: "Regular price is required when price is fixed" }
-      ),
-  };
-
-  if (!isVariation) {
-    baseSchema.files = z
-      .array(
-        z.object({
-          size: z
-            .number()
-            .refine((val) => val <= FILE_SIZE, { message: "File too large" }),
-          type: z.string().refine((val) => SUPPORTED_FORMATS.includes(val), {
-            message: "Unsupported Format",
-          }),
-        })
-      )
-      .min(1, { message: "At least one image is required" });
-  }
-
-  return z.object(baseSchema);
-};
-
-export default variationValidationSchema;

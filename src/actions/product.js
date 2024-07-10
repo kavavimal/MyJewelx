@@ -5,6 +5,22 @@ import { revalidatePath } from "next/cache";
 
 import prisma from "@/lib/prisma";
 
+export const getProducts = () => {
+  return prisma.product.findMany({
+    include: {
+      variations: {
+        include: {
+          image: true,
+        },
+      },
+      user: true,
+    },
+    orderBy: {
+      product_id: "desc",
+    },
+  });
+};
+
 export const updateProductStatus = async (productId, newStatus) => {
   const user = await checkUserSession();
 
@@ -191,6 +207,7 @@ export const searchProducts = async (data) => {
               in: data.categories,
             },
           }),
+
         ...(data.vendors &&
           data.vendors.length > 0 && {
             user: {
@@ -232,12 +249,47 @@ export const searchProducts = async (data) => {
               },
             },
           }),
+
+        ...(data.collections &&
+          data.collections.length > 0 && {
+            collections: {
+              some: {
+                collection_id: {
+                  in: data.collections,
+                },
+              },
+            },
+          }),
+
+        ...(data.characteristics &&
+          data.characteristics.length > 0 && {
+            productChars: {
+              some: {
+                characteristic: {
+                  chars_id: {
+                    in: data.characteristics,
+                  },
+                },
+              },
+            },
+          }),
       },
       include: {
         variations: {
           include: { image: true },
         },
         user: true,
+      },
+      orderBy: {
+        ...(data?.sort &&
+          data?.sort === "Ascending" && {
+            product_id: "asc",
+          }),
+
+        ...(data?.sort &&
+          data?.sort === "Descending" && {
+            product_id: "desc",
+          }),
       },
     });
 
@@ -268,4 +320,12 @@ export const getMetals = async () => {
 
 export const getPatterns = async () => {
   return await prisma.pattern.findMany();
+};
+
+export const getCharacteristics = async () => {
+  return prisma.characteristic.findMany();
+};
+
+export const getCollections = async () => {
+  return prisma.collection.findMany();
 };

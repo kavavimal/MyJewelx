@@ -1,31 +1,48 @@
-// import Banner from "@/components/Banner";
-// import Product from "@/components/Products";
+import Footer from "@/components/frontend/common/Footer";
+import FrontendHeader from "@/components/frontend/common/Header";
+import Image from "next/image";
 import prisma from "@/lib/prisma";
-// import { ProductStatus } from "@prisma/client";
-import "@/styles/globals.css";
-// import ProductLayout from "@/components/ProductLayout";
-// import ShopSection from "@/components/ShopSection";
-// async function get_all_products() {
-//   const products = await prisma.product.findMany({
-//     where: {
-//       status: ProductStatus.APPROVED,
-//     },
-//     include: {
-//       user: true,
-//       category: { include: { category: true } },
-//       country: { include: { country: true } },
-//     },
-//   });
-//   return products || [];
-// }
+import Hero from "./components/Hero";
+import TopVendors from "./components/TopVendors";
+import Testimonial from "./components/Testimonial";
+import PopularProducts from "./components/PopularProducts";
+import { getProducts } from "@/actions/product";
+
+const getCategories = () => prisma.category.findMany({});
+const getVendors = () =>
+  prisma.user.findMany({
+    where: {
+      role_id: 2,
+    },
+    include: {
+      vendor: true,
+    },
+  });
+const homeSlider = () => prisma.homeSlider.findMany({});
+const getPromoList = () =>
+  prisma.promotional.findMany({
+    where: {
+      ads_type: "HOME",
+    },
+  });
+
 export default async function Home() {
-//   const products = await get_all_products();
+  const categories = await getCategories();
+  const vendors = await getVendors();
+  const homeSlide = await homeSlider();
+  const promolist = await getPromoList();
+  const products = await getProducts();
+
   return (
-    <main>
-      {/* <Banner /> */}
-      {/* <ProductLayout />
-      <ShopSection />
-      <Trendy /> */}
-    </main>
+    <>
+      <Hero
+        categories={categories}
+        homeSlide={homeSlide}
+        promolist={promolist}
+      />
+      <PopularProducts products={products} />
+      <TopVendors vendors={vendors} />
+      <Testimonial />
+    </>
   );
 }

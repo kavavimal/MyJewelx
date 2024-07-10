@@ -16,7 +16,7 @@ export async function POST(request) {
                 ads_desc: ads_desc,
                 ads_img_url: '',
                 ads_link: ads_link,
-                ads_type: 'PDO',
+                ads_type: ads_type,
             },
         });
 

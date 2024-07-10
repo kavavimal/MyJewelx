@@ -53,15 +53,15 @@ export async function PUT(request, { params }) {
       isMultiple,
       description,
     });
-
     const exists = await prisma.attribute.findFirst({
       where: {
         name: attributeData.name,
         NOT: {
-          attribute_id: attribute_id,
+          attribute_id: Number(attribute_id),
         },
       },
     });
+console.log("attribute update", attributeData, attribute_id, exists);
 
     if (exists) {
       return NextResponse.json(
@@ -73,10 +73,11 @@ export async function PUT(request, { params }) {
     }
 
     if (
-      attribute.values.length > 0 ||
+      attribute.name !== attributeData.name &&
+      (attribute.values.length > 0 ||
       attribute.products.length > 0 ||
       attribute.productsProductAttributeValue.length > 0
-    ) {
+    )) {
       return NextResponse.json(
         {
           error: `Cannot update attribute, ${attribute.name} attribute is in use.`,

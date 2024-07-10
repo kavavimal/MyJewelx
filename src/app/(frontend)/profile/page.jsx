@@ -46,6 +46,8 @@ const page = async () => {
                 </div>
             </section>
         );
+    } else {
+        return <h1>Customer Profile</h1>;
     }
 };
 

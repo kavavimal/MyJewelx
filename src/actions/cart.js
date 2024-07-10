@@ -1,7 +1,22 @@
 "use server";
 import { checkUserSession } from "@/app/(frontend)/layout";
 import prisma from "@/lib/prisma";
+import { CURRENCY_SYMBOL } from "@/utils/constants";
 
+var options = {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+  style: "currency",
+  currency: "AED"
+};
+
+export const printPrice = (price = "") => {
+  if (price === "") {
+    return "";
+  } else {
+    return `${Number(price).toLocaleString("en-IN", options)}`;
+  }
+};
 export const getCart = async () => {
   const user = await checkUserSession();
   try {
@@ -14,7 +29,10 @@ export const getCart = async () => {
           include: {
             productVariation: {
               include: {
-                product: true,
+                product: {
+                  include: { user: true },
+                },
+                image: true,
               },
             },
           },

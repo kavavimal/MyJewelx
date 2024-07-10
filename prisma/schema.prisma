@@ -48,6 +48,8 @@ model User {
   reviews      Review[]
   orders       Order[]               @relation("buyerOrders")
   sellerOrders OrderSellerRelation[]
+  wishlist     Wishlist[]
+  likes        Like[]
 }
 
 model Role {
@@ -105,6 +107,8 @@ model Product {
   variations   ProductVariation[]
   productChars ProductChars[]
   reviews      Review[]
+  wishlist     Wishlist[]
+  likes        Like[]
 }
 
 model Vendor {
@@ -194,6 +198,7 @@ model Attribute {
 model AttributeValue {
   id                     Int                     @id @default(autoincrement())
   name                   String
+  colorCode              String?
   attribute_id           Int
   created_at             DateTime                @default(now())
   updated_at             DateTime                @updatedAt
@@ -371,9 +376,11 @@ model Image {
   variation_id     Int?
   user_id          String?           @unique
   category_id      Int?              @unique
+  review_id        Int?
   productvariation ProductVariation? @relation(fields: [variation_id], references: [variation_id], onDelete: Cascade)
   category         Category?         @relation(fields: [category_id], references: [category_id], onDelete: Cascade)
   user             User?             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  review           Review?           @relation(fields: [review_id], references: [id], onDelete: Cascade)
 }
 
 model Gemstone {
@@ -484,12 +491,33 @@ model Review {
   id        Int      @id @default(autoincrement())
   rating    Int // 1 to 5 stars
   text      String?
+  images    Image[]
   createdAt DateTime @default(now())
   // Relationships
   user      User     @relation(fields: [userId], references: [id])
   userId    String
   product   Product  @relation(fields: [productId], references: [product_id])
   productId Int
+}
+
+model Wishlist {
+  id        Int     @id @default(autoincrement())
+  userId    String
+  productId Int
+  user      User    @relation(fields: [userId], references: [id])
+  product   Product @relation(fields: [productId], references: [product_id])
+
+  @@unique([userId, productId])
+}
+
+model Like {
+  id        Int     @id @default(autoincrement())
+  userId    String
+  productId Int
+  user      User    @relation(fields: [userId], references: [id])
+  product   Product @relation(fields: [productId], references: [product_id])
+
+  @@unique([userId, productId])
 }
 
 enum AcountType {
@@ -545,16 +573,18 @@ model HomeSlider {
 }
 
 model Promotional {
-	ads_id		  Int		  @id @default(autoincrement())
-	ads_title		String
-  ads_desc		String
-  ads_link		String
-  ads_img_url	String
-	ads_type	  adsType
+  ads_id      Int      @id @default(autoincrement())
+  ads_title   String
+  ads_desc    String
+  ads_link    String
+  ads_img_url String
+  ads_type    adsType
   createdAt   DateTime @default(now())
 }
 
 enum adsType {
 	HOME
 	POD
+  SHOP
+  STORE
 }

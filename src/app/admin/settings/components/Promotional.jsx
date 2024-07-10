@@ -8,19 +8,23 @@ import React, { useState } from 'react';
 const DataTable = dynamic(() => import('react-data-table-component'), {
     ssr: false,
 });
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import DeleteAds from './DeleteAds';
+import { Select, Option } from '@material-tailwind/react';
+
 const Promotional = ({ promotional }) => {
+    const router = useRouter();
     const columns = [
-        // {
-        //     name: 'Image',
-        //     selector: (row) => (
-        //         <>
-        //             <Image src={row?.ads_img_url} width={50} height={50} />
-        //         </>
-        //     ),
-        // },
+        {
+            name: 'Image',
+            selector: (row) => (
+                <>
+                    <Image src={row?.ads_img_url} width={50} height={50} />
+                </>
+            ),
+        },
         {
             name: 'Ads Title',
             selector: (row) => row?.ads_title,
@@ -148,15 +152,19 @@ const Promotional = ({ promotional }) => {
                                         onChange={formik.handleChange}
                                     />
                                 </div>
-                                {/* <div className="mb-2 w-1/2">
-                                    <Input
-                                        label="Ads Type"
-                                        type="text"
-                                        value={formik.values?.ads_type || ''}
+                                <div className="mb-2 w-1/2">
+                                    <Select
                                         name="ads_type"
                                         onChange={formik.handleChange}
-                                    />
-                                </div> */}
+                                        value={formik.values?.ads_type || ''}
+                                    >
+                                        <Option value="">Select Type</Option>
+                                        <Option value="HOME">HOME</Option>
+                                        <Option value="POD">POD</Option>
+                                        <Option value="SHOP">SHOP</Option>
+                                        <Option value="STORE">STORE</Option>
+                                    </Select>
+                                </div>
                             </div>
                             <div className="flex items-center justify-between">
                                 <Button

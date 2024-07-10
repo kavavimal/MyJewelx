@@ -1,22 +1,20 @@
 "use client";
 import StarRatings from "@/components/frontend/StarRatings";
-import Image from "next/image";
-import React, { useEffect, useState } from "react";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-// import "slick-carousel/slick/slick-theme.css";
-import { useCartStore } from "@/contexts/cartStore";
-import { v4 as uuidv4 } from "uuid";
+import { useEffect, useState } from "react";
 import AddToCart from "@/components/frontend/cart/AddToCart";
+import ProductImages from "./ProductImages";
+import Paragraph from "@/components/Paragraph";
+import LikeIcon from "@/components/frontend/LikeIcon";
+import Share from "./Share";
+import ProductMeta from "./ProductMeta";
+import { printPrice } from "@/utils/helper";
+import ProductAttributeSelections from "./ProductAttributeSelections";
+import AddToWishlist from "@/components/frontend/cart/AddToWishlist";
 
-const Detail = ({ product }) => {
-  const updateQanity = useCartStore((state) => state.updateCartQuantity);
-  const addToCart = useCartStore((state) => state.addToCart);
-
+const Detail = ({ product, selectedOptions, filteredAttributes }) => {
   const [variation, setVariation] = useState(product?.variations[0]);
-  const [mainImage, setMainImage] = useState(variation?.image[0].path);
+
   const [makingC, setMakingC] = useState();
-  const [quantity, setQuantity] = useState(1);
   const sizes = [];
   product.ProductAttributeValue.forEach((pav) => {
     if (pav.attribute.name === "Size") {
@@ -24,150 +22,6 @@ const Detail = ({ product }) => {
     }
   });
 
-  let newarr = [];
-  // product.variations.map((variation) => {
-  //   variation.productAttributeValues.map((productAttributeValue) => {
-  //     if (
-  //       productAttributeValue &&
-  //       productAttributeValue.productAttributeValue
-  //     ) {
-  //       const attributeValueId =
-  //         productAttributeValue.productAttributeValue.attributeValue_id;
-  //       const attributeId =
-  //         productAttributeValue.productAttributeValue.attribute_id;
-  //       let attributObjcetItem = {
-  //         productAttributeValue_id:
-  //           productAttributeValue.productAttributeValue
-  //             .productAttributeValue_id,
-  //         attribute_id: attributeId,
-  //         attribute_name:
-  //           productAttributeValue.productAttributeValue.attribute.name,
-  //         attributeValue_id: attributeValueId,
-  //         attributeValue_name:
-  //           productAttributeValue.productAttributeValue.attributeValue.name,
-  //       };
-  //       // check if attribute is already in newarr
-  //       if (typeof newarr[attributeId] !== "undefined") {
-  //         let existing = newarr[attributeId];
-  //         // check if new attribuete has value already?
-  //         if (
-  //           !existing.find((e_a) => e_a.attributeValue_id === attributeValue_id)
-  //         ) {
-  //           newarr[attributeId] = [...newarr[attributeId], attributObjcetItem];
-  //         }
-  //       } else {
-  //         newarr[attributeId] = [attributObjcetItem];
-  //       }
-  //     }
-  //   });
-  // });
-
-  // console.log("newarr", newarr);
-  // Check if product and product.variations exist and are arrays
-  // const allProductAttributeValuesWithVariation = [];
-  // const uniqueValuesSet = new Set();
-
-  // if (product && Array.isArray(product.variations)) {
-  //   product.variations.map((variation) => {
-  //     if (variation && Array.isArray(variation.productAttributeValues)) {
-  //       variation.productAttributeValues.map((productAttributeValue) => {
-  //         if (
-  //           productAttributeValue &&
-  //           productAttributeValue.productAttributeValue
-  //         ) {
-  //           const attributeValueId =
-  //             productAttributeValue.productAttributeValue.attributeValue_id;
-  //           const attributeId =
-  //             productAttributeValue.productAttributeValue.attribute_id;
-  //           const uniqueKey = `${attributeId}-${attributeValueId}`;
-
-  //           // Check if the combination of attribute_id and attributeValue_id already exists in the set
-  //           if (!uniqueValuesSet.has(uniqueKey)) {
-  //             uniqueValuesSet.add(uniqueKey);
-  //             allProductAttributeValuesWithVariation.push({
-  //               productAttributeValue_id:
-  //                 productAttributeValue.productAttributeValue.productAttributeValue_id,
-  //               attribute_id: attributeId,
-  //               attribute_name:
-  //                 productAttributeValue.productAttributeValue.attribute.name,
-  //               attributeValue_id: attributeValueId,
-  //               attributeValue_name:
-  //                 productAttributeValue.productAttributeValue.attributeValue
-  //                   .name,
-  //             });
-  //           }
-  //         }
-  //       });
-  //     }
-  //   });
-  // } else {
-  //   console.log("product or product.variations is not defined or not an array");
-  // }
-
-  // console.log(
-  //   "allProductAttributeValuesWithVariation",
-  //   allProductAttributeValuesWithVariation
-  // );
-
-  // const attributeValuePairs = [
-  //   { attribute_id: 1, attributeValue_id: 1 },
-  //   // { attribute_id: 1, attributeValue_id: 2 },
-  //   // { attribute_id: 1, attributeValue_id: 3 },
-  //   { attribute_id: 2, attributeValue_id: 4 },
-  //   // { attribute_id: 2, attributeValue_id: 5 },
-  //   // { attribute_id: 2, attributeValue_id: 6 },
-  //   // { attribute_id: 2, attributeValue_id: 7 },
-  // ];
-  // const attribute_and_value_change = (attributeValuePairs) => {
-  //   let productAttributeValue_ids = [];
-  //   // product.ProductAttributeValue.map((record) => {
-  //   //   if (
-  //   //     record.attribute_id === attribute_id &&
-  //   //     record.attributeValue_id === attributeValue_id
-  //   //   ) {
-  //   //     productAttributeValue_ids.push(record.productAttributeValue_id);
-  //   //   }
-  //   // });
-  //   const productAttributeValueIdsArray = attributeValuePairs.map(
-  //     ({ attribute_id, attributeValue_id }) => {
-  //       return product.ProductAttributeValue.filter((record) => {
-  //         return (
-  //           record.attribute_id === attribute_id &&
-  //           record.attributeValue_id === attributeValue_id
-  //         );
-  //       }).map((record) => record.productAttributeValue_id);
-  //     }
-  //   );
-
-  //   const selectedVariation = product.variations.find((variation) => {
-  //     const found = variation.ProductAttributeValues.find(
-  //       (ProductAttributeValue) => {
-  //         return productAttributeValue_ids.includes(
-  //           ProductAttributeValue.productAttributeValue_id
-  //         );
-  //       }
-  //     );
-  //     if (variation.ProductAttributeValues.length === found.length) {
-  //       return true;
-  //     } else return false;
-  //   });
-  //   return selectedVariation;
-  // };
-
-  const settings = {
-    // dots: true,
-    infinite: false,
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    vertical: true,
-    verticalSwiping: true,
-    beforeChange: function (currentSlide, nextSlide) {
-      console.log("before change", currentSlide, nextSlide);
-    },
-    afterChange: function (currentSlide) {
-      console.log("after change", currentSlide);
-    },
-  };
   const making_charges = variation?.making_charges
     ? JSON.parse(variation.making_charges)
     : null;
@@ -206,7 +60,7 @@ const Detail = ({ product }) => {
     ? variation?.selling_price
     : variation?.regular_price;
   const variation_vat =
-    (variation_price * quantity * (variation?.vat ? variation_vat : 0)) / 100;
+    (variation_price * 1 * (variation?.vat ? variation_vat : 0)) / 100;
   const total_amount = (
     variation_price +
     variation_vat +
@@ -214,247 +68,93 @@ const Detail = ({ product }) => {
     other_charges_total
   ).toFixed(2);
 
-  // const addToCart = () => {
-  //   const cartItemData = new FormData();
-
-  //   cartItemData.append("variation_id", variation.variation_id);
-  //   cartItemData.append("quantity", quantity);
-  //   cartItemData.append("discount", 0);
-  //   cartItemData.append("discount_type", "fixedAmount");
-
-  //   fetch("/api/cartItem", {
-  //     method: "POST",
-  //     body: cartItemData,
-  //   }).then(async (res) => {
-  //     if (res.status === 201) {
-  //       console.log("res", res.message);
-  //     } else {
-  //       const { error, issues } = await res.json();
-  //       console.error("send Otp Failed", error);
-  //       // toast.error(error);
-  //     }
-  //   });
-  // };
-
-  const incrementValue = (e) => {
-    e.preventDefault();
-    setQuantity((prevQuantity) => prevQuantity + 1);
-  };
-
-  const decrementValue = (e) => {
-    e.preventDefault();
-    setQuantity((prevQuantity) => (prevQuantity > 1 ? prevQuantity - 1 : 1));
-  };
-
   return (
     <>
       <section className="text-gray-600 body-font overflow-hidden">
         <div className="container py-24 mx-auto max-w-screen-xl">
-          <div className="mx-auto flex flex-wrap">
-            <div className="lg:w-1/2 flex gap-1">
-              <div className="w-1/4 slider-container">
-                <Slider {...settings}>
-                  {variation?.image &&
-                    variation?.image.length > 0 &&
-                    variation?.image?.map((image, index) => {
-                      return (
-                        <Image
-                          className="border-1 shadow"
-                          key={index}
-                          src={image.path}
-                          onClick={() => setMainImage(image.path)}
-                          alt="Gallery Image"
-                          width="125"
-                          height="125"
-                        />
-                      );
-                    })}
-                  {variation?.image &&
-                    variation?.image.length > 0 &&
-                    variation?.image?.map((image, index) => {
-                      return (
-                        <Image
-                          key={index}
-                          src={image.path}
-                          onClick={() => setMainImage(image.path)}
-                          alt="Gallery Image"
-                          width="125"
-                          height="125"
-                        />
-                      );
-                    })}
-                </Slider>
-                {/* {variation.image.map((image, index) => {
-                  return (
-                    <>
-                      <Image
-                        key={index}
-                        src={image.path}
-                        onClick={() => setMainImage(image.path)}
-                        alt="Gallery Image"
-                        width="125"
-                        height="125"
-                      />{" "}
-                      <Image
-                        key={index}
-                        src={image.path}
-                        onClick={() => setMainImage(image.path)}
-                        alt="Gallery Image"
-                        width="125"
-                        height="125"
-                      />{" "}
-                      <Image
-                        key={index}
-                        src={image.path}
-                        onClick={() => setMainImage(image.path)}
-                        alt="Gallery Image"
-                        width="125"
-                        height="125"
-                      />{" "}
-                      <Image
-                        key={index}
-                        src={image.path}
-                        onClick={() => setMainImage(image.path)}
-                        alt="Gallery Image"
-                        width="125"
-                        height="125"
-                      />{" "}
-                    </>
-                  );
-                })} */}
-              </div>
-              <img
-                alt="ecommerce"
-                className="lg:w-2/3 w-full lg:h-96 h-64 object-cover object-center rounded border-1 shadow"
-                src={mainImage}
-              />
-            </div>
-            <div className="lg:w-1/2 w-full px-5 py-6 mt-6 lg:mt-0 border-1 shadow">
-              {/* <h2 className="text-sm title-font text-gray-500 tracking-widest">BRAND NAME</h2> */}
-              <h1 className="text-gray-900 text-3xl title-font font-medium mb-1">
-                The Catcher in the Rye
-              </h1>
-              <div className="flex items-center">
-                <StarRatings
-                  starRatings={
-                    variation?.starRatings ? variation?.starRatings : 4.5
-                  }
-                />
-                <span className="text-gray-600 ml-3">4 Reviews</span>
-                <span className="flex ml-3 pl-3 py-2 border-l-2 border-gray-200 space-x-2s">
-                  <a className="text-gray-500">
-                    <svg
-                      fill="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      className="w-5 h-5"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"></path>
-                    </svg>
-                  </a>
-                  <a className="text-gray-500">
-                    <svg
-                      fill="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      className="w-5 h-5"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"></path>
-                    </svg>
-                  </a>
-                  <a className="text-gray-500">
-                    <svg
-                      fill="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      className="w-5 h-5"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"></path>
-                    </svg>
-                  </a>
-                </span>
-              </div>
-              <p className="mb-1">
-                Seller : {product.user.firstName + " " + product.user.lastName}
-              </p>
-              <p className="mb-1">
-                <span>AED </span>
-                {variation?.selling_price
-                  ? variation?.selling_price
-                  : variation?.regular_price}
-              </p>
-              <div className="leading-relaxed border-b-2 border-gray-100 pb-3">
+          <div className="mx-auto flex flex-wrap justify-between">
+            <ProductImages variation={variation} />
+            <div className="lg:w-1/2 w-full pl-5">
+              <div className="p-5 mt-6 lg:mt-0 border">
+                {/* <h2 className="text-sm title-font text-gray-500 tracking-widest">BRAND NAME</h2> */}
+                <h1 className="text-gray-900 text-3xl title-font font-medium mb-1">
+                  {product.product_name}
+                </h1>
+                <div className="flex items-center">
+                  <StarRatings
+                    starRatings={
+                      variation?.starRatings ? variation?.starRatings : 4.5
+                    }
+                  />
+                  <Paragraph color="gray-600" classes="ml-3">
+                    {product?.reviews?.length} Customre Reviews
+                  </Paragraph>
+
+                  <span className="flex ml-3 pl-3 py-2 border-l-2 border-gray-200 space-x-2s">
+                    <Paragraph classes="flex" color="gray-600">
+                      <LikeIcon filled />{" "}
+                      {product.likes ? product.likes.length : "105"} Likes
+                    </Paragraph>
+                  </span>
+                </div>
+                <ProductMeta product={product} />
+
+                <div className="w-1/2 mb-1 flex">
+                  <strong className="md:w-1/2">
+                    {printPrice(
+                      variation?.selling_price
+                        ? variation?.selling_price
+                        : variation?.regular_price
+                    )}
+                  </strong>
+                  <Paragraph classes="md:w-1/2 text-right  border-l">
+                    {variation?.net_weight} gram
+                  </Paragraph>
+                </div>
+
                 <div
+                  className="leading-relaxed border-b-2 border-gray-100 pb-3"
                   dangerouslySetInnerHTML={{ __html: variation?.description }}
                 ></div>
-              </div>
-              <div className="leading-relaxed border-b-2 border-gray-100 py-3">
-                <p className="leading-relaxed pb-3">
-                  Making Charges :<span> AED </span>
-                  {makingC ? makingC : 0}
-                </p>
-                <p className="leading-relaxed pb-3">
-                  Other Charges :<span> AED </span>
-                  {other_charges_total}
-                </p>
-                <p className="leading-relaxed pb-3">
-                  Value Added Tax :{variation?.vat ? variation?.vat : 0}
-                  <span>&#37;</span>
-                </p>
-                <p className="leading-relaxed">
-                  <span> AED </span>
-                  Total Amount :{total_amount}
-                </p>
-              </div>
-              <div className="flex mt-6 items-center border-b-1 border-gray-100">
-                {product?.variations.length > 0 && (
-                  <div className="flex mb-4 items-center">
-                    <span className="mr-3">Variation</span>
-                    <div className="relative">
-                      <select
-                        className="rounded border appearance-none border-gray-300 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:border-yellow-500 text-base pl-3 pr-10"
-                        onChange={(e) => {
-                          const vid = e.target.value;
-                          const variationnew = product.variations.find((v) => Number(v.variation_id) === Number(vid));
-                          setVariation(variationnew);
-                        }}
-                      >
-                        {product?.variations?.map((v, index) => (
-                          <option key={index} value={v.variation_id}>
-                            {v.variation_name}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="absolute right-0 top-0 h-full w-10 text-center text-gray-600 pointer-events-none flex items-center justify-center">
-                        <svg
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          className="w-4 h-4"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M6 9l6 6 6-6"></path>
-                        </svg>
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
+                <div className="leading-relaxed border-b-2 border-gray-100 pb-3">
+                  <ProductAttributeSelections
+                    product={product}
+                    setVariation={setVariation}
+                    variation={variation}
+                    selectedOptions={selectedOptions}
+                    filteredAttributes={filteredAttributes}
+                  />
+                </div>
 
-              <div className="flex justify-between text-xs">
-                <AddToCart variation={variation} />
+                <div className="leading-relaxed border-b-2 border-gray-100 py-3">
+                  <p className="leading-relaxed pb-3">
+                    Making Charges :<span> AED </span>
+                    {makingC ? makingC : 0}
+                  </p>
+                  <p className="leading-relaxed pb-3">
+                    Other Charges :<span> AED </span>
+                    {other_charges_total}
+                  </p>
+                  <p className="leading-relaxed pb-3">
+                    Value Added Tax :{variation?.vat ? variation?.vat : 0}
+                    <span>&#37;</span>
+                  </p>
+                  <p className="leading-relaxed">
+                    <span> AED </span>
+                    Total Amount :{total_amount}
+                  </p>
+                </div>
+                <Paragraph>
+                  Seller :{" "}
+                  {product.user.firstName + " " + product.user.lastName}
+                </Paragraph>
 
-                <button className="text-[#F0AE11] bg-white border py-2 px-4 border-[#F0AE11] focus:outline-none hover:bg-yellow-600 rounded">
-                  Add to Whish list
-                </button>
+                <div className="flex justify-between text-xs">
+                  <AddToCart variation={variation} />
+
+                  <AddToWishlist product_id={product.product_id} />
+                </div>
+                <Share />
               </div>
             </div>
           </div>

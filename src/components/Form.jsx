@@ -15,7 +15,14 @@ export default function Form({ type }) {
   const { data: session } = useSession();
   const role = session?.user?.role;
   const [loginError, setLoginError] = useState("");
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [errors, setErrors] = useState({});
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otpSendTimeout, setOtpSendTimeout] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
@@ -44,41 +51,53 @@ export default function Form({ type }) {
     });
   };
 
-  const requestOtp = (e) => {
-    registrationValidationSchema.validate(formData, { abortEarly: false });
-    e.preventDefault();
-    setOtpError("");
-    setLoading(true);
-    if (!formData.email || formData.email === "") {
-      setOtpError("email is required");
-      console.log("error email is required");
-    } else {
-      startOtpTimeout();
-      fetch("/api/auth/otp/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          phone_number: formData.phone_number,
-          mode: "registration",
-        }),
-      }).then(async (res) => {
-        setLoading(false);
-        if (res.status === 201) {
-          // toast.success("Account created! Redirecting to login...");
-          setIsOtpSent(true);
-        } else {
-          const { error, issues } = await res.json();
-          if (error === "ZodError") {
-            const ZodError = issues.map((issue) => issue.message);
-            setOtpError(ZodError);
-          } else setOtpError(error);
-          console.error("send Otp Failed", error);
-          // toast.error(error);
-        }
+  const requestOtp = async (e) => {
+    try {
+      await registrationValidationSchema.validate(formData, {
+        abortEarly: false,
       });
+      setErrors({});
+      e.preventDefault();
+      setOtpError("");
+      setLoading(true);
+      if (!formData.email || formData.email === "") {
+        setOtpError("email is required");
+        console.log("error email is required");
+      } else {
+        startOtpTimeout();
+        fetch("/api/auth/otp/send", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            phone_number: formData.phone_number,
+            mode: "registration",
+          }),
+        }).then(async (res) => {
+          setLoading(false);
+          if (res.status === 201) {
+            // toast.success("Account created! Redirecting to login...");
+            setIsOtpSent(true);
+          } else {
+            const { error, issues } = await res.json();
+            if (error === "ZodError") {
+              const ZodError = issues.map((issue) => issue.message);
+              setOtpError(ZodError);
+            } else setOtpError(error);
+            console.error("send Otp Failed", error);
+            // toast.error(error);
+          }
+        });
+      }
+    } catch (errors) {
+      const errorMessages = {};
+      errors.inner.forEach((error) => {
+        errorMessages[error.path] = error.message;
+      });
+      setErrors(errorMessages);
+      setLoading(false);
     }
   };
 
@@ -149,6 +168,24 @@ export default function Form({ type }) {
           // toast.error(error);
         }
       });
+    }
+  };
+
+  const validateField = async (name, value) => {
+    try {
+      await registrationValidationSchema.validateAt(name, { [name]: value });
+      setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
+
+      if (name === "password" || name === "confirmPassword") {
+        if (formData.password === formData.confirmPassword) {
+          setErrors((prevErrors) => ({ ...prevErrors, confirmPassword: "" }));
+        }
+      }
+    } catch (validationError) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: validationError.message,
+      }));
     }
   };
 
@@ -243,21 +280,37 @@ export default function Form({ type }) {
                     name="firstName"
                     type="text"
                     placeholder=""
+                    error={errors.firstName}
                     className="font-emirates"
                     containerProps={{
                       className: "!min-w-0",
+                    }}
+                    onChange={(e) => {
+                      setFormData({ ...formData, firstName: e.target.value });
+                      validateField("firstName", e.target.value);
                     }}
                     labelProps={{
                       className: "font-emirates",
                     }}
                   />
+
+                  {errors.firstName && (
+                    <span className="text-red-400 text-xs mt-2">
+                      {errors.firstName}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <Input
                     label="Lastname"
                     name="lastName"
+                    error={errors.lastName}
                     type="text"
                     placeholder=" "
+                    onChange={(e) => {
+                      setFormData({ ...formData, lastName: e.target.value });
+                      validateField("lastName", e.target.value);
+                    }}
                     containerProps={{
                       className: "!min-w-0",
                     }}
@@ -266,35 +319,29 @@ export default function Form({ type }) {
                     }}
                     className="font-emirates"
                   />
+
+                  {errors.lastName && (
+                    <span className="text-red-400 text-xs mt-2">
+                      {errors.lastName}
+                    </span>
+                  )}
                 </div>
               </div>
-              {/* <div className="relative w-full min-w-[200px] h-11">
-                <input
-                  name="phone_number"
-                  type="text"
-                  className="w-full h-full px-3 py-4 font-sans text-sm font-normal transition-all bg-transparent border rounded-md peer text-blue-gray-700 outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 border-t-transparent focus:border-t-transparent border-blue-gray-200 focus:border-gray-900"
-                  placeholder=" "
-                  onChange={(e) => {
-                    setFormData({ ...formData, phone_number: e.target.value });
-                  }}
-                />
-                <label className="flex text-base w-full h-full select-none pointer-events-none absolute left-0 font-normal !overflow-visible truncate peer-placeholder-shown:text-blue-gray-500 leading-tight peer-focus:leading-tight peer-disabled:text-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500 transition-all -top-1.5 peer-placeholder-shown:text-sm text-[11px] peer-focus:text-[11px] before:content[' '] before:block before:box-border before:w-2.5 before:h-1.5 before:mt-[6.5px] before:mr-1 peer-placeholder-shown:before:border-transparent before:rounded-tl-md before:border-t peer-focus:before:border-t-2 before:border-l peer-focus:before:border-l-2 before:pointer-events-none before:transition-all peer-disabled:before:border-transparent after:content[' '] after:block after:flex-grow after:box-border after:w-2.5 after:h-1.5 after:mt-[6.5px] after:ml-1 peer-placeholder-shown:after:border-transparent after:rounded-tr-md after:border-t peer-focus:after:border-t-2 after:border-r peer-focus:after:border-r-2 after:pointer-events-none after:transition-all peer-disabled:after:border-transparent peer-placeholder-shown:leading-[4.1] text-gray-500 peer-focus:text-gray-900 before:border-blue-gray-200 peer-focus:before:!border-gray-900 after:border-blue-gray-200 peer-focus:after:!border-gray-900">
-                  Phone Number
-                </label>
-              </div> */}
             </>
           ) : (
             ""
           )}
-          <div className="relative w-full min-w-[200px] h-11">
+          <div>
             <Input
               name="email"
               type="email"
               size="lg"
+              error={errors.email}
               placeholder=" "
               label={"Email"}
               onChange={(e) => {
                 setFormData({ ...formData, email: e.target.value });
+                validateField("email", e.target.value);
               }}
               disabled={isOtpSent}
               className="rounded"
@@ -302,58 +349,73 @@ export default function Form({ type }) {
                 className: "font-emirates",
               }}
             />
+            {errors.email && (
+              <span className="text-red-400 text-xs mt-2">{errors.email}</span>
+            )}
           </div>
-          <div className="flex flex-col gap-2">
-            <Input
-              name="password"
-              type={isTextPassword ? "text" : "password"}
-              placeholder=" "
-              size="lg"
-              label="Password"
-              className="rounded"
-              labelProps={{
-                className: "font-emirates",
-              }}
-              icon={
-                <button
-                  type="button"
-                  onClick={() => setIsTextPassword(!isTextPassword)}
-                >
-                  {isTextPassword ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={24}
-                      height={24}
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        fill="currentColor"
-                        d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5"
-                      ></path>
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={24}
-                      height={24}
-                      viewBox="0 0 24 24"
-                    >
-                      <g fill="none">
-                        <path d="M24 0v24H0V0zM12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035c-.01-.004-.019-.001-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427c-.002-.01-.009-.017-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093c.012.004.023 0 .029-.008l.004-.014l-.034-.614c-.003-.012-.01-.02-.02-.022m-.715.002a.023.023 0 0 0-.027.006l-.006.014l-.034.614c0 .012.007.02.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"></path>
+          <div className="flex flex-col gap-2.5">
+            <div>
+              <Input
+                name="password"
+                type={isTextPassword ? "text" : "password"}
+                placeholder=" "
+                error={errors.password}
+                size="lg"
+                onChange={(e) => {
+                  setFormData({ ...formData, password: e.target.value });
+                  validateField("password", e.target.value);
+                }}
+                label="Password"
+                className="rounded"
+                labelProps={{
+                  className: "font-emirates",
+                }}
+                icon={
+                  <button
+                    type="button"
+                    onClick={() => setIsTextPassword(!isTextPassword)}
+                  >
+                    {isTextPassword ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        viewBox="0 0 24 24"
+                      >
                         <path
                           fill="currentColor"
-                          d="M3.05 9.31a1 1 0 1 1 1.914-.577c2.086 6.986 11.982 6.987 14.07.004a1 1 0 1 1 1.918.57a9.509 9.509 0 0 1-1.813 3.417L20.414 14A1 1 0 0 1 19 15.414l-1.311-1.311a9.116 9.116 0 0 1-2.32 1.269l.357 1.335a1 1 0 1 1-1.931.518l-.364-1.357c-.947.14-1.915.14-2.862 0l-.364 1.357a1 1 0 1 1-1.931-.518l.357-1.335a9.118 9.118 0 0 1-2.32-1.27l-1.31 1.312A1 1 0 0 1 3.585 14l1.275-1.275c-.784-.936-1.41-2.074-1.812-3.414Z"
+                          d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5"
                         ></path>
-                      </g>
-                    </svg>
-                  )}
-                </button>
-              }
-            />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        viewBox="0 0 24 24"
+                      >
+                        <g fill="none">
+                          <path d="M24 0v24H0V0zM12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035c-.01-.004-.019-.001-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427c-.002-.01-.009-.017-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093c.012.004.023 0 .029-.008l.004-.014l-.034-.614c-.003-.012-.01-.02-.02-.022m-.715.002a.023.023 0 0 0-.027.006l-.006.014l-.034.614c0 .012.007.02.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"></path>
+                          <path
+                            fill="currentColor"
+                            d="M3.05 9.31a1 1 0 1 1 1.914-.577c2.086 6.986 11.982 6.987 14.07.004a1 1 0 1 1 1.918.57a9.509 9.509 0 0 1-1.813 3.417L20.414 14A1 1 0 0 1 19 15.414l-1.311-1.311a9.116 9.116 0 0 1-2.32 1.269l.357 1.335a1 1 0 1 1-1.931.518l-.364-1.357c-.947.14-1.915.14-2.862 0l-.364 1.357a1 1 0 1 1-1.931-.518l.357-1.335a9.118 9.118 0 0 1-2.32-1.27l-1.31 1.312A1 1 0 0 1 3.585 14l1.275-1.275c-.784-.936-1.41-2.074-1.812-3.414Z"
+                          ></path>
+                        </g>
+                      </svg>
+                    )}
+                  </button>
+                }
+              />
+              {errors?.password && (
+                <span className="text-red-400 text-xs mt-2">
+                  {errors?.password}
+                </span>
+              )}
+            </div>
 
             {type === "login" ? (
               <div className="flex justify-between items-center">
-                <Checkbox label="Remember me" className="rounded" />
+                <Checkbox label="Remember me" />
                 <Link
                   href="/forgotpassword"
                   className="text-primary-200 text-sm font-medium"
@@ -372,10 +434,24 @@ export default function Form({ type }) {
                   name="confirmPassword"
                   type="password"
                   label="Confirm Password"
+                  error={errors?.confirmPassword}
+                  onChange={(e) => {
+                    validateField("confirmPassword", e.target.value);
+                    setFormData({
+                      ...formData,
+                      confirmPassword: e.target.value,
+                    });
+                  }}
                   labelProps={{
                     className: "font-emirates",
                   }}
                 />
+
+                {errors?.confirmPassword && (
+                  <span className="text-red-400 text-xs mt-2">
+                    {errors?.confirmPassword}
+                  </span>
+                )}
               </div>
             </>
           ) : (
@@ -415,15 +491,8 @@ export default function Form({ type }) {
           {type === "register" && !emailVerified && (
             <div className="flex gap-2">
               {isOtpSent ? (
-                // <button
-                //   data-ripple-light="true"
-                //   className="align-middle w-full select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
-                //   type="button"
-                //   onClick={VerifyOtp}
-                // >
-                //   Verify Otp
-                // </button>
                 <Button
+                  type="button"
                   onClick={VerifyOtp}
                   loading={loading}
                   className="bg-primary-200 text-black rounded normal-case w-full flex items-center justify-center"
@@ -431,16 +500,8 @@ export default function Form({ type }) {
                   Verify Otp
                 </Button>
               ) : (
-                // <button
-                //   data-ripple-light="true"
-                //   className="align-middle w-full select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
-                //   type="button"
-                //   onClick={requestOtp}
-                //   disabled={emailVerified}
-                // >
-                //   Send Otp
-                // </button>
                 <Button
+                  type="button"
                   onClick={requestOtp}
                   loading={loading}
                   className="w-full flex items-center justify-center bg-primary-200 text-black rounded normal-case"
@@ -449,15 +510,8 @@ export default function Form({ type }) {
                 </Button>
               )}
               {isOtpSent && otpSendTimeout && (
-                // <button
-                //   data-ripple-light="true"
-                //   className="align-middle w-full select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
-                //   type="button"
-                //   onClick={requestResendOtp}
-                // >
-                //   Resend OTP
-                // </button>
                 <Button
+                  type="button"
                   onClick={requestResendOtp}
                   loading={loading}
                   className="w-full flex items-center justify-center bg-primary-200 text-black rounded normal-case"

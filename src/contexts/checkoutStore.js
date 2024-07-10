@@ -6,28 +6,12 @@ export const useChekcoutStore = create()(
     (set, get) => ({
       shippingAddress: null,
       billingAddress: null,
-      paymentMethod: null,
-      setShippingAddress: (address) =>
-        set((state) => ({
-          checkout: {
-            ...state.checkout,
-            shippingAddress: address,
-          },
-        })),
-      setBillingAddress: (address) =>
-        set((state) => ({
-          checkout: {
-            ...state.checkout,
-            billingAddress: address,
-          },
-        })),
-      setPaymentMethod: (method) =>
-        set((state) => ({
-          checkout: {
-            ...state.checkout,
-            paymentMethod: method,
-          },
-        })),
+      paymentMethod: "cod",
+      errors: null,
+      setShippingAddress: (address) => set({ shippingAddress: address }),
+      setBillingAddress: (address) => set({ billingAddress: address }),
+      setPaymentMethod: (method) => set({ paymentMethod: method }),
+      setError: (errors) => set({ errors: errors }),
     }),
     {
       name: "Checkout store",

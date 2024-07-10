@@ -5,7 +5,7 @@ import Link from 'next/link';
 import prisma from '@/lib/prisma';
 import { Carousel, Typography, Button } from '@material-tailwind/react';
 
-const Hero = ({ categories, homeSlide }) => {
+const Hero = ({ categories, homeSlide, promolist }) => {
     return (
         <>
             <section className="bg-primary-250 py-5">
@@ -107,44 +107,29 @@ const Hero = ({ categories, homeSlide }) => {
                             </Carousel>
                         </div>
                         <div className="w-[220px]">
-                            <div className="relative flex flex-col gap-4">
-                                <Image
-                                    src="/assets/images/dimond.jfif"
-                                    width={100}
-                                    height={100}
-                                    className="w-full h-[182px] object-cover mb-5"
-                                />
-                                <div className="absolute top-6 left-6">
-                                    <p className="text-base font-playfairdisplay font-semibold w-4/5 ">
-                                        Discover the latest product
-                                    </p>
-                                    <Link
-                                        href="/"
-                                        className="text-xs py-1 px-2 inline-block border border-black rounded-sm mt-2.5"
-                                    >
-                                        Shop now
-                                    </Link>
-                                </div>
-                            </div>
-                            <div className="relative flex flex-col gap-4">
-                                <Image
-                                    src="/assets/images/latest-product.png"
-                                    width={100}
-                                    height={182}
-                                    className="w-full h-[182] object-cover mb-5"
-                                />
-                                <div className="absolute top-6 left-6">
-                                    <p className="text-base font-playfairdisplay font-semibold w-4/5">
-                                        Discover the latest product
-                                    </p>
-                                    <Link
-                                        href="/"
-                                        className="text-xs py-1 px-2 inline-block border border-black rounded-sm mt-2.5"
-                                    >
-                                        Shop now
-                                    </Link>
-                                </div>
-                            </div>
+                            {promolist.slice(0, 2).map((promo, index) => {
+                                return (
+                                    <div className="relative flex flex-col gap-4">
+                                        <Image
+                                            src={promo.ads_img_url}
+                                            width={100}
+                                            height={100}
+                                            className="w-full h-[182px] object-cover mb-5"
+                                        />
+                                        <div className="absolute top-6 left-6">
+                                            <p className="text-base font-playfairdisplay font-semibold w-4/5 ">
+                                                {promo.ads_title}
+                                            </p>
+                                            <Link
+                                                href={promo.ads_link}
+                                                className="text-xs py-1 px-2 inline-block border border-black rounded-sm mt-2.5"
+                                            >
+                                                Shop now
+                                            </Link>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
