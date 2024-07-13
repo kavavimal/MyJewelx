@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "emirates";
+  src: url("../.././public/assets/fonts/Emirates-Medium.woff") format("woff");
+}
+@font-face {
+  font-family: "playfairdisplay";
+  src: url("../.././public/assets/fonts/PlayfairDisplay-Bold.ttf") format("ttf");
+}
+
+.rdt_TableHeadRow {
+  @apply text-base font-semibold;
+}
+
+#notistack-snackbar {
+  @apply py-[4px] pr-2 gap-2 text-black font-medium;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+a,
+label,
+span,
+input,
+textarea,
+select,
+option,
+button,
+ul,
+li,
+table,
+th,
+td,
+div {
+  @apply font-emirates;
+}
+
+.container {
+  width: 1280px;
+  margin: 0 auto;
+  max-width: 96%;
+}
+
+.slick-track {
+  display: flex !important;
+}
+
+.slick-slide {
+  height: inherit !important;
+}
