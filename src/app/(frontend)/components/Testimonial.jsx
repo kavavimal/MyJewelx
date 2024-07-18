@@ -43,7 +43,7 @@ const Testimonial = ({ homeSlide }) => {
     };
     return (
         <>
-            <section className=" py-10">
+            <section className="py-10">
                 <div className="max-w-screen-xl mx-auto">
                     <div className="">
                         <h2 className="text-2xl font-semibold pb-12 font-playfairdisplay block">
@@ -51,7 +51,7 @@ const Testimonial = ({ homeSlide }) => {
                         </h2>
                         <div>
                             <Slider className="" {...settings}>
-                                <div className="text-center">
+                                <div className="text-center border">
                                     <Link href="/">
                                         <Image
                                             src="/assets/images/latest-product.png"

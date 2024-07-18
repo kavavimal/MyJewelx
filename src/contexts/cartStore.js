@@ -3,13 +3,6 @@ import addToCart from "@/actions/cart/addToCart";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// interface BearState {
-//   bears: number;
-//   increaseBears: () => void;
-//   decreaseBears: () => void;
-//   removeAllBears: () => void;
-// }
-
 export const useCartStore = create()(
   persist(
     (set, get) => ({
@@ -34,6 +27,8 @@ export const useCartStore = create()(
         const cartres = await getCart();
         if (cartres.status === "success" && cartres.cartData) {
           set({ cartItems: cartres.cartData.cartItems });
+        } else {
+          set({ cartItems: [] });
         }
       },
       updateCartQantity: async (itemId, qty) => {

@@ -257,7 +257,9 @@ const Variation = ({
       gross_weight: isVariation ? variation.gross_weight : "",
       isPriceFixed: isVariation ? variation.isPriceFixed : false,
       metal_amount: getMetalPrice(),
-      making_charge: "",
+      making_charge: variation.making_charges
+        ? JSON.parse(variation.making_charges).value
+        : "",
       files: [],
     },
     validationSchema: variatonValidationSchema,
@@ -308,7 +310,7 @@ const Variation = ({
         makingCharges = {
           metalPrice: values?.metal_amount,
           charge_type: makingCharge,
-          value: chargeValue,
+          value: values?.making_charge,
         };
       }
 
@@ -987,6 +989,7 @@ const Variation = ({
                               label="Net Weight (grams)"
                               size="lg"
                               name="net_weight"
+                              onBlur={formik.handleBlur}
                               value={formik.values?.net_weight ?? ""}
                               error={
                                 formik.errors.net_weight &&
@@ -1018,6 +1021,7 @@ const Variation = ({
                                 formik.errors.gross_weight &&
                                 formik.touched.gross_weight
                               }
+                              onBlur={formik.handleBlur}
                               onChange={formik.handleChange}
                             />
                             {formik.errors.gross_weight &&
@@ -1067,6 +1071,7 @@ const Variation = ({
                           size="lg"
                           name="regular_price"
                           onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
                           value={formik.values?.regular_price}
                           error={
                             formik.errors.regular_price &&
@@ -1108,7 +1113,8 @@ const Variation = ({
                               size="lg"
                               name="making_charge"
                               label={makingCharge}
-                              value={chargeValue}
+                              value={formik.values?.making_charge}
+                              onBlur={formik.handleBlur}
                               onChange={(e) => {
                                 setChargeValue(e.target.value);
                                 formik.handleChange(e);

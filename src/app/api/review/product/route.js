@@ -1,6 +1,8 @@
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { join } from "path";
+import { writeFile, unlink } from "fs/promises";
 
 const reviewSchema = z.object({
   productId: z.number(),
@@ -19,7 +21,8 @@ export async function POST(request) {
     const rating = Number(req.get("rating"));
     const text = req.get("review");
     const recommandation = req.get("recommandation");
-    
+    const files = req.getAll("files[]");
+    console.log("files upload", files);
     const parsedAttributeAndValues = reviewSchema.parse({
       productId: productId,
       userId: userId,
@@ -28,14 +31,46 @@ export async function POST(request) {
       recommandation: recommandation,
     });
 
+    const createReviewQueryData = {
+      fromUserId: userId,
+      rating: rating,
+      text: text,
+      productId: productId,
+      recommandation: recommandation
+    };
+
+    let images = [];
+    if (files && files.length > 0) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        const dateSuffix = Date.now();
+        const uploadPath = '/assets/uploads/review';
+        const dynamicFileName = `${dateSuffix}_${i}_${file.name}`;
+        const path = join(
+          process.cwd(),
+          "/public"+uploadPath,
+          dynamicFileName
+        );
+        await writeFile(path, buffer);
+
+        images.push({
+          path: `${uploadPath}/${dynamicFileName}`,
+          image_type: "review",
+        });
+      }
+      if (images.length > 0){
+        createReviewQueryData.images = {
+          //check this query for updating relations with images and variation and for delete support
+          createMany: {
+            data: images,
+          },
+        };
+      }
+    }
     const result = await prisma.review.create({
-      data: {
-        fromUserId: userId,
-        rating: rating,
-        text: text,
-        productId: productId,
-        recommandation: recommandation
-      },
+      data: createReviewQueryData,
     });
 
     return NextResponse.json({message: "Review Added Successfully", review: result }, {status: 201});

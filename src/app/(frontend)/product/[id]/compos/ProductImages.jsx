@@ -89,7 +89,7 @@ export default function ProductImages({ variation }) {
                     asNavFor={nav1}
                     ref={(slider) => (sliderRef2 = slider)}
                     arrows={false}
-                    slidesToShow={3}
+                    slidesToShow={4}
                     swipeToSlide={true}
                     focusOnSelect={true}
                 >

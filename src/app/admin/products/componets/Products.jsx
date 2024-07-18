@@ -9,7 +9,8 @@ import DeleteProduct from "./DeleteProduct";
 import { ADMIN_ID, CUSTOMER_ID, VENDOR_ID } from "@/utils/constants";
 import dynamic from "next/dynamic";
 import { ProductStatus } from "@prisma/client";
-import { updateProductStatus } from "@/actions/product";
+import { updateProductFeaturedStatus, updateProductStatus } from "@/actions/product";
+import { showToast } from "@/utils/helper";
 
 const Products = ({ products }) => {
   if (typeof window !== "undefined") {
@@ -47,6 +48,31 @@ const Products = ({ products }) => {
                     ? ProductStatus.DRAFT
                     : ProductStatus.PUBLISHED
                 )
+              }
+            />
+          </div>
+        </>
+      ),
+    },
+    {
+      name: "Featured",
+      cell: (row) => (
+        <>
+          <div className="flex items-center grow">
+            <Switch
+              checked={row.featured === true}
+              // label={"Featured"}
+              ripple={false}
+              onChange={async () => {
+
+                let rs = await updateProductFeaturedStatus(
+                  row.product_id,
+                  !row.featured
+                );
+                if (rs.success) {
+                  showToast({message: 'Product Featured Status updated'});
+                }
+                }
               }
             />
           </div>

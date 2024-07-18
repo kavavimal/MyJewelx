@@ -3,12 +3,14 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Quantity from "./Quantity";
 import { useCartStore } from "@/contexts/cartStore";
-import { CURRENCY_SYMBOL } from "@/utils/constants";
 import RemoveCartItem from "./RemoveCartItem";
 import Paragraph from "@/components/Paragraph";
 import { printPrice } from "@/utils/helper";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const CartSidebar = () => {
+  const router = useRouter();
   const carts = useCartStore((state) => state);
   const totalAmount = useCartStore((state) => state.totalAmount());
 
@@ -94,10 +96,10 @@ const CartSidebar = () => {
                         <div>
                           <div className="flex justify-between text-base font-medium text-gray-900">
                             <div className="w-20 mr-2">
-                              <img
-                                src={
-                                  cartItem.productVariation?.image?.[0]?.path
-                                }
+                              <Image
+                                src={cartItem.productVariation?.image?.[0]?.path}
+                                width={150}
+                                height={150}
                                 alt={
                                   cartItem.productVariation?.product
                                     ?.product_name
@@ -107,7 +109,7 @@ const CartSidebar = () => {
                             </div>
                             <div>
                               <h3>
-                                <Link href="#">
+                                <Link href={`/product/${cartItem.productVariation?.product_id}`}>
                                   {
                                     cartItem.productVariation?.product
                                       ?.product_name

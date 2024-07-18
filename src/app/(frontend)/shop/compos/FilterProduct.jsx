@@ -1,11 +1,5 @@
 "use client";
-import {
-  getCharacteristics,
-  getCollections,
-  getMetals,
-  getPatterns,
-  getVendors,
-} from "@/actions/product";
+import { useShopStore } from "@/contexts/shopStore";
 import {
   Accordion,
   AccordionBody,
@@ -14,20 +8,19 @@ import {
   Checkbox,
 } from "@material-tailwind/react";
 import { CharsType } from "@prisma/client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
-const FilterProduct = ({ categories, setSelectedFilters }) => {
-  const [vendors, setVendors] = useState([]);
-  const [metals, setMetals] = useState([]);
-  const [patterns, setPatterns] = useState([]);
-  const [characteristics, setCharacteristics] = useState([]);
-  const [collections, setCollections] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedVendors, setSelectedVendors] = useState([]);
-  const [selectedMetals, setSelectedMetals] = useState([]);
-  const [selectedPatterns, setSelectedPatterns] = useState([]);
-  const [selectedCharacteristics, setSelectedCharacteristics] = useState([]);
-  const [selectedCollections, setSelectedCollections] = useState([]);
+const FilterProduct = ({ filterdDatas }) => {
+  const selectedFilters = useShopStore((store) => store.filters);
+  const setSelectedFilters = useShopStore((store) => store.setFilters);
+
+  const vendors = filterdDatas.vendors;
+  const metals = filterdDatas.metals;
+  const patterns = filterdDatas.patterns;
+  const characteristics = filterdDatas.characteristics;
+  const collections = filterdDatas.collections;
+  const categories = filterdDatas.categories;
+
   const [isShowMore, setIsShowMore] = useState(false);
   const [openAccordions, setOpenAccordions] = useState([1]);
 
@@ -41,200 +34,82 @@ const FilterProduct = ({ categories, setSelectedFilters }) => {
 
   const handleCategoryChange = (event) => {
     const categoryId = parseInt(event.target.value);
-    if (event.target.checked) {
-      setSelectedCategories((prevSelectedCategories) => [
-        ...prevSelectedCategories,
-        { category_id: categoryId },
-      ]);
-    } else {
-      setSelectedCategories((prevSelectedCategories) =>
-        prevSelectedCategories.filter(
-          (category) => category.category_id !== categoryId
-        )
-      );
-    }
+    let filters = selectedFilters;
+    filters = {
+      ...filters,
+      categories: event.target.checked
+        ? [...filters.categories, categoryId]
+        : [...filters.categories.filter((c) => c !== categoryId)],
+    };
+
+    setSelectedFilters(filters);
   };
 
   const handleVendorChange = (event) => {
     const vendorName = event.target.value;
-    if (event.target.checked) {
-      setSelectedVendors((prevSelectedVendors) => [
-        ...prevSelectedVendors,
-        { name: vendorName },
-      ]);
-    } else {
-      setSelectedVendors((prevSelectedVendors) =>
-        prevSelectedVendors.filter((vendor) => vendor.name !== vendorName)
-      );
-    }
+    let filters = selectedFilters;
+    filters = {
+      ...filters,
+      vendors: event.target.checked
+        ? [...filters.vendors, vendorName]
+        : [...filters.vendors.filter((c) => c !== vendorName)],
+    };
+    setSelectedFilters(filters);
   };
 
   const handleMetalChange = (event) => {
     const id = parseInt(event.target.value);
-    if (event.target.checked) {
-      setSelectedMetals((prevSelectedMetals) => [
-        ...prevSelectedMetals,
-        { id: id },
-      ]);
-    } else {
-      setSelectedMetals((prevSelectedMetals) =>
-        prevSelectedMetals.filter((metal) => metal.id !== id)
-      );
-    }
+    let filters = selectedFilters;
+    filters = {
+      ...filters,
+      metals: event.target.checked
+        ? [...filters.metals, id]
+        : [...filters.metals.filter((c) => c !== id)],
+    };
+    setSelectedFilters(filters);
   };
 
   const handlePatternChange = (event) => {
     const id = parseInt(event.target.value);
-    if (event.target.checked) {
-      setSelectedPatterns((prevSelectedPatterns) => [
-        ...prevSelectedPatterns,
-        { id: id },
-      ]);
-    } else {
-      setSelectedPatterns((prevSelectedPatterns) =>
-        prevSelectedPatterns.filter((pattern) => pattern.id !== id)
-      );
-    }
+    let filters = selectedFilters;
+    filters = {
+      ...filters,
+      patterns: event.target.checked
+        ? [...filters.patterns, id]
+        : [...filters.patterns.filter((c) => c !== id)],
+    };
+    setSelectedFilters(filters);
   };
 
   const handleCharacteristicsChange = (event) => {
     const id = parseInt(event.target.value);
-    if (event.target.checked) {
-      setSelectedCharacteristics((prevSelectedCharacteristics) => [
-        ...prevSelectedCharacteristics,
-        { id: id },
-      ]);
-    } else {
-      setSelectedCharacteristics((prevSelectedCharacteristics) =>
-        prevSelectedCharacteristics.filter(
-          (characteristic) => characteristic.id !== id
-        )
-      );
-    }
+    let filters = selectedFilters;
+    filters = {
+      ...filters,
+      characteristics: event.target.checked
+        ? [...filters.characteristics, id]
+        : [...filters.characteristics.filter((c) => c !== id)],
+    };
+    setSelectedFilters(filters);
   };
 
   const handleCollectionsChange = (event) => {
     const id = parseInt(event.target.value);
-    if (event.target.checked) {
-      setSelectedCollections((prevSelectedCollections) => [
-        ...prevSelectedCollections,
-        { id: id },
-      ]);
-    } else {
-      setSelectedCollections((prevSelectedCollections) =>
-        prevSelectedCollections.filter((collection) => collection.id !== id)
-      );
-    }
+    let filters = selectedFilters;
+    filters = {
+      ...filters,
+      collections: event.target.checked
+        ? [...filters.collections, id]
+        : [...filters.collections.filter((c) => c !== id)],
+    };
+    setSelectedFilters(filters);
   };
-  const fetchVendors = async () => {
-    try {
-      const vendorsData = await getVendors();
-      setVendors(vendorsData);
-    } catch (error) {
-      console.error("Error fetching vendors:", error);
-    }
-  };
-
-  const fetchMetals = async () => {
-    try {
-      const metalsData = await getMetals();
-      setMetals(metalsData);
-    } catch (error) {
-      console.error("Error fetching metals:", error);
-    }
-  };
-
-  const fetchPatterns = async () => {
-    try {
-      const patternsData = await getPatterns();
-      console.log(patternsData);
-      setPatterns(patternsData);
-    } catch (error) {
-      console.error("Error fetching patterns:", error);
-    }
-  };
-
-  const fetchCharacteristics = async () => {
-    try {
-      const characteristicsData = await getCharacteristics();
-      setCharacteristics(characteristicsData);
-    } catch (error) {
-      console.error("Error fetching characteristics:", error);
-    }
-  };
-
-  const fetchCollections = async () => {
-    try {
-      const collectionsData = await getCollections();
-      setCollections(collectionsData);
-    } catch (error) {
-      console.error("Error fetching collections:", error);
-    }
-  };
-
-  useEffect(() => {
-    setSelectedFilters((prevSelectedFilters) => ({
-      ...prevSelectedFilters,
-      categories: selectedCategories.map((category) => category.category_id),
-    }));
-  }, [selectedCategories]);
-
-  useEffect(() => {
-    setSelectedFilters((prevSelectedFilters) => ({
-      ...prevSelectedFilters,
-      vendors: selectedVendors.map((vendor) => vendor.name),
-    }));
-  }, [selectedVendors]);
-
-  useEffect(() => {
-    setSelectedFilters((prevSelectedFilters) => ({
-      ...prevSelectedFilters,
-      metals: selectedMetals.map((metal) => metal.id),
-    }));
-  }, [selectedMetals]);
-
-  useEffect(() => {
-    setSelectedFilters((prevSelectedFilters) => ({
-      ...prevSelectedFilters,
-      characteristics: selectedCharacteristics.map(
-        (characteristic) => characteristic.id
-      ),
-    }));
-  }, [selectedCharacteristics]);
-
-  useEffect(() => {
-    setSelectedFilters((prevSelectedFilters) => ({
-      ...prevSelectedFilters,
-      patterns: selectedPatterns.map((pattern) => pattern.id),
-    }));
-  }, [selectedPatterns]);
-
-  useEffect(() => {
-    setSelectedFilters((prevSelectedFilters) => ({
-      ...prevSelectedFilters,
-      collections: selectedCollections.map((collection) => collection.id),
-    }));
-  }, [selectedCollections]);
-
-  useEffect(() => {
-    fetchVendors();
-    fetchMetals();
-    fetchPatterns();
-    fetchCharacteristics();
-    fetchCollections();
-  }, []);
 
   return (
     <div>
       <div className="mb-4">
         <Button
           onClick={() => {
-            setSelectedCategories([]);
-            setSelectedVendors([]);
-            setSelectedMetals([]);
-            setSelectedCharacteristics([]);
-            setSelectedPatterns([]);
-            setSelectedCollections([]);
             setSelectedFilters({});
           }}
           variant="outlined"
@@ -282,10 +157,9 @@ const FilterProduct = ({ categories, setSelectedFilters }) => {
                       <Checkbox
                         value={category.category_id}
                         id={category.name}
-                        checked={selectedCategories.some(
+                        checked={selectedFilters?.categories && selectedFilters?.categories?.some(
                           (selectedCategory) =>
-                            selectedCategory.category_id ===
-                            category.category_id
+                            selectedCategory === category.category_id
                         )}
                         onChange={handleCategoryChange}
                         ripple={false}
@@ -352,9 +226,9 @@ const FilterProduct = ({ categories, setSelectedFilters }) => {
                     >
                       <Checkbox
                         value={`${vendor.firstName} ${vendor.lastName}`}
-                        checked={selectedVendors.some(
+                        checked={selectedFilters?.vendors && selectedFilters?.vendors?.some(
                           (selectedVendor) =>
-                            selectedVendor.name ===
+                            selectedVendor ===
                             `${vendor.firstName} ${vendor.lastName}`
                         )}
                         onChange={handleVendorChange}
@@ -394,8 +268,8 @@ const FilterProduct = ({ categories, setSelectedFilters }) => {
                       <Checkbox
                         value={metal?.id}
                         onChange={handleMetalChange}
-                        checked={selectedMetals.some(
-                          (selectedMetal) => selectedMetal.id === metal?.id
+                        checked={selectedFilters.metals && selectedFilters?.metals?.some(
+                          (selectedMetal) => selectedMetal === metal?.id
                         )}
                         id={metal?.name}
                         ripple={false}
@@ -433,9 +307,9 @@ const FilterProduct = ({ categories, setSelectedFilters }) => {
                       <Checkbox
                         value={pattern?.pattern_id}
                         onChange={handlePatternChange}
-                        checked={selectedPatterns.some(
+                        checked={selectedFilters?.patterns && selectedFilters?.patterns?.some(
                           (selectedPattern) =>
-                            selectedPattern.id === pattern?.pattern_id
+                            selectedPattern === pattern?.pattern_id
                         )}
                         id={pattern?.name}
                         ripple={false}
@@ -478,9 +352,9 @@ const FilterProduct = ({ categories, setSelectedFilters }) => {
                         <Checkbox
                           value={brand?.chars_id}
                           onChange={handleCharacteristicsChange}
-                          checked={selectedCharacteristics.some(
+                          checked={selectedFilters?.characteristics && selectedFilters?.characteristics?.some(
                             (selectedCharacteristic) =>
-                              selectedCharacteristic.id === brand?.chars_id
+                              selectedCharacteristic === brand?.chars_id
                           )}
                           id={brand?.name}
                           ripple={false}
@@ -524,9 +398,9 @@ const FilterProduct = ({ categories, setSelectedFilters }) => {
                         <Checkbox
                           value={trend?.chars_id}
                           onChange={handleCharacteristicsChange}
-                          checked={selectedCharacteristics.some(
-                            (selectedCharacteristic) =>
-                              selectedCharacteristic.id === trend?.chars_id
+                          checked={selectedFilters?.characteristics && selectedFilters?.characteristics?.some(
+                            (selectedTrend) =>
+                              selectedTrend === trend?.chars_id
                           )}
                           id={trend?.name}
                           ripple={false}
@@ -564,9 +438,9 @@ const FilterProduct = ({ categories, setSelectedFilters }) => {
                       <Checkbox
                         value={collection?.collection_id}
                         onChange={handleCollectionsChange}
-                        checked={selectedCollections.some(
+                        checked={selectedFilters?.collections && selectedFilters?.collections?.some(
                           (selectedCollection) =>
-                            selectedCollection.id === collection?.collection_id
+                            selectedCollection === collection?.collection_id
                         )}
                         id={collection?.name}
                         label={collection?.name}
@@ -608,9 +482,9 @@ const FilterProduct = ({ categories, setSelectedFilters }) => {
                         <Checkbox
                           value={style?.chars_id}
                           onChange={handleCharacteristicsChange}
-                          checked={selectedCharacteristics.some(
+                          checked={selectedFilters?.characteristics && selectedFilters?.characteristics?.some(
                             (selectedCharacteristic) =>
-                              selectedCharacteristic.id === style?.chars_id
+                              selectedCharacteristic === style?.chars_id
                           )}
                           id={style?.name}
                           ripple={false}
@@ -653,9 +527,9 @@ const FilterProduct = ({ categories, setSelectedFilters }) => {
                         <Checkbox
                           value={theme?.chars_id}
                           onChange={handleCharacteristicsChange}
-                          checked={selectedCharacteristics.some(
+                          checked={selectedFilters?.characteristics && selectedFilters?.characteristics?.some(
                             (selectedCharacteristic) =>
-                              selectedCharacteristic.id === theme?.chars_id
+                              selectedCharacteristic === theme?.chars_id
                           )}
                           id={theme?.name}
                           ripple={false}

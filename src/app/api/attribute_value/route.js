@@ -13,6 +13,7 @@ export async function POST(request) {
 
     const name = req.get("name");
     const attribute_id = Number(req.get("attribute_id"));
+    const colorCode = req.get("colorCode");
 
     const exists = await prisma.attributeValue.findFirst({
       where: { name: name, attribute_id: attribute_id },
@@ -33,6 +34,7 @@ export async function POST(request) {
       data: {
         name: AttributeValueData.name,
         attribute_id: AttributeValueData.attribute_id,
+        colorCode: colorCode || ''
       },
     });
 

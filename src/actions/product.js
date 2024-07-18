@@ -46,6 +46,31 @@ export const updateProductStatus = async (productId, newStatus) => {
     };
   }
 };
+export const updateProductFeaturedStatus = async (productId, newStatus) => {
+  const user = await checkUserSession();
+
+  try {
+    const product = await prisma.product.update({
+      data: {
+        featured: newStatus,
+      },
+      where: {
+        product_id: productId,
+      },
+    });
+    revalidatePath("/");
+    return {
+      message: "Product Feature Stat Updated Successfully",
+      product,
+      success: true,
+    };
+  } catch (e) {
+    return {
+      message: "Something went wrong",
+      error: e,
+    };
+  }
+};
 export const getProduct = async (product_id) => {
   const user = await checkUserSession();
   if (!user) {
@@ -198,20 +223,23 @@ export const searchProducts = async (data) => {
     data.vendors.length > 0 &&
     data.vendors.map((vendor) => vendor.split(" ")[1]);
   try {
-    // let pricefilter = false;
-    // if (data.price.min && data.price.max) {
-    //   pricefilter = {
-    //     variations: {
-    //       some: {
-    //         selling_price: { gt: Number(data.price.min), lt: Number(data.price.max) },
-    //       },
-    //     },
-    //   };
-    // }
+    let pricefilter = false;
+    if (data?.price && data?.price?.min && data?.price?.max) {
+      pricefilter = {
+        variations: {
+          some: {
+            selling_price: {
+              gt: Number(data.price.min),
+              lt: Number(data.price.max),
+            },
+          },
+        },
+      };
+    }
     const products = prisma.product.findMany({
       where: {
         status: "PUBLISHED",
-        // ...(pricefilter && pricefilter),
+        ...(pricefilter && pricefilter),
         ...(data.categories &&
           data.categories.length > 0 && {
             categoryId: {
@@ -284,11 +312,109 @@ export const searchProducts = async (data) => {
               },
             },
           }),
+
+        ...(data?.category && {
+          category: {
+            name: {
+              equals: data?.category,
+            },
+          },
+        }),
+
+        ...(data?.q && {
+          OR: [
+            {
+              product_name: {
+                contains: data?.q,
+                mode: "insensitive",
+              },
+            },
+            {
+              user: {
+                OR: [
+                  {
+                    firstName: {
+                      contains: data?.q,
+                      mode: "insensitive",
+                    },
+                  },
+                  {
+                    lastName: {
+                      contains: data?.q,
+                      mode: "insensitive",
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              variations: {
+                some: {
+                  variation_name: {
+                    contains: data?.q,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+            {
+              ProductAttributeValue: {
+                some: {
+                  attributeValue: {
+                    attribute: {
+                      name: {
+                        contains: data?.q,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            {
+              patterns: {
+                some: {
+                  pattern: {
+                    name: {
+                      contains: data?.q,
+                      mode: "insensitive",
+                    },
+                  },
+                },
+              },
+            },
+            {
+              collections: {
+                some: {
+                  collection: {
+                    name: {
+                      contains: data?.q,
+                      mode: "insensitive",
+                    },
+                  },
+                },
+              },
+            },
+            {
+              productChars: {
+                some: {
+                  characteristic: {
+                    name: {
+                      contains: data?.q,
+                      mode: "insensitive",
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        }),
       },
       include: {
         variations: {
           include: { image: true },
         },
+        reviews: true,
         user: true,
       },
       orderBy: {
@@ -301,11 +427,25 @@ export const searchProducts = async (data) => {
           data?.sort === "Descending" && {
             product_id: "desc",
           }),
+
+        // ...(data?.sort &&
+        //   data?.sort === "Low to High" && {
+        //     variations: {
+        //       selling_price: "asc",
+        //     },
+        //   }),
+        // ...(data?.sort &&
+        //   data?.sort === "High to Low" && {
+        //     variations: {
+        //       selling_price: "desc",
+        //     },
+        //   }),
       },
     });
 
     return products;
   } catch (error) {
+    console.log("error", error);
     return [];
   }
 };
@@ -340,3 +480,19 @@ export const getCharacteristics = async () => {
 export const getCollections = async () => {
   return prisma.collection.findMany();
 };
+
+async function getGrams(str) {
+  // Regular expression to find the number followed by "gram" (case insensitive)
+  const regex = /(\d+)\s*gram/i;
+
+  // Execute the regex on the input string
+  const match = await str?.match(regex);
+
+  // If a match is found, return the number of grams
+  if (match) {
+    return parseInt(match[1], 10); // Parse the captured number as an integer
+  } else {
+    // If no match is found, return null or any default value
+    return null;
+  }
+}

@@ -1,0 +1,52 @@
+import React from "react";
+import prisma from "@/lib/prisma";
+import { checkUserSession } from "@/app/(frontend)/layout";
+import Products from "../products/componets/Products";
+
+export const revalidate = 0;
+
+const getProducts = async () => {
+  const user = await checkUserSession();
+  try {
+    if (user.role.role_name !== "ADMIN") {
+      return prisma.product.findMany({
+        include: {
+          user: {
+            include: {
+              vendor: true,
+            },
+          },
+        },
+        orderBy: {
+          product_id: "desc",
+        },
+        where: {
+          user_id: user.id,
+        },
+      });
+    }
+    return prisma.product.findMany({
+      include: {
+        user: {
+          include: {
+            vendor: true,
+          },
+        },
+      },
+      orderBy: {
+        product_id: "desc",
+      },
+    });
+  } catch (error) {}
+};
+
+const products = async () => {
+  const response = await getProducts();
+  return (
+    <>
+      <Products products={response} />
+    </>
+  );
+};
+
+export default products;

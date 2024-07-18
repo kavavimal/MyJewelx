@@ -16,7 +16,8 @@ const Quantity = ({ cartItem }) => {
     if (cartI.quantity !== q) {
       setQ(cartI.quantity);
     }
-  }, [cartItems]);
+  }, [cartItems, cartItem]);
+  
   const quantityChange = async (type) => {
     setLocalLoading(true);
     let cartI = findItem(cartItem.cartItem_id);

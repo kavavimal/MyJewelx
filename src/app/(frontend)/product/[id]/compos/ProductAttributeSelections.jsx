@@ -71,7 +71,7 @@ export default function ProductAttributeSelections({
                             {group.map((attribute) => {
                                 const bgcolor =
                                     attribute.attribute.name === 'Color'
-                                        ? attribute.attributeValue.name
+                                        ? attribute.attributeValue.colorCode
                                         : '';
                                 const selected_attr =
                                     selectedOption?.length > 0

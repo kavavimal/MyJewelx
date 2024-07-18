@@ -15,12 +15,15 @@ import {
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PriceFilter from "./PriceFilter";
+import { useSearchParams } from "next/navigation";
 
 const ShopComponent = ({ products, categories, promolist }) => {
   const [loading, setLoading] = useState(false);
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [selectedFilters, setSelectedFilters] = useState({});
   const [sort, setSort] = useState("");
+  const query = useSearchParams().get("q");
+  const category = useSearchParams().get("category");
 
   const filterByPrice = async (min, max) => {
     setLoading(true);
@@ -46,6 +49,15 @@ const ShopComponent = ({ products, categories, promolist }) => {
   useEffect(() => {
     setSelectedFilters((prev) => ({ ...prev, sort: sort }));
   }, [sort]);
+
+  useEffect(() => {
+    if (query) {
+      setSelectedFilters((prev) => ({ ...prev, q: query }));
+    }
+    if (category) {
+      setSelectedFilters((prev) => ({ ...prev, category: category }));
+    }
+  }, []);
   return (
     <section className="container pb-20 pt-5">
       <div className="mb-5">
@@ -111,18 +123,20 @@ const ShopComponent = ({ products, categories, promolist }) => {
           </Select>
         </div>
       </div>
-      <div className="flex items-start gap-5">
+      <div className="flex items-start gap-[11px]">
         <div
-          className="w-3/12"
+          className="w-[224px]"
           style={{
             position: "sticky",
-            top: 20,
+            top: 120,
             left: 0,
           }}
         >
           <FilterProduct
             categories={categories}
             setSelectedFilters={setSelectedFilters}
+            query={query}
+            category={category}
           />
         </div>
 

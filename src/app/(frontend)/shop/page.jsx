@@ -1,35 +1,72 @@
-import prisma from '@/lib/prisma';
-import ShopComponent from './compos/ShopComponent';
-import { getCategories } from '@/actions/category';
-const getProducts = async () => {
-    return await prisma.product.findMany({
-        where: { status: 'PUBLISHED' },
-        include: {
-            variations: {
-                include: { image: true },
-            },
-            user: true,
-        },
-        // include: { variations: true, image: true },
-    });
+import { searchProducts } from "@/actions/product";
+import { attributeIDs } from "@/utils/constants";
+import FilterProduct from "./compos/FilterProduct";
+import ProductLoop from "./compos/ProductLoop";
+import ShopTopComponent from "./compos/ShopTopComponent";
+
+const getFilterableDatas = async () => {
+  const vendors = await prisma.user.findMany({
+    where: {
+      role_id: 2,
+    },
+    include: {
+      vendor: true,
+    },
+  });
+
+  const categories = await prisma.category.findMany({
+    where: {
+      parent_id: null,
+    },
+  });
+
+  const metals = await prisma.attributeValue.findMany({
+    where: {
+      attribute_id: attributeIDs.MATERIAL,
+    },
+  });
+
+  const patterns = await prisma.pattern.findMany();
+  const characteristics = await prisma.characteristic.findMany();
+  const collections = await prisma.collection.findMany();
+
+  return {
+    vendors,
+    categories,
+    metals,
+    patterns,
+    characteristics,
+    collections,
+  };
 };
-const getPromoList = () =>
-    prisma.promotional.findMany({
-        where: {
-            ads_type: 'SHOP',
-        },
-    });
 
-export default async function Shop() {
-    const products = await getProducts();
-    const categories = await getCategories();
-    const promolist = await getPromoList();
+export default async function Shop({ searchParams }) {
+    let searchFilter = {};
+    if (searchParams?.q) {
+        searchFilter = {...searchFilter, q: searchParams.q};
+    }
+    if (searchParams?.cat) {
+        searchFilter = {...searchFilter, categories: [searchParams.category]};
+    }
+  const products = await searchProducts(searchFilter);
+  const filterdDatas = await getFilterableDatas();
+  return (
+    <>
+      <ShopTopComponent />
+      <div className="flex items-start gap-[11px]">
+        <div
+          className="w-[224px]"
+          style={{
+            position: "sticky",
+            top: 120,
+            left: 0,
+          }}
+        >
+          <FilterProduct filterdDatas={filterdDatas} />
+        </div>
 
-    return (
-        <ShopComponent
-            products={products}
-            categories={categories}
-            promolist={promolist}
-        />
-    );
+        <ProductLoop products={products} />
+      </div>
+    </>
+  );
 }

@@ -27,31 +27,32 @@ model Account {
 }
 
 model User {
-  id           String                @id @default(cuid())
-  email        String                @unique
+  id           String     @id @default(cuid())
+  email        String     @unique
   password     String?
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt
-  account_type AcountType            @default(CUSTOMER)
-  status       UserStatus            @default(ACTIVE)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  account_type AcountType @default(CUSTOMER)
+  status       UserStatus @default(ACTIVE)
   role_id      Int
   phone_number String?
   otp          String?
   firstName    String
   lastName     String
   products     Product[]
-  role         Role                  @relation(fields: [role_id], references: [role_id])
+  role         Role       @relation(fields: [role_id], references: [role_id])
   vendor       Vendor?
   accounts     Account[]
   image        Image?
   carts        Cart?
   reviews      Review[]
-  myreviews       Review[]               @relation("myreviews")
+  myreviews    Review[]   @relation("myreviews")
 
   orders       Order[]               @relation("buyerOrders")
   sellerOrders OrderSellerRelation[]
   wishlist     Wishlist[]
   likes        Like[]
+  viewProducts ViewedProduct[]
 }
 
 model Role {
@@ -85,6 +86,7 @@ model Product {
   user_id               String
   product_name          String
   isOnlineBuyable       Boolean                 @default(false)
+  featured              Boolean                 @default(false)
   country_id            Int?
   country               Country?                @relation(fields: [country_id], references: [country_id])
   user                  User                    @relation(fields: [user_id], references: [id])
@@ -101,6 +103,9 @@ model Product {
   category    Category  @relation("CategoryProducts", fields: [categoryId], references: [category_id])
   subcategory Category? @relation("SubCategoryProducts", fields: [subCategoryId], references: [category_id])
 
+  relatedProducts RelatedProduct[] @relation("RelatedProducts")
+  relatedTo       RelatedProduct[] @relation("RelatedTo")
+
   collections  ProductCollection[]
   genders      ProductGender[]
   patterns     ProductPatten[]
@@ -111,6 +116,29 @@ model Product {
   reviews      Review[]
   wishlist     Wishlist[]
   likes        Like[]
+  viewedBy     ViewedProduct[]
+}
+
+model ViewedProduct {
+  id        Int    @id @default(autoincrement())
+  userId    String
+  productId Int
+
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [product_id])
+
+  @@unique([userId, productId])
+}
+
+model RelatedProduct {
+  id               Int @id @default(autoincrement())
+  productId        Int
+  relatedProductId Int
+
+  product        Product @relation("RelatedProducts", fields: [productId], references: [product_id], onDelete: Cascade)
+  relatedProduct Product @relation("RelatedTo", fields: [relatedProductId], references: [product_id], onDelete: Cascade)
+
+  @@unique([productId, relatedProductId])
 }
 
 model Vendor {
@@ -452,7 +480,7 @@ model OtpVerification {
 
 // Define the data model for orders
 model Order {
-  id              Int    @id @default(autoincrement())
+  id              Int     @id @default(autoincrement())
   shippingAddress String
   billingAddress  String
   paymentMethod   String
@@ -491,21 +519,22 @@ model OrderItem {
 
 // Define the data model for reviews
 model Review {
-  id        Int      @id @default(autoincrement())
-  rating    Int // 1 to 5 stars
-  text      String?
+  id             Int          @id @default(autoincrement())
+  rating         Int // 1 to 5 stars
+  text           String?
   recommandation String?
-  images    Image[]
-  createdAt DateTime @default(now())
-  status  ReviewStatus  @default(PUBLISHED)
+  images         Image[]
+  createdAt      DateTime     @default(now())
+  status         ReviewStatus @default(PUBLISHED)
+  replay         String?
 
   // Relationships
-  fromUser      User     @relation(fields: [fromUserId], references: [id], "myreviews")
-  fromUserId    String
+  fromUser   User   @relation(fields: [fromUserId], references: [id], "myreviews")
+  fromUserId String
 
-  user      User?     @relation(fields: [userId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
   userId    String?
-  product   Product?  @relation(fields: [productId], references: [product_id])
+  product   Product? @relation(fields: [productId], references: [product_id])
   productId Int?
 }
 

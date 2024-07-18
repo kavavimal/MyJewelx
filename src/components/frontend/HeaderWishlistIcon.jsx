@@ -6,8 +6,10 @@ import { useEffect } from 'react';
 const HeaderWishlistIcon = () => {
     const fetchWishlist = useWishlistStore((state) => state.fetchWishlist);
     const wishlistItems = useWishlistStore((state) => state.wishlistItems);
+    const fetchLikedlist = useWishlistStore((state) => state.fetchLikedlist);
     useEffect(() => {
         fetchWishlist();
+        fetchLikedlist();
     }, []);
     return (
         <>

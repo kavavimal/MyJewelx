@@ -1,20 +1,18 @@
 "use client";
 import StarRatings from "@/components/frontend/StarRatings";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AddToCart from "@/components/frontend/cart/AddToCart";
 import ProductImages from "./ProductImages";
 import Paragraph from "@/components/Paragraph";
-import LikeIcon from "@/components/frontend/LikeIcon";
 import Share from "./Share";
 import ProductMeta from "./ProductMeta";
 import { printPrice } from "@/utils/helper";
 import ProductAttributeSelections from "./ProductAttributeSelections";
 import AddToWishlist from "@/components/frontend/cart/AddToWishlist";
+import ProductLikes from "@/components/frontend/ProductLikes";
 
-const Detail = ({ product, selectedOptions, filteredAttributes }) => {
+const Detail = ({ product, selectedOptions, filteredAttributes, avgRating }) => {
   const [variation, setVariation] = useState(product?.variations[0]);
-
-  const [makingC, setMakingC] = useState();
   const sizes = [];
   product.ProductAttributeValue.forEach((pav) => {
     if (pav.attribute.name === "Size") {
@@ -22,51 +20,15 @@ const Detail = ({ product, selectedOptions, filteredAttributes }) => {
     }
   });
 
-  const making_charges = variation?.making_charges
-    ? JSON.parse(variation.making_charges)
-    : null;
   const other_charges = variation?.other_charges
     ? JSON.parse(variation.other_charges)
     : null;
-  let other_charges_total = 0;
-  useEffect(() => {
-    if (making_charges) {
-      if (making_charges.charge_type === "perPiece/Flat") {
-        setMakingC(making_charges.metalPrice);
-      } else if (making_charges.charge_type === "Per Gram On Net Weight") {
-        let metalPrice = variation.net_weight * making_charges.value;
-        metalPrice = metalPrice.toFixed(2);
-        setMakingC(metalPrice);
-      } else if (
-        making_charges.charge_type === "Per(%) On Metal Rate On Karat"
-      ) {
-        let metalPrice =
-          ((variation.selling_price
-            ? variation.selling_price
-            : variation.regular_price) *
-            making_charges.value) /
-          100;
-        metalPrice = metalPrice.toFixed(2);
-        setMakingC(metalPrice);
-      }
-    }
-  }, [making_charges, variation]);
+  let other_charges_total = other_charges.filter((a) => a.charge_type === 'additional').reduce((total, charges) => total + Number(charges.value),0);
+  let gemstone_total = other_charges.filter((a) => a.charge_type === 'gemstone').reduce((total, charges) => total + Number(charges.value),0);
 
-  other_charges?.map((charges) => {
-    other_charges_total = other_charges_total + Number(charges.value);
-  });
-
-  const variation_price = variation?.selling_price
-    ? variation?.selling_price
-    : variation?.regular_price;
-  const variation_vat =
-    (variation_price * 1 * (variation?.vat ? variation_vat : 0)) / 100;
-  const total_amount = (
-    variation_price +
-    variation_vat +
-    (makingC ? Number(makingC) : 0) +
-    other_charges_total
-  ).toFixed(2);
+  const vat = other_charges.find((a) => a.charge_type === 'vat/tax');
+    
+  
 
   return (
     <>
@@ -81,19 +43,18 @@ const Detail = ({ product, selectedOptions, filteredAttributes }) => {
                   {product.product_name}
                 </h1>
                 <div className="flex items-center">
-                  <StarRatings
-                    starRatings={
-                      variation?.starRatings ? variation?.starRatings : 4.5
-                    }
-                  />
+                  <StarRatings starRatings={avgRating ? avgRating : 0} />
                   <Paragraph color="gray-600" classes="ml-3">
-                    {product?.reviews?.length} Customre Reviews
+                    {product?.reviews?.length} Customer Reviews
                   </Paragraph>
 
                   <span className="flex ml-3 pl-3 py-2 border-l-2 border-gray-200 space-x-2s">
                     <Paragraph classes="flex" color="gray-600">
-                      <LikeIcon filled />{" "}
-                      {product.likes ? product.likes.length : "105"} Likes
+                      <ProductLikes 
+                        product_id={product.product_id} 
+                        showCount
+                        count={product.likes && product.likes.length ? product.likes.length  : '0'} 
+                      />
                     </Paragraph>
                   </span>
                 </div>
@@ -101,11 +62,7 @@ const Detail = ({ product, selectedOptions, filteredAttributes }) => {
 
                 <div className="w-1/2 mb-1 flex">
                   <strong className="md:w-1/2">
-                    {printPrice(
-                      variation?.selling_price
-                        ? variation?.selling_price
-                        : variation?.regular_price
-                    )}
+                    {printPrice(variation?.selling_price ? variation?.selling_price : variation?.regular_price)}
                   </strong>
                   <Paragraph classes="md:w-1/2 text-right  border-l">
                     {variation?.net_weight} gram
@@ -128,20 +85,20 @@ const Detail = ({ product, selectedOptions, filteredAttributes }) => {
 
                 <div className="leading-relaxed border-b-2 border-gray-100 py-3">
                   <p className="leading-relaxed pb-3">
-                    Making Charges :<span> AED </span>
-                    {makingC ? makingC : 0}
+                    Making Charges : {printPrice(variation.making_charges ? variation.making_charges?.value : 0)}
                   </p>
                   <p className="leading-relaxed pb-3">
-                    Other Charges :<span> AED </span>
-                    {other_charges_total}
+                    Gemstone Charges : {printPrice(gemstone_total)}
                   </p>
                   <p className="leading-relaxed pb-3">
-                    Value Added Tax :{variation?.vat ? variation?.vat : 0}
+                    Other Charges : {printPrice(other_charges_total)}
+                  </p>
+                  <p className="leading-relaxed pb-3">
+                    Value Added Tax : {vat ? vat?.value : 0}
                     <span>&#37;</span>
                   </p>
                   <p className="leading-relaxed">
-                    <span> AED </span>
-                    Total Amount :{total_amount}
+                    Total Amount : {printPrice(variation?.selling_price ? variation?.selling_price : variation?.regular_price)}
                   </p>
                 </div>
                 <Paragraph>

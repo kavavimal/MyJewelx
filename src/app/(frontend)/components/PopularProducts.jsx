@@ -1,40 +1,129 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ProductCard from "../shop/compos/ProductCard";
 import RecentlyViewed from "./RecentlyViewed";
 import PopularTags from "./PopularTags";
-
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Grid, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/grid";
+import ReactSelect from "react-select";
+import { get } from "@/utils/api";
 const PopularProducts = ({ products }) => {
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState([]);
+  const [filterProducts, setFilterProducts] = useState(products);
+  const options =
+    categories?.length > 0
+      ? categories.map((category) => ({
+          value: category.category_id,
+          label: category.name,
+        }))
+      : [];
+  const getCategories = async () => {
+    try {
+      const repsonse = await get("/api/category");
+      setCategories(repsonse?.data?.categories);
+    } catch (error) {
+      setCategories([]);
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedCategory.length === 0) {
+      setFilterProducts(products);
+    } else {
+      setFilterProducts(
+        products.filter((product) => {
+          return selectedCategory.includes(product.categoryId);
+        })
+      );
+    }
+  }, [selectedCategory]);
+
+  console.log(products);
+  useEffect(() => {
+    getCategories();
+  }, []);
   return (
-    <div className="py-10">
-      <div className="flex container gap-5">
-        <div className="w-3/12">
-          <h3 className="text-lg font-playfairdisplay font-semibold tracking-wide">
+    <div className="py-[53px]">
+      <div className="flex items-start container gap-5">
+        <div className="w-[220px]">
+          <h3 className="mb-2.5 mt-3 text-lg font-playfairdisplay font-semibold tracking-wide">
             Recently Viewed
           </h3>
-          <div className="mt-5 mb-3">
+          <div className="">
             <RecentlyViewed />
           </div>
           <div>
-            <h3 className="text-lg font-playfairdisplay font-semibold tracking-wide">
-              Popular tags
-            </h3>
-            <div className="mt-3">
+            <div className="pt-[15px] pb-2.5">
+              <h3 className="text-lg font-playfairdisplay font-semibold tracking-wide">
+                Popular tags
+              </h3>
+            </div>
+            <div>
               <PopularTags />
             </div>
           </div>
         </div>
-        <div className="w-9/12">
-          <h3 className="text-2xl font-playfairdisplay font-semibold tracking-wide">
-            Popular Products
-          </h3>
-          <div className="mt-4">
-            <div className="flex-1 grid grid-cols-4 gap-5">
-              {products.slice(0, 12).map((product) => (
-                <ProductCard key={product.product_id} product={product} />
-              ))}
+        <div className="w-[calc(100%-240px)]">
+          <div className="mb-[17px] flex justify-between items-center">
+            <h3 className="text-2xl font-playfairdisplay font-semibold tracking-wide">
+              Popular Products
+            </h3>
+            <div className="min-w-[176px]">
+              <ReactSelect
+                isMulti
+                options={options}
+                style={{
+                  menu: (provided) => ({
+                    control: (provided, state) => ({
+                      ...provided,
+                      width: 300,
+                    }),
+                    ...provided,
+                    padding: ".7rem",
+                    zIndex: 9999,
+                  }),
+                  menuPortal: (provided) => ({
+                    ...provided,
+                    zIndex: 9999, // Ensure this is high enough to be above the Swiper slider
+                  }),
+                }}
+                value={options.filter((option) =>
+                  selectedCategory.includes(option.value)
+                )}
+                onChange={(options) => {
+                  setSelectedCategory(options.map((option) => option.value));
+                }}
+                menuPortalTarget={
+                  typeof window !== "undefined" && document.body
+                }
+              />
+              {/* <select name="" id="">
+                {categories?.length > 0 &&
+                  categories.map((category) => (
+                    <option value={category.category_id}>
+                      {category.name}
+                    </option>
+                  ))}
+              </select> */}
             </div>
           </div>
+          <Swiper
+            slidesPerView={4}
+            spaceBetween={20}
+            modules={[Grid, Pagination]}
+            grid={{ rows: 2, fill: "row" }}
+          >
+            {filterProducts.map((product) => (
+              <SwiperSlide key={product.product_id}>
+                <ProductCard product={product} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
       </div>
     </div>

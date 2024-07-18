@@ -16,9 +16,9 @@ export async function PUT(request, { params }) {
       include: { attributeValuePricings: true, ProductAttributeValue: true },
     });
 
-    if (attributeValue) {
+    if (!attributeValue) {
       return NextResponse.json(
-        { error: " Can't find the AttributeValue with given id." },
+        { error: " Can't find the AttributeValue with given id."+id},
         { status: 400 }
       );
     }
@@ -26,6 +26,7 @@ export async function PUT(request, { params }) {
 
     const name = res.get("name");
     const attribute_id = Number(res.get("attribute_id"));
+    const colorCode = res.get("colorCode");
 
     const attributeValueData = updateAttributeValueSchema.parse({
       name,
@@ -33,10 +34,10 @@ export async function PUT(request, { params }) {
     });
 
     const exists = await prisma.attributeValue.findFirst({
-      where: { name: name, attribute_id: attribute_id },
-      NOT: {
-        id: id,
-      },
+      where: {
+        AND: { name: name, attribute_id: attribute_id }, 
+        NOT: { id: id },
+      }
     });
 
     if (exists) {
@@ -47,29 +48,32 @@ export async function PUT(request, { params }) {
         { status: 400 }
       );
     }
-
-    if (
-      attributeValue.ProductAttributeValue.length > 0 ||
-      attributeValue.attributeValuePricings.length > 0
-    ) {
-      return NextResponse.json({
-        error: `${attributeValue.name} attributeValue is in use, can't update it.`,
-      });
+    
+    if (attributeValueData.name !== attributeValue.name) {
+      if (
+        attributeValue.ProductAttributeValue.length > 0 ||
+        attributeValue.attributeValuePricings.length > 0
+      ) {
+        return NextResponse.json({
+          error: `${attributeValue.name} attributeValue is in use, can't update it.`,
+        });
+      }
     }
-
     const result = await prisma.attributeValue.update({
       where: { id },
       data: {
         name: attributeValueData.name,
         attribute_id: attributeValueData.attribute_id,
+        colorCode: colorCode || ''
       },
     });
-
+    
     return NextResponse.json(
       { message: "Attribute value updated Successfully", result },
       { status: 201 }
     );
   } catch (error) {
+    console.log('error', error);
     if (error === "ZodError") {
       return NextResponse.json(
         { error: "Validation Error", issues: error.errors },

@@ -8,16 +8,27 @@ import React, { useState } from "react";
 import DataTable from "react-data-table-component";
 import { useRouter } from "next/navigation";
 import DeleteValue from "./DeleteValue";
+import { attributeIDs } from "@/utils/constants";
 
 const ValueForm = ({ attribute_values, attribute_id }) => {
+  console.log('attribute_values', attribute_values);
   const router = useRouter();
   const [value, setValue] = useState(false);
-  const columns = [
+  let columns = [
     {
       name: "Name",
       selector: (row) => row?.name,
     },
-    {
+  ];
+  if (attribute_id === attributeIDs.COLOR) {
+    columns.push({
+      name: 'Color Code',
+      selector: (row) => (<>
+       <span className="flex items-center "><span className="inline-block p-4 rounded-full mr-3" style={{backgroundColor: row?.colorCode}}></span>{row?.colorCode}</span>
+      </>)
+  });
+  }
+  columns.push({
       name: "Action",
       selector: (row) => (
         <>
@@ -43,11 +54,12 @@ const ValueForm = ({ attribute_values, attribute_id }) => {
         </>
       ),
     },
-  ];
+  );
   const formik = useFormik({
     initialValues: {
       name: value ? value.name : "",
       attribute_id: attribute_id,
+      colorCode: value && value.colorCode ? value.colorCode : ''
     },
     enableReinitialize: true,
     validationSchema: productValueValidationSchema,
@@ -182,6 +194,19 @@ const ValueForm = ({ attribute_values, attribute_id }) => {
                     error={formik.touched.name && formik.errors.name}
                   />
                 </div>
+                {attribute_id === attributeIDs.COLOR ? 
+                  <div className="">
+                    <input
+                      className="w-20 p-0"
+                      label="Color Code"
+                      type="color"
+                      name="colorCode"
+                      value={formik.values?.colorCode || ""}
+                      onChange={formik.handleChange}
+                      error={formik.touched.colorCode && formik.errors.colorCode}
+                    />
+                  </div>
+                :''}
                 <div className="flex items-center justify-between">
                   <Button
                     type="submit"

@@ -11,44 +11,44 @@ const addCategorySchema = z.object({
   parent_id: z.union([z.string(), z.number(), z.null()]).optional(),
 });
 
-export const GET = async (request, { params }) => {
-  try {
-    const category_id = Number(params.id);
+// export const GET = async (request, { params }) => {
+//   try {
+//     const category_id = Number(params.id);
 
-    // Check if a category with the same name already exists (excluding the current category)
-    const exists = await prisma.category.findFirst({
-      where: {
-        category_id: category_id,
-      },
-    });
+//     // Check if a category with the same name already exists (excluding the current category)
+//     const exists = await prisma.category.findFirst({
+//       where: {
+//         category_id: category_id,
+//       },
+//     });
 
-    if (!exists) {
-      return NextResponse.json(
-        { error: `Category with id : ${category_id} not exists.` },
-        { status: 404 }
-      );
-    }
+//     if (!exists) {
+//       return NextResponse.json(
+//         { error: `Category with id : ${category_id} not exists.` },
+//         { status: 404 }
+//       );
+//     }
 
-    // Update the category
-    const subCategory = await prisma.category.findMany({
-      where: {
-        parent_id: category_id,
-      },
-    });
+//     // Update the category
+//     const subCategory = await prisma.category.findMany({
+//       where: {
+//         parent_id: category_id,
+//       },
+//     });
 
-    return NextResponse.json(
-      { result: exists, subCategory, message: "Category fetch successfully" },
-      { status: 200 }
-    );
-  } catch (error) {
-    // Handle other errors
-    console.error("Error in PUT:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error", e: error },
-      { status: 500 }
-    );
-  }
-};
+//     return NextResponse.json(
+//       { result: exists, subCategory, message: "Category fetch successfully" },
+//       { status: 200 }
+//     );
+//   } catch (error) {
+//     // Handle other errors
+//     console.error("Error in PUT:", error);
+//     return NextResponse.json(
+//       { error: "Internal Server Error", e: error },
+//       { status: 500 }
+//     );
+//   }
+// };
 
 export async function POST(request) {
   try {
@@ -140,5 +140,20 @@ export async function POST(request) {
       { error: "Internal Server Error", e: error },
       { status: 500 }
     );
+  }
+}
+
+export async function GET() {
+  try {
+    const categories = await prisma.category.findMany({
+      where: {
+        parent_id: null,
+      },
+    });
+
+    return NextResponse.json({ success: true, categories }, { status: 200 });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ error: error }, { status: 500 });
   }
 }

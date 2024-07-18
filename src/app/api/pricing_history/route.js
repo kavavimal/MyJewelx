@@ -1,6 +1,130 @@
 import prisma from "@/lib/prisma";
+import { attributeIDs } from "@/utils/constants";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+
+const updateProductVariationPrices = async (newPrices) => {
+  const variations = await prisma.productVariation.findMany({
+    where: {
+      net_weight: {
+        not: null,
+      },
+      isPriceFixed: false,
+    },
+    include: {
+      product: {
+        include: {
+          attributes: true,
+          ProductAttributeValue: true,
+        }
+      },
+      productAttributeValues: {
+        include: {
+          productAttributeValue: {
+            include: {
+              attribute: true,
+              attributeValue: true
+            }
+          }
+        }
+      }
+    }
+  });
+
+  
+
+  // find attribute matching with pricing history table for variation
+  for (const variation of variations) {
+    const materialVariation = variation.productAttributeValues.find((pav) => pav.productAttributeValue.attribute_id === attributeIDs.MATERIAL) 
+    const isGold = Number(materialVariation.productAttributeValue.attributeValue_id) === Number(attributeIDs.MATERIAL_GOLD);
+    
+    console.log('variation',variation);
+    const making_charges = JSON.parse(variation.making_charges);
+    const other_charges = JSON.parse(variation.other_charges);
+
+
+    let price = 0;
+    let metalPrice = 0;
+    if (isGold) {
+      const materialGoldKaratVariation = variation.productAttributeValues.find((pav) => pav.productAttributeValue.attribute_id === attributeIDs.GOLDKARAT) 
+
+      const mapstring = String(materialGoldKaratVariation.productAttributeValue.attributeValue.name).replace(/\s/g, "").toLowerCase();
+      if (Object.keys(newPrices).includes(mapstring)) {
+        let p = newPrices[mapstring];
+        metalPrice = p;
+      }
+    } else {
+      const mapstring = String(materialVariation.productAttributeValue.attributeValue.name).replace(/\s/g, "").toLowerCase();
+      if (Object.keys(newPrices).includes(mapstring)) {
+        let p = newPrices[mapstring];
+        metalPrice = p;
+      }
+    }
+    metalPrice = metalPrice * variation.net_weight;
+
+    price = price + metalPrice;
+    
+    switch(making_charges.charge_type) {
+      case "Per Gram On Net Weight":
+        price = price + parseFloat(making_charges.value || 0) * parseFloat(variation.net_weight || 0) || 0;
+        break;
+      case "Per Piece / Flat":
+        price = price + (parseFloat(making_charges.value) || 0);
+        break;
+      case "Per(%) On Metal Rate On Karat":
+        price = price + (metalPrice * (parseFloat(making_charges.value) || 0)) / 100 || 0;
+        break;
+      default:
+        break;
+    }
+    const gemstoneAmounts = other_charges.filter((a) => a.charge_type === 'gemstone');
+    if (gemstoneAmounts.length > 0) {
+      let gemstoneAmount = gemstoneAmounts.reduce((a, b) => a + parseFloat(b.value), 0);
+      price = price + gemstoneAmount;
+    }
+    
+    const additionalAmounts = other_charges.filter((a) => a.charge_type === 'additional');
+    if (additionalAmounts.length > 0) {
+      let additionalAmount = additionalAmounts.reduce((a, b) => a + b.value, 0);
+      price = price + additionalAmount;
+    }
+    
+    const discount = other_charges.find((a) => a.charge_type === 'discount');
+    if (discount) {
+      switch (discount.name) {
+        case "Per Gram On Net Weight":
+          let appliedDiscout = parseFloat(variation.net_weight || 0) * parseFloat(discount.value || 0) || 0;
+          price = price - appliedDiscout;
+          break;
+        case "Per Piece / Flat":
+          price = price - (parseFloat(discount.value) || 0);
+          break;
+        case "Per(%) On Metal Rate On Karat":
+          price = price - (metalPrice * (parseFloat(discount.value) || 0)) / 100 || 0;
+          break;
+        default:
+          break;
+      }
+    }
+    let totalPrice = price;
+    const vat = other_charges.find((a) => a.charge_type === 'vat/tax');
+    if (vat.value === "5") {
+      totalPrice = price + (price * 5) / 100 || 0;
+    }
+     
+    await prisma.productVariation.update({
+      where: { variation_id: variation.variation_id },
+      data: { 
+        selling_price: totalPrice, 
+        making_charges: JSON.stringify({
+          ...variation.making_charges, 
+          metalPrice: metalPrice
+        })
+      },
+    });
+  }
+};
+
 
 const pricingHistoryUpdateSchema = z.object({
   karat24: z
@@ -71,7 +195,7 @@ export async function POST(request) {
         where: { date: date },
         data: validatedData,
       });
-
+      await updateProductVariationPrices(updatedPricingHistory);
       return NextResponse.json(
         {
           message: `Pricing history updated successfully`,

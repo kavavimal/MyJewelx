@@ -1,3 +1,4 @@
+import { addToLikedlist, fetchLikelist, removeFromLikedlist } from "@/actions/likes";
 import {
   addToWishlist,
   fetchWishlist,
@@ -39,7 +40,6 @@ export const useWishlistStore = create()(
         }
       },
       addToWishlist: async (product_id) => {
-        console.log("called addToWishlist");
         set({ loading: true });
         const { wishlistItems } = get();
         let newwishlistItems = [...wishlistItems];
@@ -52,7 +52,6 @@ export const useWishlistStore = create()(
         }
       },
       removeFromWishlist: async (product_id) => {
-        console.log("called removeFromWishlist");
         set({ loading: true });
         const { wishlistItems } = get();
         const removeResponse = await removeFromWishlist(product_id);
@@ -60,6 +59,58 @@ export const useWishlistStore = create()(
           set({
             wishlistItems: [
               ...wishlistItems.filter((item) => item.productId !== product_id),
+            ],
+            loading: false,
+          });
+        } else {
+          set({ loading: false });
+        }
+      },
+      // like functions
+      likedItems: [],
+      findLikelist: (product_id) => {
+        const { likedItems } = get();
+        return likedItems.find((item) => item.productId === product_id)
+          ? true
+          : false;
+      },
+      fetchLikedlist: async () => {
+        const likedlistResponse = await fetchLikelist();
+        if (
+          likedlistResponse.status === "success" &&
+          likedlistResponse.LikedItems
+        ) {
+          set({
+            loading: false,
+            likedItems: likedlistResponse.LikedItems,
+          });
+        } else {
+          set({
+            loading: false,
+            likedItems: [],
+          });
+        }
+      },
+      addToLikedlist: async (product_id) => {
+        set({ loading: true });
+        const { likedItems } = get();
+        let newlikedItems = [...likedItems];
+        const addResponse = await addToLikedlist(product_id);
+        if (addResponse.status === "success") {
+          newlikedItems = [...newlikedItems, addResponse.LikedItem];
+          set({ likedItems: newlikedItems, loading: false });
+        } else {
+          set({ loading: false });
+        }
+      },
+      removeFromLikedlist: async (product_id) => {
+        set({ loading: true });
+        const { likedItems } = get();
+        const removeResponse = await removeFromLikedlist(product_id);
+        if (removeResponse.status === "success") {
+          set({
+            likedItems: [
+              ...likedItems.filter((item) => item.productId !== product_id),
             ],
             loading: false,
           });

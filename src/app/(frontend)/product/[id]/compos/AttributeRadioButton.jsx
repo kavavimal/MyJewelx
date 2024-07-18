@@ -29,7 +29,7 @@ export default function AttributeRadioButton({
         onChange={handleRadioChange}
         className="hidden"
       />
-      {label}
+      {bgColor ? '' : label}
     </label>
   );
 }

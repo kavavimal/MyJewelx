@@ -34,3 +34,11 @@ export const variation_discount_types = {
   3 : "Per Piece / Flat",
 };
 export const CURRENCY_SYMBOL = 'AED';
+
+export const SUPPORTED_FORMATS_IMAGES = [
+  "image/jpg",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
+export const FILE_SIZE = 500 * 1024 * 1024; // 500M

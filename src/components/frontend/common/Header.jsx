@@ -12,8 +12,10 @@ import {
   MenuItem,
   MenuList,
 } from "@material-tailwind/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { truncate } from "@/utils/helper";
+import { Form, Formik, useFormik } from "formik";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const MenuLinks = [
   // {
@@ -36,6 +38,32 @@ const MenuLinks = [
 ];
 export default function FrontendHeader({ categories }) {
   const [category, setCategory] = useState(null);
+  const router = useRouter();
+  const searchParams = useSearchParams()
+ 
+  const searchStr = searchParams.get('q')
+
+  const formik = useFormik({
+    initialValues: {
+      search: searchStr || "",
+    },
+    onSubmit: (values, { resetForm }) => {
+      if (values?.search.trim() !== "") {
+        if (!category || category === "All") {
+          router.push(`/shop/?q=${values.search}`);
+        } else {
+          router.push(`/shop/?q=${values.search}&category=${category}`);
+        }
+        resetForm();
+        router.refresh();
+      }
+    },
+  });
+
+  useEffect(()=> {
+    formik.setFieldValue('search', searchStr);
+  }, [searchStr]);
+  
   return (
     <>
       <div className="top-bar bg-black py-2">
@@ -110,56 +138,68 @@ export default function FrontendHeader({ categories }) {
             </Link>
           </div>
           <div>
-            <div className="flex items-center justify-center">
-              <Menu placement="bottom-start">
-                <MenuHandler>
-                  <Button
-                    ripple={false}
-                    variant="text"
-                    color="blue-gray"
-                    className="flex h-10 items-center gap-2 rounded-r-none rounded-l  border-r-0 bg-[#E6E6E6] hover:opacity-100 focus:bg-none capitalize font-normal text-sm font-emirates outline-none focus:outline-none active:outline-none"
-                  >
-                    {category ? truncate(category, 10) : "All"}
-                  </Button>
-                </MenuHandler>
-                <MenuList className="max-h-[20rem] max-w-[18rem]">
-                  <MenuItem onClick={() => setCategory("All")}>All</MenuItem>
-                  {categories.length > 0 &&
-                    categories.map((category, index) => {
-                      return (
-                        <MenuItem
-                          onClick={() => setCategory(category.name)}
-                          key={index}
-                        >
-                          {category.name}
-                        </MenuItem>
-                      );
-                    })}
-                </MenuList>
-              </Menu>
-              <input
-                type="text"
-                name="search"
-                className="h-10 border-[#E6E6E6] border-x-0 border-y-[1.5px] focus:outline-none px-3 placeholder:text-secondary-100 text-secondary-100 w-[615px]"
-                placeholder="Search my Jewlex"
-              />
-              <IconButton className="hover:shadow-none shadow-none outline-none rounded-s-none focus:outline-none active:outline-none">
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 18 18"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M12.9925 11.9286C13.9277 10.7229 14.3685 9.20611 14.2251 7.68694C14.0817 6.16776 13.365 4.76026 12.2207 3.75078C11.0764 2.7413 9.59051 2.20568 8.06531 2.25287C6.54011 2.30007 5.09018 2.92654 4.01048 4.00484C2.92985 5.08388 2.30133 6.53438 2.25301 8.06074C2.20468 9.58709 2.74019 11.0744 3.75041 12.2197C4.76062 13.3649 6.16951 14.0819 7.68996 14.2244C9.21042 14.3669 10.728 13.9244 11.9335 12.9868L11.9657 13.0206L15.1472 16.2028C15.2169 16.2725 15.2996 16.3278 15.3907 16.3655C15.4817 16.4032 15.5793 16.4226 15.6779 16.4226C15.7764 16.4226 15.874 16.4032 15.965 16.3655C16.0561 16.3278 16.1388 16.2725 16.2085 16.2028C16.2782 16.1332 16.3334 16.0504 16.3712 15.9594C16.4089 15.8683 16.4283 15.7708 16.4283 15.6722C16.4283 15.5737 16.4089 15.4761 16.3712 15.385C16.3334 15.294 16.2782 15.2113 16.2085 15.1416L13.0262 11.9601C13.0153 11.9493 13.004 11.9388 12.9925 11.9286ZM11.4355 5.06609C11.8589 5.4827 12.1957 5.97902 12.4264 6.52644C12.6571 7.07386 12.7771 7.66153 12.7795 8.25555C12.7819 8.84958 12.6667 9.43821 12.4405 9.98748C12.2143 10.5368 11.8815 11.0358 11.4615 11.4559C11.0415 11.8759 10.5424 12.2086 9.99313 12.4348C9.44385 12.661 8.85523 12.7763 8.2612 12.7738C7.66717 12.7714 7.0795 12.6514 6.53209 12.4207C5.98467 12.1901 5.48834 11.8533 5.07173 11.4298C4.23917 10.5836 3.77473 9.44267 3.77956 8.25555C3.78439 7.06844 4.25812 5.93132 5.09754 5.0919C5.93697 4.25247 7.07408 3.77875 8.2612 3.77391C9.44831 3.76908 10.5893 4.23353 11.4355 5.06609Z"
-                    fill="currentColor"
+            <Formik initialValues={formik.initialValues}>
+              <Form onSubmit={formik.handleSubmit}>
+                <div className="flex items-center justify-center">
+                  <Menu placement="bottom-start">
+                    <MenuHandler>
+                      <Button
+                        ripple={false}
+                        variant="text"
+                        color="blue-gray"
+                        className="flex h-10 items-center gap-2 rounded-r-none rounded-l  border-r-0 bg-[#E6E6E6] hover:opacity-100 focus:bg-none capitalize font-normal text-sm font-emirates outline-none focus:outline-none active:outline-none"
+                      >
+                        {category ? truncate(category, 10) : "All"}
+                      </Button>
+                    </MenuHandler>
+                    <MenuList className="max-h-[20rem] max-w-[18rem]">
+                      <MenuItem onClick={() => setCategory("All")}>
+                        All
+                      </MenuItem>
+                      {categories.length > 0 &&
+                        categories.map((category, index) => {
+                          return (
+                            <MenuItem
+                              onClick={() => setCategory(category.name)}
+                              key={index}
+                            >
+                              {category.name}
+                            </MenuItem>
+                          );
+                        })}
+                    </MenuList>
+                  </Menu>
+                  <input
+                    type="text"
+                    name="search"
+                    value={formik.values.search}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className="h-10 border-[#E6E6E6] border-x-0 border-y-[1.5px] focus:outline-none px-3 placeholder:text-secondary-100 text-secondary-100 w-[615px]"
+                    placeholder="Search my Jewlex"
                   />
-                </svg>
-              </IconButton>
-            </div>
+                  <IconButton
+                    type="submit"
+                    className="hover:shadow-none shadow-none outline-none rounded-s-none focus:outline-none active:outline-none"
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 18 18"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M12.9925 11.9286C13.9277 10.7229 14.3685 9.20611 14.2251 7.68694C14.0817 6.16776 13.365 4.76026 12.2207 3.75078C11.0764 2.7413 9.59051 2.20568 8.06531 2.25287C6.54011 2.30007 5.09018 2.92654 4.01048 4.00484C2.92985 5.08388 2.30133 6.53438 2.25301 8.06074C2.20468 9.58709 2.74019 11.0744 3.75041 12.2197C4.76062 13.3649 6.16951 14.0819 7.68996 14.2244C9.21042 14.3669 10.728 13.9244 11.9335 12.9868L11.9657 13.0206L15.1472 16.2028C15.2169 16.2725 15.2996 16.3278 15.3907 16.3655C15.4817 16.4032 15.5793 16.4226 15.6779 16.4226C15.7764 16.4226 15.874 16.4032 15.965 16.3655C16.0561 16.3278 16.1388 16.2725 16.2085 16.2028C16.2782 16.1332 16.3334 16.0504 16.3712 15.9594C16.4089 15.8683 16.4283 15.7708 16.4283 15.6722C16.4283 15.5737 16.4089 15.4761 16.3712 15.385C16.3334 15.294 16.2782 15.2113 16.2085 15.1416L13.0262 11.9601C13.0153 11.9493 13.004 11.9388 12.9925 11.9286ZM11.4355 5.06609C11.8589 5.4827 12.1957 5.97902 12.4264 6.52644C12.6571 7.07386 12.7771 7.66153 12.7795 8.25555C12.7819 8.84958 12.6667 9.43821 12.4405 9.98748C12.2143 10.5368 11.8815 11.0358 11.4615 11.4559C11.0415 11.8759 10.5424 12.2086 9.99313 12.4348C9.44385 12.661 8.85523 12.7763 8.2612 12.7738C7.66717 12.7714 7.0795 12.6514 6.53209 12.4207C5.98467 12.1901 5.48834 11.8533 5.07173 11.4298C4.23917 10.5836 3.77473 9.44267 3.77956 8.25555C3.78439 7.06844 4.25812 5.93132 5.09754 5.0919C5.93697 4.25247 7.07408 3.77875 8.2612 3.77391C9.44831 3.76908 10.5893 4.23353 11.4355 5.06609Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </IconButton>
+                </div>
+              </Form>
+            </Formik>
           </div>
           <div>
             <div

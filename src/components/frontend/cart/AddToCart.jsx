@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useCartStore } from "@/contexts/cartStore";
 import { useSession } from "next-auth/react";
 import { v4 as uuidv4 } from "uuid";
@@ -16,27 +16,31 @@ export default function AddToCart({ variation }) {
   const cartItems = useCartStore((state) => state.cartItems);
   const addToCart = useCartStore((state) => state.addToCart);
 
+  const [findCartItem, setFindCartItem] = useState(cartItems.find(
+    (ci) => ci.variation_id === variation.variation_id
+  ))
+
+  useEffect(() => {
+    setFindCartItem(cartItems.find(
+      (ci) => ci.variation_id === variation.variation_id
+    ))
+  }, [cartItems, variation.variation_id])
+
+
   const onAddtoCart = () => {
     if (session && session.status === "authenticated" && session.data.user.id) {
       addToCart({
-        // cartItem_id: uuidv4(),
-        // user_id: session.data.user.id,
         quantity: 1,
         variation_id: variation.variation_id,
-        price: variation.selling_price,
+        price: variation?.selling_price ? variation?.selling_price : variation?.regular_price,
       });
     } else {
       Router.push(`/login?redirect=${encodeURIComponent(pathname)}`, "replace");
     }
   };
 
-  if (cartItems && cartItems.length > 0) {
-    const finditem = cartItems.find(
-      (ci) => ci.variation_id === variation.variation_id
-    );
-    if (finditem) {
-      return <Quantity cartItem={finditem} />;
-    }
+  if (cartItems && cartItems.length > 0 && findCartItem) {
+      return <Quantity cartItem={findCartItem} />;
   }
   return (
     <ButtonComponent onClick={onAddtoCart}>
