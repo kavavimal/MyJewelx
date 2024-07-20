@@ -1,19 +1,17 @@
 import { searchProducts } from "@/actions/product";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-
+export const initFilterData = { categories: [],
+  vendors: [],
+  metals: [],
+  patterns: [],
+  characteristics: [],
+  sort: "Ascending",
+  price: { min: 0, max: 2000000 },
+};
 export const useShopStore = create()(
   (set, get) => ({
     products: [],
-    filters: {
-      categories: [],
-      vendors: [],
-      metals: [],
-      patterns: [],
-      characteristics: [],
-      sort: "Ascending",
-      price: { min: 0, max: 2000000 },
-    },
+    filters: initFilterData,
     loading: false,
 
     setProducts: async (products) => {

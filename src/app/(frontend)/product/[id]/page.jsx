@@ -62,7 +62,7 @@ async function get_productBy_id(id) {
     }, {});
 
     const multipleAttributesCount = Object.keys(attributeCount).map((att) =>
-      attributeCount[att] > 1
+      attributeCount
         ? product.ProductAttributeValue.filter(
             (item) => Number(item.attribute_id) === Number(att)
           )

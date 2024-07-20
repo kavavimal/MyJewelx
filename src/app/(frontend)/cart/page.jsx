@@ -5,9 +5,19 @@ import Container from '@/components/frontend/Container';
 import Link from 'next/link';
 import CartItem from './CartItem';
 import Paragraph from '@/components/Paragraph';
+import prisma from '@/lib/prisma';
+import Ads from './Ads';
+
+const getAds = () =>
+    prisma.promotional.findMany({
+        where: {
+            ads_type: 'CART',
+        },
+    });
 
 export default async function Cart() {
     const cart = await getCart();
+    const ads = await getAds();
     if (!cart.cartData || cart.cartData.cartItems.length === 0) {
         return (
             <Container>
@@ -54,6 +64,7 @@ export default async function Cart() {
                     </div>
                 </div>
             </section>
+            <Ads ads={ads} />
         </Container>
     );
 }

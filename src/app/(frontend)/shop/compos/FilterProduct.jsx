@@ -1,5 +1,5 @@
 "use client";
-import { useShopStore } from "@/contexts/shopStore";
+import { initFilterData, useShopStore } from "@/contexts/shopStore";
 import {
   Accordion,
   AccordionBody,
@@ -15,6 +15,7 @@ const FilterProduct = ({ filterdDatas }) => {
   const setSelectedFilters = useShopStore((store) => store.setFilters);
 
   const vendors = filterdDatas.vendors;
+  console.log(vendors);
   const metals = filterdDatas.metals;
   const patterns = filterdDatas.patterns;
   const characteristics = filterdDatas.characteristics;
@@ -110,7 +111,7 @@ const FilterProduct = ({ filterdDatas }) => {
       <div className="mb-4">
         <Button
           onClick={() => {
-            setSelectedFilters({});
+            setSelectedFilters(initFilterData);
           }}
           variant="outlined"
           className="border-[#DFDFDF] text-[#676767] focus:ring-0 font-normal text-sm font-emirates normal-case flex gap-1.5 items-center py-2.5 px-7 rounded-sm"
@@ -157,10 +158,13 @@ const FilterProduct = ({ filterdDatas }) => {
                       <Checkbox
                         value={category.category_id}
                         id={category.name}
-                        checked={selectedFilters?.categories && selectedFilters?.categories?.some(
-                          (selectedCategory) =>
-                            selectedCategory === category.category_id
-                        )}
+                        checked={
+                          selectedFilters?.categories &&
+                          selectedFilters?.categories?.some(
+                            (selectedCategory) =>
+                              selectedCategory === category.category_id
+                          )
+                        }
                         onChange={handleCategoryChange}
                         ripple={false}
                         label={category.name}
@@ -211,35 +215,39 @@ const FilterProduct = ({ filterdDatas }) => {
           className="text-sm py-3 font-medium font-emirates"
           onClick={() => handleAccordionToggle(2)}
         >
-          Filter By Vendor
+          Filter By Store
         </AccordionHeader>
         <AccordionBody>
           <div className="min-w-0 pt-2 p-0 px-0 flex flex-col gap-3">
             {vendors &&
               vendors.length > 0 &&
-              vendors?.map((vendor, index) => {
-                return (
-                  <div className="p-0" key={index}>
-                    <label
-                      htmlFor={`${vendor.firstName} ${vendor.lastName}`}
-                      className="flex w-full cursor-pointer items-center"
-                    >
-                      <Checkbox
-                        value={`${vendor.firstName} ${vendor.lastName}`}
-                        checked={selectedFilters?.vendors && selectedFilters?.vendors?.some(
-                          (selectedVendor) =>
-                            selectedVendor ===
-                            `${vendor.firstName} ${vendor.lastName}`
-                        )}
-                        onChange={handleVendorChange}
-                        id={`${vendor.firstName} ${vendor.lastName}`}
-                        ripple={false}
-                        label={`${vendor.firstName} ${vendor.lastName}`}
-                      />
-                    </label>
-                  </div>
-                );
-              })}
+              vendors
+                ?.filter((vendor) => vendor?.vendor?.store_name)
+                .map((vendor, index) => {
+                  return (
+                    <div className="p-0" key={index}>
+                      <label
+                        htmlFor={vendor?.vendor?.store_name}
+                        className="flex w-full cursor-pointer items-center"
+                      >
+                        <Checkbox
+                          value={vendor?.vendor?.store_name}
+                          checked={
+                            selectedFilters?.vendors &&
+                            selectedFilters?.vendors?.some(
+                              (selectedVendor) =>
+                                selectedVendor === vendor?.vendor?.store_name
+                            )
+                          }
+                          onChange={handleVendorChange}
+                          id={vendor?.vendor?.store_name}
+                          ripple={false}
+                          label={vendor?.vendor?.store_name}
+                        />
+                      </label>
+                    </div>
+                  );
+                })}
           </div>
         </AccordionBody>
       </Accordion>
@@ -268,9 +276,12 @@ const FilterProduct = ({ filterdDatas }) => {
                       <Checkbox
                         value={metal?.id}
                         onChange={handleMetalChange}
-                        checked={selectedFilters.metals && selectedFilters?.metals?.some(
-                          (selectedMetal) => selectedMetal === metal?.id
-                        )}
+                        checked={
+                          selectedFilters.metals &&
+                          selectedFilters?.metals?.some(
+                            (selectedMetal) => selectedMetal === metal?.id
+                          )
+                        }
                         id={metal?.name}
                         ripple={false}
                         label={metal?.name}
@@ -307,10 +318,13 @@ const FilterProduct = ({ filterdDatas }) => {
                       <Checkbox
                         value={pattern?.pattern_id}
                         onChange={handlePatternChange}
-                        checked={selectedFilters?.patterns && selectedFilters?.patterns?.some(
-                          (selectedPattern) =>
-                            selectedPattern === pattern?.pattern_id
-                        )}
+                        checked={
+                          selectedFilters?.patterns &&
+                          selectedFilters?.patterns?.some(
+                            (selectedPattern) =>
+                              selectedPattern === pattern?.pattern_id
+                          )
+                        }
                         id={pattern?.name}
                         ripple={false}
                         label={pattern?.name}
@@ -352,10 +366,13 @@ const FilterProduct = ({ filterdDatas }) => {
                         <Checkbox
                           value={brand?.chars_id}
                           onChange={handleCharacteristicsChange}
-                          checked={selectedFilters?.characteristics && selectedFilters?.characteristics?.some(
-                            (selectedCharacteristic) =>
-                              selectedCharacteristic === brand?.chars_id
-                          )}
+                          checked={
+                            selectedFilters?.characteristics &&
+                            selectedFilters?.characteristics?.some(
+                              (selectedCharacteristic) =>
+                                selectedCharacteristic === brand?.chars_id
+                            )
+                          }
                           id={brand?.name}
                           ripple={false}
                           label={brand?.name}
@@ -398,10 +415,13 @@ const FilterProduct = ({ filterdDatas }) => {
                         <Checkbox
                           value={trend?.chars_id}
                           onChange={handleCharacteristicsChange}
-                          checked={selectedFilters?.characteristics && selectedFilters?.characteristics?.some(
-                            (selectedTrend) =>
-                              selectedTrend === trend?.chars_id
-                          )}
+                          checked={
+                            selectedFilters?.characteristics &&
+                            selectedFilters?.characteristics?.some(
+                              (selectedTrend) =>
+                                selectedTrend === trend?.chars_id
+                            )
+                          }
                           id={trend?.name}
                           ripple={false}
                           label={trend?.name}
@@ -438,10 +458,13 @@ const FilterProduct = ({ filterdDatas }) => {
                       <Checkbox
                         value={collection?.collection_id}
                         onChange={handleCollectionsChange}
-                        checked={selectedFilters?.collections && selectedFilters?.collections?.some(
-                          (selectedCollection) =>
-                            selectedCollection === collection?.collection_id
-                        )}
+                        checked={
+                          selectedFilters?.collections &&
+                          selectedFilters?.collections?.some(
+                            (selectedCollection) =>
+                              selectedCollection === collection?.collection_id
+                          )
+                        }
                         id={collection?.name}
                         label={collection?.name}
                       />
@@ -482,10 +505,13 @@ const FilterProduct = ({ filterdDatas }) => {
                         <Checkbox
                           value={style?.chars_id}
                           onChange={handleCharacteristicsChange}
-                          checked={selectedFilters?.characteristics && selectedFilters?.characteristics?.some(
-                            (selectedCharacteristic) =>
-                              selectedCharacteristic === style?.chars_id
-                          )}
+                          checked={
+                            selectedFilters?.characteristics &&
+                            selectedFilters?.characteristics?.some(
+                              (selectedCharacteristic) =>
+                                selectedCharacteristic === style?.chars_id
+                            )
+                          }
                           id={style?.name}
                           ripple={false}
                           label={style?.name}
@@ -527,10 +553,13 @@ const FilterProduct = ({ filterdDatas }) => {
                         <Checkbox
                           value={theme?.chars_id}
                           onChange={handleCharacteristicsChange}
-                          checked={selectedFilters?.characteristics && selectedFilters?.characteristics?.some(
-                            (selectedCharacteristic) =>
-                              selectedCharacteristic === theme?.chars_id
-                          )}
+                          checked={
+                            selectedFilters?.characteristics &&
+                            selectedFilters?.characteristics?.some(
+                              (selectedCharacteristic) =>
+                                selectedCharacteristic === theme?.chars_id
+                            )
+                          }
                           id={theme?.name}
                           ripple={false}
                           label={theme?.name}

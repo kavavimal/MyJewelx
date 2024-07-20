@@ -34,9 +34,9 @@ const ProductCard = ({ product }) => {
                   : "/assets/images/image.png"
               }
               alt="image for design"
-              width={245}
-              height={192}
-              className="max-w-[245px] max-h-[192px] hover:scale-110 transition-all duration-300"
+              width={350}
+              height={350}
+              className="max-w-full max-h-[300px] hover:scale-105 transition-all duration-300"
             />
           </Link>
         </div>
@@ -66,9 +66,12 @@ const ProductCard = ({ product }) => {
           />
           {product?.user && (
             <p lassName="text-black text-sm leading-[23.83px]">
-              Seller: {product?.user?.firstName + " " + product?.user?.lastName}
+              Seller:{" "}
+              {product?.user?.vendor?.store_name ??
+                product?.user?.firstName + " " + product?.user?.lastName}
             </p>
           )}
+          {console.log(product?.user)}
         </div>
       </CardBody>
     </Card>

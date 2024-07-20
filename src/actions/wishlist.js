@@ -41,6 +41,9 @@ export const addToWishlist = async (productId) => {
         userId: user.id,
         productId: productId,
       },
+      include: {
+        product: true
+      }
     });
 
     return {

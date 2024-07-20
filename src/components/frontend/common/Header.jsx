@@ -39,9 +39,9 @@ const MenuLinks = [
 export default function FrontendHeader({ categories }) {
   const [category, setCategory] = useState(null);
   const router = useRouter();
-  const searchParams = useSearchParams()
- 
-  const searchStr = searchParams.get('q')
+  const searchParams = useSearchParams();
+
+  const searchStr = searchParams.get("q");
 
   const formik = useFormik({
     initialValues: {
@@ -54,16 +54,15 @@ export default function FrontendHeader({ categories }) {
         } else {
           router.push(`/shop/?q=${values.search}&category=${category}`);
         }
-        resetForm();
         router.refresh();
       }
     },
   });
 
-  useEffect(()=> {
-    formik.setFieldValue('search', searchStr);
+  useEffect(() => {
+    formik.setFieldValue("search", searchStr);
   }, [searchStr]);
-  
+
   return (
     <>
       <div className="top-bar bg-black py-2">

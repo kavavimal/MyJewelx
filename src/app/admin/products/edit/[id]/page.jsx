@@ -2,7 +2,8 @@ import prisma from "@/lib/prisma";
 import React from "react";
 import ProductForm from "../../componets/ProductForm";
 import { attributeIDs } from "@/utils/constants";
-import { CharsType } from "@prisma/client";
+import { CharsType, ProductStatus } from "@prisma/client";
+import { getProducts } from "@/actions/product";
 
 export const getCategories = async (id = null) => {
   return await prisma.category.findMany({});
@@ -80,6 +81,7 @@ const getProduct = (id) => {
       collections: true,
       patterns: true,
       states: true,
+      relatedProducts: true,
       productChars: {
         include: {
           characteristic: true,
@@ -137,6 +139,7 @@ const page = async ({ params: { id } }) => {
   const styles = await getStyles();
   const themes = await getThemes();
   const trends = await getTrends();
+  const allproducts = await getProducts({status: [ProductStatus.PUBLISHED]});
 
   return (
     <ProductForm
@@ -155,6 +158,7 @@ const page = async ({ params: { id } }) => {
       styles={styles}
       themes={themes}
       trends={trends}
+      allproducts={allproducts}
     />
   );
 };

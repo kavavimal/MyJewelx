@@ -1,15 +1,21 @@
 "use client";
 import LoadingDots from "@/components/loading-dots";
 import { useCartStore } from "@/contexts/cartStore";
+import { showToast } from "@/utils/helper";
 import { useEffect, useState } from "react";
 
-const Quantity = ({ cartItem }) => {
+const Quantity = ({ cartItem, maxQ }) => {
   const cartItems = useCartStore((state) => state.cartItems);
   const findItem = useCartStore((state) => state.findItem);
   const updateQanity = useCartStore((state) => state.updateCartQantity);
   const removeFromCart = useCartStore((state) => state.removeFromCart);
   const [localLoading, setLocalLoading] = useState(false);
+  const [maxQuantity, setMaxQuantity] = useState(maxQ || -1);
   const [q, setQ] = useState(cartItem.quantity);
+
+  useEffect(() => {
+    setMaxQuantity(maxQ || -1);
+  },[maxQ]);
 
   useEffect(() => {
     let cartI = findItem(cartItem.cartItem_id);
@@ -19,20 +25,27 @@ const Quantity = ({ cartItem }) => {
   }, [cartItems, cartItem]);
   
   const quantityChange = async (type) => {
-    setLocalLoading(true);
+    
     let cartI = findItem(cartItem.cartItem_id);
     let newQ = cartI?.quantity;
     if (type === "increment") {
       newQ = parseInt(newQ) + 1;
       // setQuantity((prevQuantity) => prevQuantity + 1);
     } else if (type === "decrement" && cartItem?.quantity === 1) {
+      setLocalLoading(true);
       await removeFromCart(cartItem.cartItem_id);
+      setLocalLoading(false);
     } else if (type === "decrement" && cartItem?.quantity > 1) {
       newQ = parseInt(newQ) - 1;
       // setQuantity((prevQuantity) => prevQuantity - 1);
     }
-    await updateQanity(cartItem.cartItem_id, newQ);
-    setLocalLoading(false);
+    if (newQ > maxQuantity) {
+      showToast({message: "Max product Quantity reached", variant: "error"});
+    } else {
+      setLocalLoading(true);
+      await updateQanity(cartItem.cartItem_id, newQ);
+      setLocalLoading(false);
+    }
   };
 
   return (

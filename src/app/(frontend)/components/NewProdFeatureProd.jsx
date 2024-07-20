@@ -14,7 +14,6 @@ const NewProdFeatureProd = ({ products }) => {
       <section className="py-10">
         <div className="max-w-screen-xl mx-auto">
           <div className="flex items-center justify-center gap-6">
-            {console.log(products)}
             <div className="new-products w-3/12">
               <h3 className="text-2xl font-playfairdisplay font-semibold tracking-wide">
                 New Products

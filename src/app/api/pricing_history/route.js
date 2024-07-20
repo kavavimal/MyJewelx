@@ -31,17 +31,12 @@ const updateProductVariationPrices = async (newPrices) => {
     }
   });
 
-  
-
   // find attribute matching with pricing history table for variation
   for (const variation of variations) {
     const materialVariation = variation.productAttributeValues.find((pav) => pav.productAttributeValue.attribute_id === attributeIDs.MATERIAL) 
     const isGold = Number(materialVariation.productAttributeValue.attributeValue_id) === Number(attributeIDs.MATERIAL_GOLD);
-    
-    console.log('variation',variation);
     const making_charges = JSON.parse(variation.making_charges);
     const other_charges = JSON.parse(variation.other_charges);
-
 
     let price = 0;
     let metalPrice = 0;
@@ -61,18 +56,17 @@ const updateProductVariationPrices = async (newPrices) => {
       }
     }
     metalPrice = metalPrice * variation.net_weight;
-
     price = price + metalPrice;
-    
     switch(making_charges.charge_type) {
       case "Per Gram On Net Weight":
-        price = price + parseFloat(making_charges.value || 0) * parseFloat(variation.net_weight || 0) || 0;
+        price = price + (parseFloat(making_charges.value || 0) * parseFloat(variation.net_weight || 0)) || 0;
         break;
       case "Per Piece / Flat":
         price = price + (parseFloat(making_charges.value) || 0);
         break;
       case "Per(%) On Metal Rate On Karat":
-        price = price + (metalPrice * (parseFloat(making_charges.value) || 0)) / 100 || 0;
+        const metalpricemakingcharge = (metalPrice * (parseFloat(making_charges.value) || 0)) / 100;
+        price = price +  metalpricemakingcharge;
         break;
       default:
         break;
@@ -85,7 +79,7 @@ const updateProductVariationPrices = async (newPrices) => {
     
     const additionalAmounts = other_charges.filter((a) => a.charge_type === 'additional');
     if (additionalAmounts.length > 0) {
-      let additionalAmount = additionalAmounts.reduce((a, b) => a + b.value, 0);
+      let additionalAmount = additionalAmounts.reduce((a, b) => a + parseFloat(b.value), 0);
       price = price + additionalAmount;
     }
     
@@ -100,26 +94,25 @@ const updateProductVariationPrices = async (newPrices) => {
           price = price - (parseFloat(discount.value) || 0);
           break;
         case "Per(%) On Metal Rate On Karat":
-          price = price - (metalPrice * (parseFloat(discount.value) || 0)) / 100 || 0;
+          const metalpriceDiscount = (metalPrice * (parseFloat(discount.value) || 0)) / 100
+          price = price - metalpriceDiscount || 0;
           break;
         default:
           break;
       }
     }
-    let totalPrice = price;
+    
+    let totalPrice = parseFloat(price);
     const vat = other_charges.find((a) => a.charge_type === 'vat/tax');
     if (vat.value === "5") {
-      totalPrice = price + (price * 5) / 100 || 0;
+      const vatprice = (price * 5) / 100;
+      totalPrice = parseFloat(price) +  parseFloat(vatprice);
     }
-     
     await prisma.productVariation.update({
       where: { variation_id: variation.variation_id },
       data: { 
-        selling_price: totalPrice, 
-        making_charges: JSON.stringify({
-          ...variation.making_charges, 
-          metalPrice: metalPrice
-        })
+        selling_price: totalPrice,
+        making_charges: JSON.stringify({...making_charges, metalPrice})
       },
     });
   }
@@ -184,10 +177,8 @@ export async function POST(request) {
       palladium: parseFloat(req.get("palladium")),
     };
 
-    console.log("inputData", inputData);
 
     if (pricingHistory) {
-      console.log("form update");
       // Validate the input data using Zod
       const validatedData = pricingHistoryUpdateSchema.parse(inputData);
 
@@ -205,7 +196,6 @@ export async function POST(request) {
       );
     } else {
       // Validate the input data using Zod
-      console.log("form create");
       const validatedData = pricingHistoryCreateSchema.parse({
         date,
         ...inputData,

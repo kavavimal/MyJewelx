@@ -47,6 +47,7 @@ const ProductForm = ({
   styles,
   themes,
   trends,
+  allproducts
 }) => {
   const router = useRouter();
   const [currentProduct, setCurrentProduct] = useState(product ?? {});
@@ -410,6 +411,7 @@ const ProductForm = ({
       delivery_includes: product ? product?.delivery_includes ?? "" : "",
       return_policy: product ? product?.return_policy ?? "" : "",
       purchase_note: product ? product?.purchase_note ?? "" : "",
+      relatedProducts: product ? product?.relatedProducts?.map((item) => item?.relatedProductId) : []
     },
 
     enableReinitialize: true,
@@ -550,6 +552,7 @@ const ProductForm = ({
                 states: values.states,
                 genders: values.genders.join(","),
                 offline_reason: values.offline_reason,
+                relatedProducts:values.relatedProducts.join(","),
                 characteristics: [
                   productBrand,
                   productStyle,
@@ -1463,6 +1466,25 @@ const ProductForm = ({
                       onBlur={formik.handleBlur}
                       value={formik.values.purchase_note ?? ""}
                       onChange={formik.handleChange}
+                    />
+                  </div>
+                  <div>
+                    <Typography>Related products</Typography>
+                    <ReactSelect
+                      isMulti
+                      placeholder="Related Products"
+                      name="relatedProducts"
+                      options={allproducts.filter((p) => p.product_id !== product.product_id)?.map((p) => {return {label: p.product_name, value: p.product_id}})}
+                      styles={style}
+                      value={allproducts.filter((p) => p.product_id !== product.product_id)?.map((p) => {return {label: p.product_name, value: p.product_id}})?.filter((option) =>
+                        formik.values.relatedProducts.includes(option.value)
+                      )}
+                      onChange={(options) =>
+                        formik.setFieldValue(
+                          "relatedProducts",
+                          options.map((option) => option.value)
+                        )
+                      }
                     />
                   </div>
                 </div>

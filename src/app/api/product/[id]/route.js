@@ -151,7 +151,8 @@ export async function PUT(request, { params }) {
       const purchase_note = req.get("purchase_note")
         ? req.get("purchase_note")
         : "";
-
+      const relatedProducts =
+        req.get("relatedProducts") !== "" ? req.get("relatedProducts").split(",") : [];
       const stepTwoData = stepTwoSchema.parse({
         isOnlineBuyable,
         country_id,
@@ -244,6 +245,18 @@ export async function PUT(request, { params }) {
               create: stepTwoData.genders.map((gender_id) => ({
                 gender: {
                   connect: { gender_id: Number(gender_id) },
+                },
+              })),
+            }),
+          },
+        }),
+        ...(relatedProducts && {
+          relatedProducts: {
+            deleteMany: {},
+            ...(relatedProducts.length > 0 && {
+              create: relatedProducts.map((product_id) => ({
+                relatedProduct: {
+                  connect: { product_id: Number(product_id) },
                 },
               })),
             }),

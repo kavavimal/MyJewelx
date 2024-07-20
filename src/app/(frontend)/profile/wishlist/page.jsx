@@ -5,9 +5,19 @@ import { checkUserSession } from '../../layout';
 import Paragraph from '@/components/Paragraph';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Wishlist from './components/WhishList';
+import prisma from '@/lib/prisma';
+import Ads from './components/Ads';
+
+const getAds = () =>
+    prisma.promotional.findMany({
+        where: {
+            ads_type: 'CART',
+        },
+    });
 
 export default async function WishlistPage() {
     const user = await checkUserSession();
+    const promolist = await getAds();
     if (!user) {
         redirect('/login');
     }
@@ -31,6 +41,7 @@ export default async function WishlistPage() {
     }
     return (
         <Container>
+            <Ads promolist={promolist} />
             <Breadcrumbs
                 items={[
                     { link: '/profile', label: 'Profile' },

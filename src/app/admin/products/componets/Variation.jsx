@@ -605,7 +605,7 @@ const Variation = ({
           setChargeValue((prev) =>
             prev !== charges.value ? charges.value : prev
           );
-          formik.setFieldValue("metal_amount", charges.metalPrice);
+          formik.setFieldValue("metal_amount", getMetalPrice());
         }
         if (otherCharges) {
           const newGemstoneCharges = [];

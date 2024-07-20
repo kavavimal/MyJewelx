@@ -14,9 +14,11 @@ export default function ProductLoop({ products }) {
   return (
     <>
       {filterdProducts.length > 0 ? (
-        <div className="flex-1 grid grid-cols-4 gap-5">
+        <div className="flex-1 grid grid-cols-3 gap-5">
           {loading ? (
-            <LoadingDots />
+            <div className="w-full min-h-80 flex items-center justify-center col-span-4">
+              <LoadingDots size={10} />
+            </div>
           ) : (
             filterdProducts.map((product) => (
               <ProductCard key={product.product_id} product={product} />

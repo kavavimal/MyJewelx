@@ -5,8 +5,15 @@ import { revalidatePath } from "next/cache";
 
 import prisma from "@/lib/prisma";
 
-export const getProducts = () => {
+export const getProducts = (data = false) => {
+  let where = {};
+  if (data !== false && data?.status) {
+    where = {
+      status: { in: data?.status },
+    };
+  }
   return prisma.product.findMany({
+    where: where,
     include: {
       variations: {
         include: {
@@ -214,14 +221,14 @@ export const createProduct = async (formData) => {
 };
 
 export const searchProducts = async (data) => {
-  const firstNames =
-    data?.vendors &&
-    data.vendors.length > 0 &&
-    data.vendors.map((vendor) => vendor.split(" ")[0]);
-  const lastName =
-    data?.vendors &&
-    data.vendors.length > 0 &&
-    data.vendors.map((vendor) => vendor.split(" ")[1]);
+  // const firstNames =
+  //   data?.vendors &&
+  //   data.vendors.length > 0 &&
+  //   data.vendors.map((vendor) => vendor.split(" ")[0]);
+  // const lastName =
+  //   data?.vendors &&
+  //   data.vendors.length > 0 &&
+  //   data.vendors.map((vendor) => vendor.split(" ")[1]);
   try {
     let pricefilter = false;
     if (data?.price && data?.price?.min && data?.price?.max) {
@@ -247,23 +254,34 @@ export const searchProducts = async (data) => {
             },
           }),
 
-        ...(data.vendors &&
-          data.vendors.length > 0 && {
+        // ...(data.vendors &&
+        //   data.vendors.length > 0 && {
+        //     user: {
+        //       AND: [
+        //         {
+        //           firstName: {
+        //             in: firstNames,
+        //             mode: "insensitive",
+        //           },
+        //         },
+        //         {
+        //           lastName: {
+        //             in: lastName,
+        //             mode: "insensitive",
+        //           },
+        //         },
+        //       ],
+        //     },
+        //   }),
+
+        ...(data?.vendors &&
+          data?.vendors?.length > 0 && {
             user: {
-              AND: [
-                {
-                  firstName: {
-                    in: firstNames,
-                    mode: "insensitive",
-                  },
+              vendor: {
+                store_name: {
+                  in: data.vendors,
                 },
-                {
-                  lastName: {
-                    in: lastName,
-                    mode: "insensitive",
-                  },
-                },
-              ],
+              },
             },
           }),
 
@@ -415,7 +433,11 @@ export const searchProducts = async (data) => {
           include: { image: true },
         },
         reviews: true,
-        user: true,
+        user: {
+          include: {
+            vendor: true,
+          },
+        },
       },
       orderBy: {
         ...(data?.sort &&
@@ -428,12 +450,12 @@ export const searchProducts = async (data) => {
             product_id: "desc",
           }),
 
-        // ...(data?.sort &&
-        //   data?.sort === "Low to High" && {
-        //     variations: {
-        //       selling_price: "asc",
-        //     },
-        //   }),
+        ...(data?.sort &&
+          data?.sort === "Low to High" && {
+            variations: {
+              selling_price: "asc",
+            },
+          }),
         // ...(data?.sort &&
         //   data?.sort === "High to Low" && {
         //     variations: {

@@ -43,7 +43,6 @@ const PopularProducts = ({ products }) => {
     }
   }, [selectedCategory]);
 
-  console.log(products);
   useEffect(() => {
     getCategories();
   }, []);
@@ -69,7 +68,7 @@ const PopularProducts = ({ products }) => {
           </div>
         </div>
         <div className="w-[calc(100%-240px)]">
-          <div className="mb-[17px] flex justify-between items-center">
+          <div className="mb-3 flex justify-between items-center">
             <h3 className="text-2xl font-playfairdisplay font-semibold tracking-wide">
               Popular Products
             </h3>
@@ -113,7 +112,7 @@ const PopularProducts = ({ products }) => {
             </div>
           </div>
           <Swiper
-            slidesPerView={4}
+            slidesPerView={3}
             spaceBetween={20}
             modules={[Grid, Pagination]}
             grid={{ rows: 2, fill: "row" }}

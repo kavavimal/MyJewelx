@@ -9,12 +9,18 @@ import LoadingDots from "@/components/loading-dots";
 import ButtonComponent from "../ButtonComponent";
 
 export default function AddToCart({ variation }) {
+  const isProductInstock = variation?.stock_management && variation?.stock_status && variation?.quantity > 0;
+  if (!isProductInstock){
+    return <p className="error text-red-500">Product is not available at the moment</p>;
+  }
+ 
   const Router = useRouter();
   const pathname = usePathname();
   const session = useSession();
   const loading = useCartStore((state) => state.loading);
   const cartItems = useCartStore((state) => state.cartItems);
   const addToCart = useCartStore((state) => state.addToCart);
+  const maxQ = variation?.stock_management && variation?.stock_status ? variation?.quantity : -1;
 
   const [findCartItem, setFindCartItem] = useState(cartItems.find(
     (ci) => ci.variation_id === variation.variation_id
@@ -26,7 +32,7 @@ export default function AddToCart({ variation }) {
     ))
   }, [cartItems, variation.variation_id])
 
-
+  
   const onAddtoCart = () => {
     if (session && session.status === "authenticated" && session.data.user.id) {
       addToCart({
@@ -39,8 +45,10 @@ export default function AddToCart({ variation }) {
     }
   };
 
+
+
   if (cartItems && cartItems.length > 0 && findCartItem) {
-      return <Quantity cartItem={findCartItem} />;
+      return <Quantity cartItem={findCartItem} maxQ={maxQ} />;
   }
   return (
     <ButtonComponent onClick={onAddtoCart}>
