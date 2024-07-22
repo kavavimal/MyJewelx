@@ -41,13 +41,14 @@ const getFilterableDatas = async () => {
 };
 
 export default async function Shop({ searchParams }) {
-    let searchFilter = {};
-    if (searchParams?.q) {
-        searchFilter = {...searchFilter, q: searchParams.q};
-    }
-    if (searchParams?.cat) {
-        searchFilter = {...searchFilter, categories: [searchParams.category]};
-    }
+  console.log("searchParams", searchParams);
+  let searchFilter = {};
+  if (searchParams?.q) {
+    searchFilter = { ...searchFilter, q: searchParams.q };
+  }
+  if (searchParams?.category) {
+    searchFilter = { ...searchFilter, category: searchParams.category };
+  }
   const products = await searchProducts(searchFilter);
   const filterdDatas = await getFilterableDatas();
   return (

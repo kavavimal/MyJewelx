@@ -320,6 +320,7 @@ const Variation = ({
             `/api/variation/${variation?.variation_id}`,
             {
               ...values,
+              isDiscount: isDiscount,
               variation_name: variation?.variation_name,
               making_charges: JSON.stringify(makingCharges),
               other_charges: JSON.stringify(otherCharges),
@@ -372,6 +373,7 @@ const Variation = ({
         try {
           const response = await post("/api/variation", {
             ...values,
+            isDiscount: isDiscount,
             variation_name: variation?.name,
             making_charges: JSON.stringify(makingCharges),
             other_charges: JSON.stringify(otherCharges),
@@ -487,31 +489,31 @@ const Variation = ({
           metalPrice = metalPrice * parseFloat(formik.values?.net_weight || 0);
         }
       }
-
       if (formik.values?.isPriceFixed) {
         const productPrice = formik.values.regular_price;
         price = price + parseFloat(productPrice || 0);
       } else {
         price = price + metalPrice;
-        if (makingCharge === "Per Gram On Net Weight") {
-          price =
-            price +
+        switch (makingCharge) {
+          case "Per Gram On Net Weight":
+            let chargeM =
               parseFloat(chargeValue || 0) *
                 parseFloat(formik.values?.net_weight || 0) || 0;
-          setTotalMakingCharge(
-            parseFloat(chargeValue) *
-              parseFloat(formik.values?.net_weight || 0) || 0
-          );
-          console.log(price);
-        } else if (makingCharge === "Per Piece / Flat") {
-          price = price + (parseFloat(chargeValue) || 0);
-          setTotalMakingCharge(parseFloat(chargeValue || 0));
-        } else if (makingCharge === "Per(%) On Metal Rate On Karat") {
-          price =
-            price + (metalPrice * (parseFloat(chargeValue) || 0)) / 100 || 0;
-          setTotalMakingCharge(
-            (metalPrice * (parseFloat(chargeValue) || 0)) / 100 || 0
-          );
+            setTotalMakingCharge(chargeM);
+            price = price + chargeM;
+            break;
+          case "Per Piece / Flat":
+            setTotalMakingCharge(parseFloat(chargeValue || 0));
+            price = price + (parseFloat(chargeValue) || 0);
+            break;
+          case "Per(%) On Metal Rate On Karat":
+            let chargeMK =
+              (metalPrice * (parseFloat(chargeValue) || 0)) / 100 || 0;
+            setTotalMakingCharge(chargeMK);
+            price = price + chargeMK;
+            break;
+          default:
+            break;
         }
       }
 
@@ -527,30 +529,37 @@ const Variation = ({
         setTotalAdditionalCharge(additionalAmount);
       }
 
-      if (isDiscount && discountType === "Per Gram On Net Weight") {
-        let appliedDiscout =
-          parseFloat(formik.values?.net_weight || 0) *
-            parseFloat(discountValue || 0) || 0;
-        price = price - appliedDiscout;
-        setAppliedDiscout(appliedDiscout);
-      }
+      if (isDiscount) {
+        switch (discountType) {
+          case "Per Gram On Net Weight":
+            let appliedDiscout =
+              parseFloat(formik.values?.net_weight || 0) *
+                parseFloat(discountValue || 0) || 0;
+            price = price - appliedDiscout;
+            setAppliedDiscout(appliedDiscout);
+            break;
 
-      if (isDiscount && discountType === "Per Piece / Flat") {
-        price = price - (parseFloat(discountValue) || 0);
-        setAppliedDiscout(discountValue || 0);
-      }
+          case "Per Piece / Flat":
+            price = price - (parseFloat(discountValue) || 0);
+            setAppliedDiscout(discountValue || 0);
+            break;
 
-      if (isDiscount && discountType === "Per(%) On Metal Rate On Karat") {
-        price =
-          price - (metalPrice * (parseFloat(discountValue) || 0)) / 100 || 0;
-        setAppliedDiscout(
-          (metalPrice * (parseFloat(discountValue) || 0)) / 100 || 0
-        );
+          case "Per(%) On Metal Rate On Karat":
+            let appliedDiscoutW =
+              (metalPrice * (parseFloat(discountValue) || 0)) / 100 || 0;
+            price = price - appliedDiscoutW;
+            setAppliedDiscout(appliedDiscoutW);
+            break;
+
+          default:
+            break;
+        }
       }
 
       if (taxValue === "5") {
-        totalPrice = price + (price * 5) / 100 || 0;
-        setAppliedVatTax(parseFloat((price * 5) / 100 || 0));
+        let vatprice = parseFloat((price * 5) / 100) || 0;
+        totalPrice = price + vatprice;
+        setAppliedVatTax(vatprice);
       } else {
         totalPrice = price;
         setAppliedVatTax(0);
@@ -607,6 +616,7 @@ const Variation = ({
           );
           formik.setFieldValue("metal_amount", getMetalPrice());
         }
+        setIsDiscount(variation.isDiscount);
         if (otherCharges) {
           const newGemstoneCharges = [];
           const newAdditionalCharges = [];
@@ -659,9 +669,9 @@ const Variation = ({
               ? newAdditionalCharges
               : prev
           );
-          setIsDiscount((prev) =>
-            prev !== Boolean(discountType) ? Boolean(discountType) : prev
-          );
+          // setIsDiscount((prev) =>
+          //   prev !== Boolean(discountType) ? Boolean(discountType) : prev
+          // );
           setDiscountType((prev) =>
             prev !== discountType ? discountType : prev
           );
@@ -726,7 +736,7 @@ const Variation = ({
                       />
 
                       {formik.errors.sku && formik.touched.sku && (
-                        <p className="text-red-500 text-xs ">
+                        <p className="text-red-500 text-xs mt-2 ms-2">
                           {formik.errors.sku}
                         </p>
                       )}
@@ -762,7 +772,7 @@ const Variation = ({
 
                       {formik.errors.description &&
                         formik.touched.description && (
-                          <p className="text-red-500 text-xs">
+                          <p className="text-red-500 text-xs mt-2 ms-2">
                             {formik.errors.description}
                           </p>
                         )}
@@ -786,7 +796,7 @@ const Variation = ({
                               />
                               {formik.errors.length &&
                                 formik.touched.length && (
-                                  <p className="text-red-500 text-xs">
+                                  <p className="text-red-500 text-xs mt-2 ms-2">
                                     {formik.errors.length}
                                   </p>
                                 )}
@@ -805,7 +815,7 @@ const Variation = ({
                               />
                               {formik.errors.height &&
                                 formik.touched.height && (
-                                  <p className="text-red-500 text-xs">
+                                  <p className="text-red-500 text-xs mt-2 ms-2">
                                     {formik.errors.height}
                                   </p>
                                 )}
@@ -825,7 +835,7 @@ const Variation = ({
                                 }
                               />
                               {formik.errors.width && formik.touched.width && (
-                                <p className="text-red-500 text-xs">
+                                <p className="text-red-500 text-xs mt-2 ms-2">
                                   {formik.errors.width}
                                 </p>
                               )}
@@ -845,7 +855,7 @@ const Variation = ({
                               />
                               {formik.errors.thickness &&
                                 formik.touched.thickness && (
-                                  <p className="text-red-500 text-xs">
+                                  <p className="text-red-500 text-xs mt-2 ms-2">
                                     {formik.errors.thickness}
                                   </p>
                                 )}
@@ -954,7 +964,7 @@ const Variation = ({
                             </ul>
                             {formik.errors.stock_status &&
                               formik.touched.stock_status && (
-                                <p className="text-red-500 text-xs">
+                                <p className="text-red-500 text-xs mt-2 ms-2">
                                   {formik.errors.stock_status}
                                 </p>
                               )}
@@ -1005,7 +1015,7 @@ const Variation = ({
                             />
                             {formik.errors.net_weight &&
                               formik.touched.net_weight && (
-                                <p className="text-red-500 text-xs">
+                                <p className="text-red-500 text-xs mt-2 ms-2">
                                   {formik.errors.net_weight}
                                 </p>
                               )}
@@ -1026,7 +1036,7 @@ const Variation = ({
                             />
                             {formik.errors.gross_weight &&
                               formik.touched.gross_weight && (
-                                <p className="text-red-500 text-xs">
+                                <p className="text-red-500 text-xs mt-2 ms-2">
                                   {formik.errors.gross_weight}
                                 </p>
                               )}
@@ -1080,7 +1090,7 @@ const Variation = ({
                         />
                         {formik.errors.regular_price &&
                           formik.touched.regular_price && (
-                            <p className="text-red-500 text-xs">
+                            <p className="text-red-500 text-xs mt-2 ms-2">
                               {formik.errors.regular_price}
                             </p>
                           )}
@@ -1126,7 +1136,7 @@ const Variation = ({
                             />
                             {formik.errors.making_charge &&
                               formik.touched.making_charge && (
-                                <p className="text-red-500 text-xs">
+                                <p className="text-red-500 text-xs mt-2 ms-2">
                                   {formik.errors.making_charge}
                                 </p>
                               )}
@@ -1652,9 +1662,7 @@ const Variation = ({
                               <td className="text-right text-gray-700">
                                 {(
                                   formik?.values?.metal_amount *
-                                  parseFloat(
-                                    formik.values?.net_weight || 0
-                                  ).toFixed(2)
+                                  parseFloat(formik.values?.net_weight || 0)
                                 ).toLocaleString("en-IN", {
                                   minimumFractionDigits: 2,
                                   maximumFractionDigits: 2,

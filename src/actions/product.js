@@ -243,7 +243,23 @@ export const searchProducts = async (data) => {
         },
       };
     }
-    const products = prisma.product.findMany({
+    let order = {};
+
+    switch (data.sort) {
+      case "Ascending":
+        order = { product_id: "asc" };
+        break;
+      case "Descending":
+        order = { product_id: "desc" };
+        break;
+      default:
+        order = { product_id: "asc" };
+    }
+    const page = data.page || 1;
+    const pageSize = data.pageSize || 10;
+    const skip = (page - 1) * pageSize;
+    const grams = await getGrams(data.q);
+    const products = await prisma.product.findMany({
       where: {
         status: "PUBLISHED",
         ...(pricefilter && pricefilter),
@@ -332,11 +348,24 @@ export const searchProducts = async (data) => {
           }),
 
         ...(data?.category && {
-          category: {
-            name: {
-              equals: data?.category,
+          OR: [
+            {
+              category: {
+                name: {
+                  equals: data?.category,
+                  mode: "insensitive",
+                },
+              },
             },
-          },
+            {
+              subcategory: {
+                name: {
+                  equals: data?.category,
+                  mode: "insensitive",
+                },
+              },
+            },
+          ],
         }),
 
         ...(data?.q && {
@@ -425,6 +454,25 @@ export const searchProducts = async (data) => {
                 },
               },
             },
+            {
+              variations: {
+                some: {
+                  net_weight: {
+                    equals: grams,
+                  },
+                },
+              },
+            },
+            {
+              variations: {
+                some: {
+                  variation_name: {
+                    contains: data?.q,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
           ],
         }),
       },
@@ -439,32 +487,26 @@ export const searchProducts = async (data) => {
           },
         },
       },
-      orderBy: {
-        ...(data?.sort &&
-          data?.sort === "Ascending" && {
-            product_id: "asc",
-          }),
-
-        ...(data?.sort &&
-          data?.sort === "Descending" && {
-            product_id: "desc",
-          }),
-
-        ...(data?.sort &&
-          data?.sort === "Low to High" && {
-            variations: {
-              selling_price: "asc",
-            },
-          }),
-        // ...(data?.sort &&
-        //   data?.sort === "High to Low" && {
-        //     variations: {
-        //       selling_price: "desc",
-        //     },
-        //   }),
-      },
+      orderBy: order,
+      // skip: skip,
+      // take: pageSize,
     });
 
+    // Manual sorting based on variations' selling price
+    if (data.sort === "Low to High" || data.sort === "High to Low") {
+      products.sort((a, b) => {
+        const aPrice = a.variations.reduce(
+          (min, v) => (v.selling_price < min ? v.selling_price : min),
+          Number.MAX_VALUE
+        );
+        const bPrice = b.variations.reduce(
+          (min, v) => (v.selling_price < min ? v.selling_price : min),
+          Number.MAX_VALUE
+        );
+
+        return data.sort === "Low to High" ? aPrice - bPrice : bPrice - aPrice;
+      });
+    }
     return products;
   } catch (error) {
     console.log("error", error);

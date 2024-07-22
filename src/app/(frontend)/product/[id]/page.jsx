@@ -10,7 +10,7 @@ import Container from "@/components/frontend/Container";
 import moment from "moment";
 
 async function get_productBy_id(id) {
-  if(id){
+  if (id) {
     const product = await prisma.product.findFirst({
       where: { product_id: Number(id) },
       include: {
@@ -30,7 +30,7 @@ async function get_productBy_id(id) {
           },
         },
         user: true,
-        
+
         country: true,
         likes: true,
         genders: {
@@ -52,10 +52,10 @@ async function get_productBy_id(id) {
     const reviews = product.reviews.filter(
       (review) => review.status === ReviewStatus.PUBLISHED
     );
-    const allRating = reviews.reduce((arr, item) => [...arr, item.rating],[]);
+    const allRating = reviews.reduce((arr, item) => [...arr, item.rating], []);
     const sumRating = allRating.reduce((a, b) => a + b, 0);
-    const avgRating = (sumRating / allRating.length) || 0;
-    
+    const avgRating = sumRating / allRating.length || 0;
+
     const attributeCount = product.ProductAttributeValue.reduce((acc, item) => {
       acc[item.attribute_id] = (acc[item.attribute_id] || 0) + 1;
       return acc;
@@ -79,14 +79,15 @@ async function get_productBy_id(id) {
 
     let selectedOptions = {};
     const variation = product.variations[0];
-    const multipleAttributesCountFirstVariation = Object.keys(attributeCount).map(
-      (att) =>
-        attributeCount[att] > 1
-          ? variation.productAttributeValues.find(
-              (item) =>
-                Number(item.productAttributeValue.attribute_id) === Number(att)
-            )
-          : false
+    const multipleAttributesCountFirstVariation = Object.keys(
+      attributeCount
+    ).map((att) =>
+      attributeCount[att] > 1
+        ? variation.productAttributeValues.find(
+            (item) =>
+              Number(item.productAttributeValue.attribute_id) === Number(att)
+          )
+        : false
     );
     selectedOptions = multipleAttributesCountFirstVariation
       .filter((a) => a !== false)
@@ -102,7 +103,7 @@ async function get_productBy_id(id) {
       selectedOptions: selectedOptions,
       filteredAttributes: filteredAttributes,
       reviews: reviews,
-      avgRating: avgRating
+      avgRating: avgRating,
     };
   }
   return false;
@@ -112,21 +113,21 @@ async function updateViewForThisProduct(userId, productId) {
     where: {
       userId_productId: {
         userId: userId,
-        productId: Number(productId)
-      }
-    }
+        productId: Number(productId),
+      },
+    },
   });
-  if (existingCheck){
+  if (existingCheck) {
     return existingCheck;
   }
   const viewProduct = await prisma.viewedProduct.create({
     data: {
-      user: {connect: {id: userId}},
-      product: {connect: {product_id: Number(productId)}},
+      user: { connect: { id: userId } },
+      product: { connect: { product_id: Number(productId) } },
     },
   });
   return viewProduct;
-};
+}
 
 export default async function ProductDetails({ params: { id } }) {
   const user = await checkUserSession();
@@ -142,30 +143,45 @@ export default async function ProductDetails({ params: { id } }) {
         filteredAttributes={productData?.filteredAttributes}
         avgRating={productData?.avgRating}
       />
-      <Container >
+      <Container>
         <div>Review</div>
         {user.id && <ReviewForm user_id={user.id} product_id={id} />}
         {productData?.reviews &&
           productData?.reviews?.map((review, index) => {
             return (
               <div key={index} className="border p-2 rounded-sm">
-              <div className="flex items-center justify-between">
-                <strong>{review.fromUser?.firstName}{" "}{review.fromUser?.lastName} </strong>
-                <div>on {moment(review.createdAt.toString()).fromNow()}</div>
+                <div className="flex items-center justify-between">
+                  <strong>
+                    {review.fromUser?.firstName} {review.fromUser?.lastName}{" "}
+                  </strong>
+                  <div>on {moment(review.createdAt.toString()).fromNow()}</div>
+                </div>
+                <StarRatings starRatings={review.rating} />
+                {review.text}
+                <div className="flex items-center gap-1">
+                  {review?.images?.length > 0 &&
+                    review?.images.map((imageItem, index) => {
+                      return (
+                        <Image
+                          key={index}
+                          src={imageItem?.path}
+                          width={100}
+                          height={100}
+                          alt=""
+                        />
+                      );
+                    })}
+                </div>
+                {review?.replay && review.replay != "" ? (
+                  <div className="border-t mt-3 pt-2 pl-5">
+                    <div className="p2 bg-blue-gray-50">
+                      Replay from seller: {review.replay}
+                    </div>
+                  </div>
+                ) : (
+                  ""
+                )}
               </div>
-              <StarRatings starRatings={review.rating} />
-              {review.text} 
-              <div className="flex items-center gap-1">
-                {review?.images?.length > 0 && review?.images.map((imageItem,index) =>{
-                return <Image key={index} src={imageItem?.path} width={100} height={100} alt=""/>
-              })}
-              </div> 
-                {review?.replay && review.replay != '' ? (
-              <div className="border-t mt-3 pt-2 pl-5">
-                  <div className="p2 bg-blue-gray-50">Replay from seller: {review.replay}</div>
-              </div>
-                  ):''}                
-          </div>
             );
           })}
       </Container>

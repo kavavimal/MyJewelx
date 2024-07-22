@@ -47,8 +47,12 @@ export async function POST(request) {
       regular_price: Number(req.get("regular_price")),
       selling_price: Number(req.get("selling_price")),
       isDiscount: isDiscount,
-      variation_discount: isDiscount ? Number(req.get("variation_discount")) : null,
-      variation_discount_type: isDiscount ? Number(req.get("variation_discount_type")) : null,
+      variation_discount: isDiscount
+        ? Number(req.get("variation_discount"))
+        : null,
+      variation_discount_type: isDiscount
+        ? Number(req.get("variation_discount_type"))
+        : null,
       description: req.get("description"),
       stock_management: req.get("stock_management") === "true" ? true : false,
       stock_status: req.get("stock_status") === "true" ? true : false,

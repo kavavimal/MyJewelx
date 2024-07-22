@@ -11,7 +11,12 @@ import ProductAttributeSelections from "./ProductAttributeSelections";
 import AddToWishlist from "@/components/frontend/cart/AddToWishlist";
 import ProductLikes from "@/components/frontend/ProductLikes";
 
-const Detail = ({ product, selectedOptions, filteredAttributes, avgRating }) => {
+const Detail = ({
+  product,
+  selectedOptions,
+  filteredAttributes,
+  avgRating,
+}) => {
   const [variation, setVariation] = useState(product?.variations[0]);
   const sizes = [];
   product.ProductAttributeValue.forEach((pav) => {
@@ -23,12 +28,14 @@ const Detail = ({ product, selectedOptions, filteredAttributes, avgRating }) => 
   const other_charges = variation?.other_charges
     ? JSON.parse(variation.other_charges)
     : null;
-  let other_charges_total = other_charges.filter((a) => a.charge_type === 'additional').reduce((total, charges) => total + Number(charges.value),0);
-  let gemstone_total = other_charges.filter((a) => a.charge_type === 'gemstone').reduce((total, charges) => total + Number(charges.value),0);
+  let other_charges_total = other_charges
+    .filter((a) => a.charge_type === "additional")
+    .reduce((total, charges) => total + Number(charges.value), 0);
+  let gemstone_total = other_charges
+    .filter((a) => a.charge_type === "gemstone")
+    .reduce((total, charges) => total + Number(charges.value), 0);
 
-  const vat = other_charges.find((a) => a.charge_type === 'vat/tax');
-    
-  
+  const vat = other_charges.find((a) => a.charge_type === "vat/tax");
 
   return (
     <>
@@ -50,10 +57,14 @@ const Detail = ({ product, selectedOptions, filteredAttributes, avgRating }) => 
 
                   <span className="flex ml-3 pl-3 py-2 border-l-2 border-gray-200 space-x-2s">
                     <Paragraph classes="flex" color="gray-600">
-                      <ProductLikes 
-                        product_id={product.product_id} 
+                      <ProductLikes
+                        product_id={product.product_id}
                         showCount
-                        count={product.likes && product.likes.length ? product.likes.length  : '0'} 
+                        count={
+                          product.likes && product.likes.length
+                            ? product.likes.length
+                            : "0"
+                        }
                       />
                     </Paragraph>
                   </span>
@@ -62,7 +73,11 @@ const Detail = ({ product, selectedOptions, filteredAttributes, avgRating }) => 
 
                 <div className="w-1/2 mb-1 flex">
                   <strong className="md:w-1/2">
-                    {printPrice(variation?.selling_price ? variation?.selling_price : variation?.regular_price)}
+                    {printPrice(
+                      variation?.selling_price
+                        ? variation?.selling_price
+                        : variation?.regular_price
+                    )}
                   </strong>
                   <Paragraph classes="md:w-1/2 text-right  border-l">
                     {variation?.net_weight} gram
@@ -85,7 +100,13 @@ const Detail = ({ product, selectedOptions, filteredAttributes, avgRating }) => 
 
                 <div className="leading-relaxed border-b-2 border-gray-100 py-3">
                   <p className="leading-relaxed pb-3">
-                    Making Charges : {printPrice(variation.making_charges ? variation.making_charges?.value : 0)}
+                    {console.log(variation?.making_charges)}
+                    Making Charges :{" "}
+                    {printPrice(
+                      variation.making_charges
+                        ? variation.making_charges?.value
+                        : 0
+                    )}
                   </p>
                   <p className="leading-relaxed pb-3">
                     Gemstone Charges : {printPrice(gemstone_total)}
@@ -98,7 +119,12 @@ const Detail = ({ product, selectedOptions, filteredAttributes, avgRating }) => 
                     <span>&#37;</span>
                   </p>
                   <p className="leading-relaxed">
-                    Total Amount : {printPrice(variation?.selling_price ? variation?.selling_price : variation?.regular_price)}
+                    Total Amount :{" "}
+                    {printPrice(
+                      variation?.selling_price
+                        ? variation?.selling_price
+                        : variation?.regular_price
+                    )}
                   </p>
                 </div>
                 <Paragraph>

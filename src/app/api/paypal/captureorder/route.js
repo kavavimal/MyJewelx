@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import client from "@/utils/paypal";
+import client from "@/lib/paypal";
 import paypal from "@paypal/checkout-server-sdk";
 import { NextResponse } from "next/server";
 

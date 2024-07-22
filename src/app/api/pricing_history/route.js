@@ -82,23 +82,24 @@ const updateProductVariationPrices = async (newPrices) => {
       let additionalAmount = additionalAmounts.reduce((a, b) => a + parseFloat(b.value), 0);
       price = price + additionalAmount;
     }
-    
-    const discount = other_charges.find((a) => a.charge_type === 'discount');
-    if (discount) {
-      switch (discount.name) {
-        case "Per Gram On Net Weight":
-          let appliedDiscout = parseFloat(variation.net_weight || 0) * parseFloat(discount.value || 0) || 0;
-          price = price - appliedDiscout;
-          break;
-        case "Per Piece / Flat":
-          price = price - (parseFloat(discount.value) || 0);
-          break;
-        case "Per(%) On Metal Rate On Karat":
-          const metalpriceDiscount = (metalPrice * (parseFloat(discount.value) || 0)) / 100
-          price = price - metalpriceDiscount || 0;
-          break;
-        default:
-          break;
+    if (variation.isDiscount) {
+      const discount = other_charges.find((a) => a.charge_type === 'discount');
+      if (discount) {
+        switch (discount.name) {
+          case "Per Gram On Net Weight":
+            let appliedDiscout = parseFloat(variation.net_weight || 0) * parseFloat(discount.value || 0) || 0;
+            price = price - appliedDiscout;
+            break;
+          case "Per Piece / Flat":
+            price = price - (parseFloat(discount.value) || 0);
+            break;
+          case "Per(%) On Metal Rate On Karat":
+            const metalpriceDiscount = (metalPrice * (parseFloat(discount.value) || 0)) / 100
+            price = price - metalpriceDiscount || 0;
+            break;
+          default:
+            break;
+        }
       }
     }
     

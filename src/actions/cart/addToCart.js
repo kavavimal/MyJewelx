@@ -72,7 +72,7 @@ const addToCart = async (item) => {
         },
         include: {
           productVariation: {
-            include: { product: true },
+            include: { product: true, image: true },
           },
         },
       });
@@ -104,7 +104,7 @@ const addToCart = async (item) => {
           },
           include: {
             productVariation: {
-              include: { product: true },
+              include: { product: true, image: true },
             },
           },
         });
@@ -134,7 +134,7 @@ const addToCart = async (item) => {
           },
           include: {
             productVariation: {
-              include: { product: true },
+              include: { product: true, image: true },
             },
           },
         });

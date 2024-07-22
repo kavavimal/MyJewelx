@@ -1,7 +1,37 @@
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Container from '@/components/frontend/Container';
 import prisma from '@/lib/prisma';
+import { stripe } from '@/lib/stripe';
+import { OrderStatus } from '@prisma/client';
 import React from 'react';
+
+const getSessionAndSetOrder = async (sessionId, orderId) => {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+  
+    if (session && session.status === "complete") {
+      const order = await prisma.order.update({
+        where: {
+          id: orderId,
+        },
+        include: {
+            orderItems: true,
+            seller: {
+                include: {
+                    user: true,
+                },
+            },
+        },
+        data: {
+          status: OrderStatus.PROCESSING,
+          paymentResponse: JSON.stringify(session)
+        },
+      });
+  
+      return { session, order };
+    }
+  
+    throw new Error("You should not be able to access this page");
+  };
 
 const fetchOrder = async (id) => {
     const order = prisma.order.findFirst({
@@ -17,12 +47,16 @@ const fetchOrder = async (id) => {
     });
     return order;
 };
-export default async function OrderDetailsPage({ params }) {
-    console.log('id', params);
-    const order = await fetchOrder(params.id);
-    console.log(order);
+export default async function OrderDetailsPage({ params, searchParams }) {
+    let order = await fetchOrder(params.id);
     if (!order.id) {
         return 'No order found';
+    }
+    if (order.paymentMethod === 'stripe' && searchParams.success) {
+        const sessionId = searchParams.session_id;
+        if (!sessionId) throw new Error("Incorrect callback URL");
+        const sessionData = await getSessionAndSetOrder(sessionId, order.id);
+        order = sessionData.order;
     }
 
     const orderTotal = order.orderItems.reduce(
@@ -66,9 +100,9 @@ export default async function OrderDetailsPage({ params }) {
                                     </span>
                                 </p>
                             </div>
-                            <button className="rounded-full py-3 px-7 font-semibold text-sm leading-7 text-white bg-indigo-600 max-lg:mt-5 shadow-sm shadow-transparent transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400">
+                            {/* <button className="rounded-full py-3 px-7 font-semibold text-sm leading-7 text-white bg-indigo-600 max-lg:mt-5 shadow-sm shadow-transparent transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400">
                                 Track Your Order
-                            </button>
+                            </button> */}
                         </div>
                         <div className="w-full px-3 min-[400px]:px-6">
                             {order.orderItems.length > 0 &&
@@ -125,7 +159,7 @@ export default async function OrderDetailsPage({ params }) {
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                        <div className="col-span-5 lg:col-span-2 flex items-center max-lg:mt-3 ">
+                                                        {/* <div className="col-span-5 lg:col-span-2 flex items-center max-lg:mt-3 ">
                                                             <div className="flex gap-3 lg:block">
                                                                 <p className="font-medium text-sm leading-7 text-black">
                                                                     Status
@@ -148,7 +182,7 @@ export default async function OrderDetailsPage({ params }) {
                                                                     2021
                                                                 </p>
                                                             </div>
-                                                        </div>
+                                                        </div> */}
                                                     </div>
                                                 </div>
                                             </div>

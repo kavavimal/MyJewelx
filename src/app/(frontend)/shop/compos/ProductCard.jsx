@@ -71,7 +71,6 @@ const ProductCard = ({ product }) => {
                 product?.user?.firstName + " " + product?.user?.lastName}
             </p>
           )}
-          {console.log(product?.user)}
         </div>
       </CardBody>
     </Card>

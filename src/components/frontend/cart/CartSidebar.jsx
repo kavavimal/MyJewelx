@@ -29,6 +29,10 @@ const CartSidebar = () => {
     setIsOpen(!isOpen);
   };
 
+  const closeSidebar = () => {
+    setIsOpen(false);
+  }
+
   const handleClickOutside = (event) => {
     if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
       setIsOpen(false);
@@ -109,7 +113,7 @@ const CartSidebar = () => {
                             </div>
                             <div>
                               <h3>
-                                <Link href={`/product/${cartItem.productVariation?.product_id}`}>
+                                <Link onClick={closeSidebar} href={`/product/${cartItem.productVariation?.product_id}`}>
                                   {
                                     cartItem.productVariation?.product
                                       ?.product_name
@@ -145,12 +149,14 @@ const CartSidebar = () => {
                 </div>
                 <div className="mt-6 flex justify-between items-center">
                   <Link
+                  onClick={closeSidebar}
                     href="/cart"
                     className="flex items-center justify-center text-center text-[#F0AE11] bg-white border py-2 px-4 border-[#F0AE11] focus:outline-none hover:bg-yellow-600 hover:text-white rounded"
                   >
                     View Cart
                   </Link>
                   <Link
+                  onClick={closeSidebar}
                     href="/checkout"
                     className="flex items-center justify-center text-center text-[#F0AE11] bg-white border py-2 px-4 border-[#F0AE11] focus:outline-none hover:bg-yellow-600 hover:text-white rounded"
                   >

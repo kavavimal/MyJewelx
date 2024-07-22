@@ -4,23 +4,23 @@ import { useCartStore } from "@/contexts/cartStore";
 import { showToast } from "@/utils/helper";
 import { useEffect, useState } from "react";
 
-const Quantity = ({ cartItem, maxQ }) => {
+const Quantity = ({ cartItem }) => {
   const cartItems = useCartStore((state) => state.cartItems);
   const findItem = useCartStore((state) => state.findItem);
   const updateQanity = useCartStore((state) => state.updateCartQantity);
   const removeFromCart = useCartStore((state) => state.removeFromCart);
   const [localLoading, setLocalLoading] = useState(false);
-  const [maxQuantity, setMaxQuantity] = useState(maxQ || -1);
+  const [maxQuantity, setMaxQuantity] = useState(cartItem.productVariation?.quantity || -1);
   const [q, setQ] = useState(cartItem.quantity);
 
   useEffect(() => {
-    setMaxQuantity(maxQ || -1);
-  },[maxQ]);
+    setMaxQuantity(cartItem?.productVariation?.quantity || -1);
+  },[cartItem]);
 
   useEffect(() => {
     let cartI = findItem(cartItem.cartItem_id);
-    if (cartI.quantity !== q) {
-      setQ(cartI.quantity);
+    if (cartI?.quantity !== q) {
+      setQ(cartI?.quantity);
     }
   }, [cartItems, cartItem]);
   
@@ -39,7 +39,7 @@ const Quantity = ({ cartItem, maxQ }) => {
       newQ = parseInt(newQ) - 1;
       // setQuantity((prevQuantity) => prevQuantity - 1);
     }
-    if (newQ > maxQuantity) {
+    if (type === "increment" && maxQuantity !== -1 && newQ > maxQuantity) {
       showToast({message: "Max product Quantity reached", variant: "error"});
     } else {
       setLocalLoading(true);

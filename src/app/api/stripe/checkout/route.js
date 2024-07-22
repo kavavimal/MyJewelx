@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { CURRENCY_SYMBOL } from "@/utils/constants";
 import { createOrder } from "../../checkout/route";
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+import { stripe } from "@/lib/stripe";
 
 const checkUserSession = async () => {
   const session = await getServerSession();
@@ -60,17 +60,21 @@ export async function POST(request) {
         payment_method_types: ["card"],
         line_items: transformedItem,
         mode: "payment",
-        success_url: redirectURL + `/order-details/${order.id}`,
+        success_url: redirectURL + `/order-details/${order.id}?success=true&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url:
           redirectURL + `/order-details/${order.id}?stripeStatus=cancel`,
         metadata: {
-          user: 'user_'+user.id,
-          order: 'order_'+order.id,
+          user: "user_" + user.id,
+          order: "order_" + order.id,
         },
       });
 
       return NextResponse.json(
-        { message: "Stripe order created successfully", id: session.id, order: order },
+        {
+          message: "Stripe order created successfully",
+          id: session.id,
+          order: order,
+        },
         { status: 200 }
       );
     }

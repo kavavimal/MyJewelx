@@ -58,8 +58,23 @@ export async function createOrder(user, requestData) {
 
   // find seller ids
   let sellerId = [];
+  let productItemsUpdate = [];
   if (userCart.cartItems.length > 0) {
-    userCart.cartItems.map((item) => {
+    userCart.cartItems.map(async (item) => {
+      //  check if stock managment is true
+      if (item.productVariation.stock_management) {
+        let nQuantity = item.productVariation.quantity - item.quantity;
+        let updateProductItem = {};
+        if (nQuantity <= 0) {
+          updateProductItem = { quantity: 0, stock_status: false };
+        } else {
+          updateProductItem = { quantity: nQuantity };
+        }
+        productItemsUpdate.push({
+          data: updateProductItem,
+          variation_id: item.productVariation.variation_id,
+        });
+      }
       sellerId.push(item.productVariation?.product?.user?.id);
     });
     sellerId = [...new Set(sellerId)];
@@ -85,6 +100,14 @@ export async function createOrder(user, requestData) {
     },
   });
   if (order) {
+    if (productItemsUpdate.length > 0) {
+      productItemsUpdate.forEach(async (variationProd) => {
+        await prisma.productVariation.update({
+          where: { variation_id: variationProd.variation_id },
+          data: { ...variationProd.data },
+        });
+      });
+    }
     await prisma.cart.delete({ where: { cart_id: userCart.cart_id } });
     return order;
   }
