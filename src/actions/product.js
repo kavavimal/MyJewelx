@@ -20,10 +20,14 @@ export const getProducts = (data = false) => {
           image: true,
         },
       },
-      user: true,
+      user: {
+        include: {
+          vendor: true,
+        },
+      },
     },
     orderBy: {
-      product_id: "asc",
+      product_id: "desc",
     },
   });
 };

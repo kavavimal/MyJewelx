@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { CURRENCY_SYMBOL } from "@/utils/constants";
+import { CURRENCY_SYMBOL, CURRENCY_SYMBOL_PAYPAL } from "@/utils/constants";
 import client from "@/lib/paypal";
 import paypal from "@paypal/checkout-server-sdk";
 import { NextResponse } from "next/server";
@@ -26,7 +26,7 @@ export async function POST(request) {
       purchase_units: [
         {
           amount: {
-            currency_code: CURRENCY_SYMBOL,
+            currency_code: CURRENCY_SYMBOL_PAYPAL,
             value: order_price + "",
           },
         },

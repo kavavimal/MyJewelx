@@ -21,7 +21,7 @@ const Topcategories = ({ categories }) => {
                 nextEl: ".swiper-category-next",
                 prevEl: ".swiper-category-prev",
               }}
-              spaceBetween={50}
+              spaceBetween={20}
               slidesPerView={5}
             >
               {categories.map((category, index) => {

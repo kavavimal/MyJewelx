@@ -11,6 +11,7 @@ export default function ProductLoop({ products }) {
   useEffect(() => {
     setProducts(products);
   }, [products]);
+
   return (
     <>
       {filterdProducts.length > 0 ? (

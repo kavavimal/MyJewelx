@@ -53,6 +53,26 @@ model User {
   wishlist     Wishlist[]
   likes        Like[]
   viewProducts ViewedProduct[]
+  addresses   Address[]
+}
+
+model Address {
+  id          Int       @id @default(autoincrement())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  type        AddressType
+  firstName   String
+  lastName    String
+  street      String?
+  address_2   String?
+  city        String
+  state       String
+  zipCode     String
+  country     String
+  phone       String?
+  email       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Role {
@@ -634,4 +654,10 @@ enum adsType {
   STORE
   CART 
   WISHLIST
+}
+
+enum AddressType {
+  BILLING
+  SHIPPING
+  OTHER
 }

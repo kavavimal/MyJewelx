@@ -2,6 +2,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { Suspense } from "react";
 import ShopBannerCraousel from "./compos/ShopBannerCraousel";
 import DeviderX from "@/components/frontend/DeviderX";
+import prisma from "@/lib/prisma";
 
 const getPromoList = async () =>
   await prisma.promotional.findMany({

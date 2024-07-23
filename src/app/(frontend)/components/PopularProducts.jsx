@@ -49,7 +49,7 @@ const PopularProducts = ({ products }) => {
   return (
     <div className="py-[53px]">
       <div className="flex items-start container gap-5">
-        <div className="w-[220px]">
+        <div className="w-[320px]">
           <h3 className="mb-2.5 mt-3 text-lg font-playfairdisplay font-semibold tracking-wide">
             Recently Viewed
           </h3>
@@ -67,7 +67,7 @@ const PopularProducts = ({ products }) => {
             </div>
           </div>
         </div>
-        <div className="w-[calc(100%-240px)]">
+        <div className="w-[calc(100%-340px)]">
           <div className="mb-3 flex justify-between items-center">
             <h3 className="text-2xl font-playfairdisplay font-semibold tracking-wide">
               Popular Products
@@ -101,28 +101,22 @@ const PopularProducts = ({ products }) => {
                   typeof window !== "undefined" && document.body
                 }
               />
-              {/* <select name="" id="">
-                {categories?.length > 0 &&
-                  categories.map((category) => (
-                    <option value={category.category_id}>
-                      {category.name}
-                    </option>
-                  ))}
-              </select> */}
             </div>
           </div>
-          <Swiper
-            slidesPerView={3}
-            spaceBetween={20}
-            modules={[Grid, Pagination]}
-            grid={{ rows: 2, fill: "row" }}
-          >
-            {filterProducts.map((product) => (
-              <SwiperSlide key={product.product_id}>
-                <ProductCard product={product} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+          <div>
+            <Swiper
+              slidesPerView={3}
+              spaceBetween={20}
+              modules={[Grid, Pagination]}
+              grid={{ rows: 2, fill: "row" }}
+            >
+              {filterProducts.map((product) => (
+                <SwiperSlide key={product.product_id}>
+                  <ProductCard product={product} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
         </div>
       </div>
     </div>

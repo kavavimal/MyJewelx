@@ -14,7 +14,7 @@ const shippingAddressValidationSchema = Yup.object({
   phone: Yup.string().required("Phone is required"),
   country: Yup.string().required("Country is required"),
   city: Yup.string().required("City is required"),
-  zipcode: Yup.string().required("Zip Code is required"),
+  zipCode: Yup.string().required("Zip Code is required"),
 });
 
 export default function ShippingAddress({
@@ -43,7 +43,7 @@ export default function ShippingAddress({
             {[
               shippingAddress?.city,
               shippingAddress?.country,
-              shippingAddress?.zipcode,
+              shippingAddress?.zipCode,
             ].join(", ")}
           </p>
           <p>{[shippingAddress?.phone, shippingAddress?.email].join(", ")}</p>
@@ -239,7 +239,7 @@ export default function ShippingAddress({
 
                 <div className="w-1/2 p-4">
                   <label
-                    for="zipcode-input"
+                    for="zipCode-input"
                     className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
                   >
                     Zipcode *
@@ -248,16 +248,16 @@ export default function ShippingAddress({
                     <div className="relative w-full">
                       <input
                         type="text"
-                        id="zipcode-input"
+                        id="zipCode-input"
                         className="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:border-s-gray-700  dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500"
-                        placeholder="zipcode"
-                        name="zipcode"
-                        value={props.values.zipcode}
+                        placeholder="zipCode"
+                        name="zipCode"
+                        value={props.values.zipCode}
                         onChange={props.handleChange}
                         onBlur={props.handleBlur}
                       />
-                      {props.errors.zipcode && props.touched.zipcode && (
-                        <p className="text-red-400">{props?.errors?.zipcode}</p>
+                      {props.errors.zipCode && props.touched.zipCode && (
+                        <p className="text-red-400">{props?.errors?.zipCode}</p>
                       )}
                     </div>
                   </div>

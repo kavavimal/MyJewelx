@@ -34,6 +34,7 @@ export const variation_discount_types = {
   3 : "Per Piece / Flat",
 };
 export const CURRENCY_SYMBOL = 'AED';
+export const CURRENCY_SYMBOL_PAYPAL = 'USD';
 
 export const SUPPORTED_FORMATS_IMAGES = [
   "image/jpg",

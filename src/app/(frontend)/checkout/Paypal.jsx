@@ -1,7 +1,7 @@
 import React from "react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { post } from "@/utils/api";
-import { CURRENCY_SYMBOL } from "@/utils/constants";
+import { CURRENCY_SYMBOL, CURRENCY_SYMBOL_PAYPAL } from "@/utils/constants";
 
 export default function Paypal({ user, cart, amount, handlePlaceOrder }) {
   const paypalCreateOrder = async () => {
@@ -44,7 +44,7 @@ export default function Paypal({ user, cart, amount, handlePlaceOrder }) {
     <PayPalScriptProvider
       options={{
         "client-id": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
-        currency: CURRENCY_SYMBOL,
+        currency: CURRENCY_SYMBOL_PAYPAL,
         intent: "capture",
       }}
     >

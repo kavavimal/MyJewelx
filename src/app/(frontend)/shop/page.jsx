@@ -3,6 +3,7 @@ import { attributeIDs } from "@/utils/constants";
 import FilterProduct from "./compos/FilterProduct";
 import ProductLoop from "./compos/ProductLoop";
 import ShopTopComponent from "./compos/ShopTopComponent";
+import prisma from "@/lib/prisma";
 
 const getFilterableDatas = async () => {
   const vendors = await prisma.user.findMany({

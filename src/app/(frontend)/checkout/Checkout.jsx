@@ -12,8 +12,9 @@ import {
   AccordionBody,
   AccordionHeader,
 } from "@material-tailwind/react";
+import { AddressType } from "@prisma/client";
 
-export default function Checkout({ user }) {
+export default function Checkout({ user, addresses}) {
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -22,11 +23,28 @@ export default function Checkout({ user }) {
     (state) => state.setShippingAddress
   );
   const setPaymentMethod = useChekcoutStore((state) => state.setPaymentMethod);
-  const [shippingAddress, updateShippingAddress] = useState("");
+  const [shippingAddress, updateShippingAddress] = useState(addresses || "");
   const handlePaymentMethodChange = (newVal) => {
     console.log("update payment", newVal);
     setPaymentMethod(newVal);
   };
+
+  const saveShippingAddressToUser = async (address) => {
+    const addressRes = await post('/api/addresses/add', {
+      type: AddressType.SHIPPING,
+      firstName: address.firstName ? address.firstName : ' ', 
+      lastName: address.lastName ? address.lastName : ' ', 
+      street: address.street ? address.street : ' ', 
+      city: address.city ? address.city : ' ', 
+      state: address.state ? address.state : ' ', 
+      zipCode: address.zipCode ? address.zipCode : ' ', 
+      country: address.country ? address.country : ' ', 
+      phone: address.phone ? address.phone : ' ', 
+      email: address.email ? address.email : ' ',
+    });
+    console.log("save address res", addressRes);
+    updateShippingAddress(addressRes.address);
+  }
 
   useEffect(() => {
     setShippingAddress(shippingAddress);
@@ -36,7 +54,7 @@ export default function Checkout({ user }) {
     <div className="mb-5">
       <div className="">
         <ShippingAddress
-          updateShippingAddress={updateShippingAddress}
+          updateShippingAddress={saveShippingAddressToUser}
           shippingAddress={shippingAddress}
         />
         {errors && errors.shipping && errors.shipping !== "" && (

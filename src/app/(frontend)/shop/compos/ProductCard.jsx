@@ -13,7 +13,7 @@ const ProductCard = ({ product }) => {
   const variation = product?.variations[0];
   const averateRating = getProductAverageRatings(product.reviews);
   return (
-    <Card className="overflow-hidden font-normal leading-[18.34px] text-left">
+    <Card className="overflow-hidden font-normal text-left">
       <CardHeader
         floated={false}
         shadow={false}
@@ -23,7 +23,7 @@ const ProductCard = ({ product }) => {
         <div className="w-auto overflow-hidden">
           <Link
             href={`/product/${product?.product_id}`}
-            className="font-normal leading-[18.34px] text-left"
+            className="font-normal text-left"
           >
             <Image
               src={
@@ -46,7 +46,7 @@ const ProductCard = ({ product }) => {
           <p className="text-black text-sm">
             <Link
               href={`/product/${product?.product_id}`}
-              className="font-normal leading-[18.34px] text-left"
+              className="font-normal text-left"
             >
               {truncate(product?.product_name, 25)}
             </Link>
@@ -65,7 +65,7 @@ const ProductCard = ({ product }) => {
             variation={variation}
           />
           {product?.user && (
-            <p lassName="text-black text-sm leading-[23.83px]">
+            <p className="text-black text-sm leading-[23.83px]">
               Seller:{" "}
               {product?.user?.vendor?.store_name ??
                 product?.user?.firstName + " " + product?.user?.lastName}

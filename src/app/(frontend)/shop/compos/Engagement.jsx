@@ -25,13 +25,12 @@ const Engagement = ({ product_id, averateRating, variation }) => {
   const updateWishlistStatus = async () => {
     setLoading(true);
     if (isInWishlist) {
-        await removeFromWishlist(product_id);
+      await removeFromWishlist(product_id);
     } else {
-        await addToWishlist(product_id);
+      await addToWishlist(product_id);
     }
     setLoading(false);
-  }
-
+  };
 
   return (
     <div className="flex justify-between items-center">
@@ -40,7 +39,7 @@ const Engagement = ({ product_id, averateRating, variation }) => {
       </div>
       <div className="flex items-center gap-2">
         <ProductLikes product_id={product_id} />
-        <button variant="text" className="rounded-full" size="sm">
+        <button className="rounded-full">
           <svg
             width="15"
             height="15"
@@ -55,12 +54,7 @@ const Engagement = ({ product_id, averateRating, variation }) => {
           </svg>
         </button>
         {loading && <LoadingDots />}
-        <button
-          variant="text"
-          className="rounded-full"
-          size="sm"
-          onClick={updateWishlistStatus}
-        >
+        <button className="rounded-full" onClick={updateWishlistStatus}>
           <svg
             // className=" hover: cursor-pointer"
             width="15"

@@ -9,6 +9,7 @@ import CartItem from '../cart/CartItem';
 import CheckoutSummary from './CheckoutSummary';
 import prisma from '@/lib/prisma';
 import Ads from './Ads';
+import { AddressType } from '@prisma/client';
 
 const getAds = () =>
     prisma.promotional.findMany({
@@ -16,11 +17,15 @@ const getAds = () =>
             ads_type: 'CART',
         },
     });
+const getUserAddress = (uid) => prisma.address.findFirst({
+    where: {userId: uid, type: AddressType.SHIPPING}
+});
 
 export default async function CheckoutPage() {
     const cart = await getCart();
     const user = await fetchCurrentUser();
     const ads = await getAds();
+    const addresses = await getUserAddress(user.id);
 
     if (!cart.cartData || cart.cartData.cartItems.length === 0) {
         return redirect('/cart');
@@ -76,7 +81,7 @@ export default async function CheckoutPage() {
                                 </div>
                             </div>
 
-                            <Checkout cart={cart} user={user} />
+                            <Checkout cart={cart} user={user} addresses={addresses} />
                             <div className="mx-auto w-full flex-none lg:max-w-2xl xl:max-w-4xl ">
                                 <h3 className="my-2 pb-2 text-2xl">
                                     Cart{' '}

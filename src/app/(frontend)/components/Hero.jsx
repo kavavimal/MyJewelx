@@ -18,7 +18,7 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
   const [isShowMore, setIsShowMore] = useState(false);
   return (
     <>
-      <section className="bg-primary-250 py-5">
+      <section className="bg-primary-250 pt-[21px] pb-[50px]">
         <div className="max-w-screen-xl mx-auto">
           <div className="flex items-start justify-between gap-5">
             <div className="w-[220px]">

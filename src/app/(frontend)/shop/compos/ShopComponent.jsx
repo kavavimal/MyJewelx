@@ -35,7 +35,6 @@ const ShopComponent = ({ products, categories, promolist }) => {
     setLoading(false);
   };
   const updateProducts = async () => {
-    // window.scrollTo(0, 200);
     setLoading(true);
     const response = await searchProducts(selectedFilters);
     setFilteredProducts(response);

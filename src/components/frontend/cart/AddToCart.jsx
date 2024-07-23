@@ -9,46 +9,54 @@ import LoadingDots from "@/components/loading-dots";
 import ButtonComponent from "../ButtonComponent";
 
 export default function AddToCart({ variation }) {
-  const isProductInstock = variation?.stock_management && variation?.stock_status && variation?.quantity > 0;
-  if (!isProductInstock){
-    return <p className="error text-red-500">Product is not available at the moment</p>;
-  }
- 
   const Router = useRouter();
   const pathname = usePathname();
   const session = useSession();
   const loading = useCartStore((state) => state.loading);
   const cartItems = useCartStore((state) => state.cartItems);
   const addToCart = useCartStore((state) => state.addToCart);
-  const maxQ = variation?.stock_management && variation?.stock_status ? variation?.quantity : -1;
-
-  const [findCartItem, setFindCartItem] = useState(cartItems.find(
-    (ci) => ci.variation_id === variation.variation_id
-  ))
+  const maxQ =
+    variation?.stock_management && variation?.stock_status
+      ? variation?.quantity
+      : -1;
+  const isProductInstock =
+    variation?.stock_management &&
+    variation?.stock_status &&
+    variation?.quantity > 0;
+  const [findCartItem, setFindCartItem] = useState(
+    cartItems.find((ci) => ci.variation_id === variation.variation_id)
+  );
 
   useEffect(() => {
-    setFindCartItem(cartItems.find(
-      (ci) => ci.variation_id === variation.variation_id
-    ))
-  }, [cartItems, variation.variation_id])
+    setFindCartItem(
+      cartItems.find((ci) => ci.variation_id === variation.variation_id)
+    );
+  }, [cartItems, variation.variation_id]);
 
-  
+  if (!isProductInstock) {
+    return (
+      <p className="error text-red-500">
+        Product is not available at the moment
+      </p>
+    );
+  }
+
   const onAddtoCart = () => {
     if (session && session.status === "authenticated" && session.data.user.id) {
       addToCart({
         quantity: 1,
         variation_id: variation.variation_id,
-        price: variation?.selling_price ? variation?.selling_price : variation?.regular_price,
+        price: variation?.selling_price
+          ? variation?.selling_price
+          : variation?.regular_price,
       });
     } else {
       Router.push(`/login?redirect=${encodeURIComponent(pathname)}`, "replace");
     }
   };
 
-
-
   if (cartItems && cartItems.length > 0 && findCartItem) {
-      return <Quantity cartItem={findCartItem} maxQ={maxQ} />;
+    return <Quantity cartItem={findCartItem} maxQ={maxQ} />;
   }
   return (
     <ButtonComponent onClick={onAddtoCart}>
