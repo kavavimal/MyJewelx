@@ -17,6 +17,7 @@ const Wishlist = ({ wishlist }) => {
                         src="/assets/images/latest-product.png"
                         width={75}
                         height={75}
+                        alt=''
                     />
                 </>
             ),

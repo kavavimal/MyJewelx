@@ -8,7 +8,8 @@ import Image from "next/image";
 import StarRatings from "@/components/frontend/StarRatings";
 import Container from "@/components/frontend/Container";
 import moment from "moment";
-
+import RelatedProduct from "./compos/RelatedProduct";
+import Breadcrumbs from "@/components/Breadcrumbs";
 async function get_productBy_id(id) {
   if (id) {
     const product = await prisma.product.findFirst({
@@ -46,6 +47,47 @@ async function get_productBy_id(id) {
         },
         ProductAttributeValue: {
           include: { attribute: true, attributeValue: true },
+        },
+        relatedProducts: {
+          include: {
+            product: {
+              include: {
+                variations: {
+                  include: {
+                    image: true,
+                    productAttributeValues: {
+                      include: {
+                        productAttributeValue: {
+                          include: {
+                            attribute: true, // Include attribute details if needed
+                            attributeValue: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                user: true,
+
+                country: true,
+                likes: true,
+                genders: {
+                  include: {
+                    gender: true,
+                  },
+                },
+                reviews: {
+                  include: {
+                    images: true,
+                    fromUser: true,
+                  },
+                },
+                ProductAttributeValue: {
+                  include: { attribute: true, attributeValue: true },
+                },
+              },
+            },
+          },
         },
       },
     });
@@ -146,44 +188,71 @@ export default async function ProductDetails({ params: { id } }) {
       <Container>
         <div>Review</div>
         {user.id && <ReviewForm user_id={user.id} product_id={id} />}
-        {productData?.reviews &&
-          productData?.reviews?.map((review, index) => {
-            return (
-              <div key={index} className="border p-2 rounded-sm">
-                <div className="flex items-center justify-between">
-                  <strong>
-                    {review.fromUser?.firstName} {review.fromUser?.lastName}{" "}
-                  </strong>
-                  <div>on {moment(review.createdAt.toString()).fromNow()}</div>
-                </div>
-                <StarRatings starRatings={review.rating} />
-                {review.text}
-                <div className="flex items-center gap-1">
-                  {review?.images?.length > 0 &&
-                    review?.images.map((imageItem, index) => {
-                      return (
+        <div className="pb-[46px]">
+          {productData?.reviews &&
+            productData?.reviews?.map((review, index) => {
+              return (
+                <div key={index} className="border p-5 rounded-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-[13px]">
+                      <div className="bg-clip-border overflow-hidden rounded-full flex w-[37px]">
                         <Image
-                          key={index}
-                          src={imageItem?.path}
-                          width={100}
-                          height={100}
-                          alt=""
+                          height={50}
+                          width={50}
+                          src="/assets/images/avatar.jpg"
+                          size="sm"
+                          className="h-[37px] w-full"
                         />
-                      );
-                    })}
-                </div>
-                {review?.replay && review.replay != "" ? (
-                  <div className="border-t mt-3 pt-2 pl-5">
-                    <div className="p2 bg-blue-gray-50">
-                      Replay from seller: {review.replay}
+                      </div>
+                      <div className="flex flex-col gap-[.5px]">
+                        <h4 className="text-lg font-medium text-secondary-100">
+                          {review.fromUser?.firstName}{" "}
+                          {review.fromUser?.lastName}
+                        </h4>
+                        <StarRatings starRatings={review.rating} />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-secondary-100">
+                      <div>
+                        on {moment(review.createdAt.toString()).fromNow()}
+                      </div>
                     </div>
                   </div>
-                ) : (
-                  ""
-                )}
-              </div>
-            );
-          })}
+                  <p className="text-secondary-100 leading-6 text-sm mt-[6px]">
+                    {review.text}
+                  </p>
+                  <div className="flex items-center gap-[15px] mt-[15px]">
+                    {review?.images?.length > 0 &&
+                      review?.images.map((imageItem, index) => {
+                        return (
+                          <Image
+                            key={index}
+                            src={imageItem?.path}
+                            width={100}
+                            height={100}
+                            alt=""
+                            className="w-[85px] h-[81px] border border-blueGray-400"
+                          />
+                        );
+                      })}
+                  </div>
+                  {review?.replay && review.replay != "" ? (
+                    <div className="border-t mt-3 pt-2 pl-5">
+                      <div className="p2 bg-blue-gray-50">
+                        Replay from seller: {review.replay}
+                      </div>
+                    </div>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              );
+            })}
+        </div>
+      </Container>
+
+      <Container>
+        <RelatedProduct product={productData} />
       </Container>
     </>
   );

@@ -43,6 +43,7 @@ const ShopComponent = ({ products, categories, promolist }) => {
 
   useEffect(() => {
     updateProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFilters]);
 
   useEffect(() => {
@@ -56,7 +57,7 @@ const ShopComponent = ({ products, categories, promolist }) => {
     if (category) {
       setSelectedFilters((prev) => ({ ...prev, category: category }));
     }
-  }, []);
+  }, [query, category]);
   return (
     <section className="container pb-20 pt-5">
       <div className="mb-5">
@@ -70,7 +71,7 @@ const ShopComponent = ({ products, categories, promolist }) => {
                 <div className="relative h-full w-full" key={index}>
                   <img
                     src={promo.ads_img_url}
-                    alt="image 2"
+                    alt="promo 2"
                     className="h-full w-full object-cover"
                   />
                   <div className="absolute inset-0 flex flex-col justify-center items-center gap-4 bg-black/25">
@@ -125,11 +126,11 @@ const ShopComponent = ({ products, categories, promolist }) => {
       <div className="flex items-start gap-[11px]">
         <div
           className="w-[224px]"
-          style={{
-            position: "sticky",
-            top: 120,
-            left: 0,
-          }}
+          // style={{
+          //   position: "sticky",
+          //   top: 120,
+          //   left: 0,
+          // }}
         >
           <FilterProduct
             categories={categories}

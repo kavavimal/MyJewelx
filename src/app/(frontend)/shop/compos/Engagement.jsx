@@ -20,6 +20,7 @@ const Engagement = ({ product_id, averateRating, variation }) => {
   );
   useEffect(() => {
     setIsInWishlist(findWishlist(product_id));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product_id, wishlistItems]);
 
   const updateWishlistStatus = async () => {

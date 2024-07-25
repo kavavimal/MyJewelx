@@ -185,6 +185,7 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
                                             height={100}
                                             width={100}
                                             className="w-20 h-20"
+                                            alt=""
                                           />
                                         </Link>
                                       );
@@ -222,13 +223,13 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
               </div>
             </div>
             <div className="w-[800px]">
-              <Carousel className="rounded">
+              <Carousel className="rounded-sm">
                 {homeSlide.map((slide, index) => {
                   return (
                     <div className="relative" key={index}>
                       <img
                         src={slide.image_url}
-                        alt="image 2"
+                        alt="slider hero 2"
                         className="h-full w-full object-cover"
                       />
                       <div className="absolute inset-0 grid items-center">
@@ -269,12 +270,13 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
               <div className="flex flex-col gap-5">
                 {promolist.slice(0, 2).map((promo, index) => {
                   return (
-                    <div className="relative" key={index}>
+                    <div className="relative rounded-sm" key={index}>
                       <Image
                         src={promo.ads_img_url}
                         width={100}
                         height={100}
                         className="w-full h-[185px] object-cover"
+                        alt="slider Promo"
                       />
                       <div className="absolute top-6 left-6">
                         <p className="text-base font-playfairdisplay font-semibold w-4/5 ">
@@ -282,7 +284,7 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
                         </p>
                         <Link
                           href={promo.ads_link}
-                          className="text-xs py-1 px-2 inline-block border border-black rounded-sm mt-2.5"
+                          className="text-xs py-1 px-2 inline-block border border-black rounded font-bold mt-2.5"
                         >
                           Shop now
                         </Link>

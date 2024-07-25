@@ -10,6 +10,8 @@ import "swiper/css/pagination";
 import "swiper/css/grid";
 import ReactSelect from "react-select";
 import { get } from "@/utils/api";
+import { theme } from "@/utils/constants";
+
 const PopularProducts = ({ products }) => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState([]);
@@ -41,7 +43,7 @@ const PopularProducts = ({ products }) => {
         })
       );
     }
-  }, [selectedCategory]);
+  }, [products, selectedCategory]);
 
   useEffect(() => {
     getCategories();
@@ -76,21 +78,24 @@ const PopularProducts = ({ products }) => {
               <ReactSelect
                 isMulti
                 options={options}
-                style={{
-                  menu: (provided) => ({
-                    control: (provided, state) => ({
-                      ...provided,
-                      width: 300,
-                    }),
+                styles={{
+                  control: (provided, state) => ({
                     ...provided,
-                    padding: ".7rem",
-                    zIndex: 9999,
+                    borderWidth: "1px",
+                    backgroundColor: "#fff",
+                    color: "#222",
+                    borderRadius: 4,
                   }),
-                  menuPortal: (provided) => ({
+
+                  multiValue: (provided, state) => ({
                     ...provided,
-                    zIndex: 9999, // Ensure this is high enough to be above the Swiper slider
+                    backgroundColor: "transparent",
+                    borderWidth: "1px",
+                    borderRadius: "4px",
+                    borderColor: "#F0AE11",
                   }),
                 }}
+                theme={theme}
                 value={options.filter((option) =>
                   selectedCategory.includes(option.value)
                 )}
@@ -104,18 +109,24 @@ const PopularProducts = ({ products }) => {
             </div>
           </div>
           <div>
-            <Swiper
-              slidesPerView={3}
-              spaceBetween={20}
-              modules={[Grid, Pagination]}
-              grid={{ rows: 2, fill: "row" }}
-            >
-              {filterProducts.map((product) => (
-                <SwiperSlide key={product.product_id}>
-                  <ProductCard product={product} />
-                </SwiperSlide>
-              ))}
-            </Swiper>
+            {filterProducts.length === 0 ? (
+              <div className="text-center">
+                <p>No products found</p>
+              </div>
+            ) : (
+              <Swiper
+                slidesPerView={3}
+                spaceBetween={20}
+                modules={[Grid, Pagination]}
+                grid={{ rows: 2, fill: "row" }}
+              >
+                {filterProducts.map((product) => (
+                  <SwiperSlide key={product.product_id}>
+                    <ProductCard product={product} />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            )}
           </div>
         </div>
       </div>

@@ -6,10 +6,12 @@ import ProductImages from "./ProductImages";
 import Paragraph from "@/components/Paragraph";
 import Share from "./Share";
 import ProductMeta from "./ProductMeta";
-import { printPrice } from "@/utils/helper";
+import { printPrice, truncate } from "@/utils/helper";
 import ProductAttributeSelections from "./ProductAttributeSelections";
 import AddToWishlist from "@/components/frontend/cart/AddToWishlist";
 import ProductLikes from "@/components/frontend/ProductLikes";
+import Image from "next/image";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const Detail = ({
   product,
@@ -18,6 +20,7 @@ const Detail = ({
   avgRating,
 }) => {
   const [variation, setVariation] = useState(product?.variations[0]);
+  const [isReadMore, setIsReadMore] = useState(false);
   const sizes = [];
   product.ProductAttributeValue.forEach((pav) => {
     if (pav.attribute.name === "Size") {
@@ -39,21 +42,56 @@ const Detail = ({
 
   return (
     <>
-      <section className="text-gray-600 body-font overflow-hidden">
-        <div className="container py-24 mx-auto max-w-screen-xl">
-          <div className="mx-auto flex flex-wrap justify-between">
+      <section className="body-font overflow-hidden">
+        <div className="container mx-auto">
+          <div className="border-b border-primary-200 py-[15px] mb-[30px]">
+            <Breadcrumbs
+              items={[
+                { link: "/product", label: "Product" },
+                {
+                  link: `/product/${product?.product_id}`,
+                  label: product?.product_name,
+                  current: true,
+                },
+              ]}
+            />
+          </div>
+          <div className="mx-auto flex justify-center items-start gap-[50px]">
             <ProductImages variation={variation} />
-            <div className="lg:w-1/2 w-full pl-5">
-              <div className="p-5 mt-6 lg:mt-0 border">
-                {/* <h2 className="text-sm title-font text-gray-500 tracking-widest">BRAND NAME</h2> */}
-                <h1 className="text-gray-900 text-3xl title-font font-medium mb-1">
+            <div className="lg:w-1/2 w-full">
+              <div className="p-5 px-4 pt-7 pb-[15px] lg:mt-0 border border-blueGray-300 rounded-sm">
+                <div className="flex justify-between items-center pb-2.5 border-b border-b-blueGray-300">
+                  <div className="flex items-center gap-2.5">
+                    <div>
+                      <Image
+                        src="/assets/images/Mark.svg"
+                        width={30}
+                        height={30}
+                        alt="Mark"
+                      />
+                    </div>
+                    <h4 className="text-black text-xl">
+                      Malabar Golds and Diamonds
+                    </h4>
+                  </div>
+                  <div className="w-[55px] h-[55px] bg-clip-border overflow-hidden rounded-sm">
+                    <Image
+                      src="/assets/images/brand.png"
+                      height={100}
+                      width={100}
+                      alt="brand"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+                <h1 className="text-gray-900 text-3xl title-font font-medium mt-2.5 leading-[40px]">
                   {product.product_name}
                 </h1>
                 <div className="flex items-center">
                   <StarRatings starRatings={avgRating ? avgRating : 0} />
-                  <Paragraph color="gray-600" classes="ml-3">
+                  <p className="ml-3 leading-5 text-sm">
                     {product?.reviews?.length} Customer Reviews
-                  </Paragraph>
+                  </p>
 
                   <span className="flex ml-3 pl-3 py-2 border-l-2 border-gray-200 space-x-2s">
                     <Paragraph classes="flex" color="gray-600">
@@ -69,26 +107,43 @@ const Detail = ({
                     </Paragraph>
                   </span>
                 </div>
-                <ProductMeta product={product} />
+                <div className="mb-3.5">
+                  <ProductMeta product={product} />
+                </div>
 
-                <div className="w-1/2 mb-1 flex">
-                  <strong className="md:w-1/2">
+                <div className="w-1/2 mb-1 flex ">
+                  <strong className="md:w-1/2 text-lg font-medium">
                     {printPrice(
                       variation?.selling_price
                         ? variation?.selling_price
                         : variation?.regular_price
                     )}
                   </strong>
-                  <Paragraph classes="md:w-1/2 text-right  border-l">
+                  <p className="md:w-1/2 ps-5 border-l text-base text-secondary-100">
                     {variation?.net_weight} gram
-                  </Paragraph>
+                  </p>
                 </div>
 
-                <div
-                  className="leading-relaxed border-b-2 border-gray-100 pb-3"
-                  dangerouslySetInnerHTML={{ __html: variation?.description }}
-                ></div>
-                <div className="leading-relaxed border-b-2 border-gray-100 pb-3">
+                <div className="product__description">
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: isReadMore
+                        ? variation?.description
+                        : truncate(variation?.description, 300),
+                    }}
+                  />
+                  {variation?.description?.length > 300 && (
+                    <div>
+                      <button
+                        className="font-medium text-base"
+                        onClick={() => setIsReadMore(!isReadMore)}
+                      >
+                        {isReadMore ? "Less..." : "Read More..."}
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="border-b border-b-blueGray-300 py-3">
                   <ProductAttributeSelections
                     product={product}
                     setVariation={setVariation}
@@ -98,9 +153,8 @@ const Detail = ({
                   />
                 </div>
 
-                <div className="leading-relaxed border-b-2 border-gray-100 py-3">
-                  <p className="leading-relaxed pb-3">
-                    {console.log(variation?.making_charges)}
+                <div className="pb-3 border-b border-b-blueGray-300 pt-2.5">
+                  {/* <p className="leading-relaxed pb-3">
                     Making Charges :{" "}
                     {printPrice(
                       variation.making_charges
@@ -125,16 +179,115 @@ const Detail = ({
                         ? variation?.selling_price
                         : variation?.regular_price
                     )}
-                  </p>
+                  </p> */}
+                  <table className="w-1/2">
+                    <thead>
+                      <tr>
+                        <th className="text-left font-medium text-base text-black py-1">
+                          Cost Type
+                        </th>
+                        <th className="text-right font-medium text-base text-black py-1">
+                          Amount AED
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="text-left text-secondary-100 font-light text-base py-1">
+                          Metal Charges <span>:</span>
+                        </td>
+                        <td className="text-right text-secondary-100 font-light text-base py-1">
+                          5,000.00
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td className="text-left text-secondary-100 font-light text-base py-1">
+                          Making Charges <span>:</span>
+                        </td>
+                        <td className="text-right text-secondary-100 font-light text-base py-1">
+                          {printPrice(
+                            variation.making_charges
+                              ? variation.making_charges?.value
+                              : 0
+                          )}
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td className="text-left text-secondary-100 font-light text-base py-1">
+                          Other Charges <span>:</span>
+                        </td>
+                        <td className="text-right text-secondary-100 font-light text-base py-1">
+                          {printPrice(gemstone_total)}
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td className="text-left text-secondary-100 font-light text-base py-1">
+                          Add Charges <span>:</span>
+                        </td>
+                        <td className="text-right text-secondary-100 font-light text-base py-1">
+                          {printPrice(other_charges_total)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="text-left text-secondary-100 font-light text-base py-1">
+                          Discount <span>:</span>
+                        </td>
+                        <td className="text-right text-secondary-100 font-light text-base py-1">
+                          -60.00
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td className="text-left text-secondary-100 font-light text-base py-1">
+                          Shipping Charges <span>:</span>
+                        </td>
+                        <td className="text-right text-secondary-100 font-light text-base py-1">
+                          - 50.90
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="text-left text-secondary-100 font-light text-base py-1">
+                          Sub Total <span>:</span>
+                        </td>
+                        <td className="text-right text-secondary-100 font-light text-base py-1">
+                          5,470.00
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="text-left text-secondary-100 font-light text-base py-1">
+                          VAT 5% <span>:</span>
+                        </td>
+                        <td className="text-right text-secondary-100 font-light text-base py-1">
+                          {vat ? vat?.value : 0}
+                        </td>
+                      </tr>
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td className="text-left text-black font-medium text-base py-1">
+                          Total <span>:</span>
+                        </td>
+                        <td className="text-right text-black font-medium text-base py-1">
+                          {printPrice(
+                            variation?.selling_price
+                              ? variation?.selling_price
+                              : variation?.regular_price
+                          )}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
                 </div>
-                <Paragraph>
+                <p className="text-base font-light text-secondary-100 mb-3 mt-2.5">
                   Seller :{" "}
                   {product.user.firstName + " " + product.user.lastName}
-                </Paragraph>
+                </p>
 
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between items-center text-xs gap-[15px]">
                   <AddToCart variation={variation} />
-
                   <AddToWishlist product_id={product.product_id} />
                 </div>
                 <Share />

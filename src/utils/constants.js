@@ -29,12 +29,12 @@ export const ATTRIBUTE_ORDER = [
 export const INDIA = 1;
 
 export const variation_discount_types = {
-  1 : "Per Gram On Net Weight",
-  2  : "Per(%) On Metal Rate On Karat",
-  3 : "Per Piece / Flat",
+  1: "Per Gram On Net Weight",
+  2: "Per(%) On Metal Rate On Karat",
+  3: "Per Piece / Flat",
 };
-export const CURRENCY_SYMBOL = 'AED';
-export const CURRENCY_SYMBOL_PAYPAL = 'USD';
+export const CURRENCY_SYMBOL = "AED";
+export const CURRENCY_SYMBOL_PAYPAL = "USD";
 
 export const SUPPORTED_FORMATS_IMAGES = [
   "image/jpg",
@@ -43,3 +43,14 @@ export const SUPPORTED_FORMATS_IMAGES = [
   "image/webp",
 ];
 export const FILE_SIZE = 500 * 1024 * 1024; // 500M
+
+export const theme = (theme) => ({
+  ...theme,
+  colors: {
+    ...theme.colors,
+    primary: "#F0AE11",
+    primary25: "#F0AE1114",
+    primary50: "#F0AE1122",
+    primary75: "#F0AE1129",
+  },
+});

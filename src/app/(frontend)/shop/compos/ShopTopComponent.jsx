@@ -13,7 +13,7 @@ export default function ShopTopComponent() {
     setSelectedFilters({ ...selectedFilters, price: { min: min, max: max } });
   };
   return (
-    <div className="flex justify-end items-center">
+    <div className="flex justify-end items-center mb-5">
       <div className="w-full">
         <PriceFilter filterByPrice={filterByPrice} />
       </div>

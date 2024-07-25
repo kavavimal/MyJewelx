@@ -1,17 +1,12 @@
 "use client";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { AcountType } from "@prisma/client";
-import LoadingDots from "@/components/loading-dots";
-import Image from "next/image";
-import { Alert, Button, Input, Option, Select } from "@material-tailwind/react";
-import { Formik, useFormik } from "formik";
-import { post, update } from "@/utils/api";
 import { userValidationSchema } from "@/schemas/ValidationSchema";
+import { update } from "@/utils/api";
+import { Button, Input } from "@material-tailwind/react";
+import { AcountType } from "@prisma/client";
+import { Formik, useFormik } from "formik";
+import { useRouter } from "next/navigation";
 import { enqueueSnackbar } from "notistack";
-import { useSession } from "next-auth/react";
-import SessionLoader from "@/components/SessionLoader";
+import { useEffect, useState } from "react";
 
 const Profile = ({ user }) => {
   const userAcountType = Object.keys(AcountType)?.map((type) => {

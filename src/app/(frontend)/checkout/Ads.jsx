@@ -14,6 +14,7 @@ const Ads = ({ ads }) => {
                 <div key={index} className="relative">
                   <Image
                     src={adslist.ads_img_url}
+                    alt={adslist.ads_desc}
                     layout="responsive"
                     height={100}
                     width={100}

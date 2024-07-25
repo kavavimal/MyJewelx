@@ -41,7 +41,7 @@ export default function CheckoutSummary({ cart, user, showCoupon = false }) {
     return flag;
   };
 
-  const handlePlaceOrder = async () => {
+  const handlePlaceOrder = async (responseData = null) => {
     if (!user) {
       // Redirect to login if not authenticated
       return;
@@ -54,6 +54,7 @@ export default function CheckoutSummary({ cart, user, showCoupon = false }) {
       shippingAddress: JSON.stringify(shippingAddress),
       // billingAddress: JSON.stringify(billingAddress),
       paymentMethod,
+      paymentResponse: responseData
     });
 
     if (response.data && response.data.order && response.data.order.id) {

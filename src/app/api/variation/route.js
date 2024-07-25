@@ -13,7 +13,7 @@ const productVariationSchema = z.object({
   isDiscount: z.boolean(),
   variation_discount: z.number().optional().nullable(),
   variation_discount_type: z.number().optional().nullable(),
-  description: z.string().min(1, "description required").max(200),
+  description: z.string().min(1, "description required"),
   sku: z.string().min(1, "sku required").max(20),
   stock_management: z.boolean(),
   stock_status: z.boolean(),

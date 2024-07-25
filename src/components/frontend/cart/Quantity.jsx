@@ -10,12 +10,14 @@ const Quantity = ({ cartItem }) => {
   const updateQanity = useCartStore((state) => state.updateCartQantity);
   const removeFromCart = useCartStore((state) => state.removeFromCart);
   const [localLoading, setLocalLoading] = useState(false);
-  const [maxQuantity, setMaxQuantity] = useState(cartItem.productVariation?.quantity || -1);
+  const [maxQuantity, setMaxQuantity] = useState(
+    cartItem.productVariation?.quantity || -1
+  );
   const [q, setQ] = useState(cartItem.quantity);
 
   useEffect(() => {
     setMaxQuantity(cartItem?.productVariation?.quantity || -1);
-  },[cartItem]);
+  }, [cartItem]);
 
   useEffect(() => {
     let cartI = findItem(cartItem.cartItem_id);
@@ -23,9 +25,8 @@ const Quantity = ({ cartItem }) => {
       setQ(cartI?.quantity);
     }
   }, [cartItems, cartItem]);
-  
+
   const quantityChange = async (type) => {
-    
     let cartI = findItem(cartItem.cartItem_id);
     let newQ = cartI?.quantity;
     if (type === "increment") {
@@ -40,7 +41,7 @@ const Quantity = ({ cartItem }) => {
       // setQuantity((prevQuantity) => prevQuantity - 1);
     }
     if (type === "increment" && maxQuantity !== -1 && newQ > maxQuantity) {
-      showToast({message: "Max product Quantity reached", variant: "error"});
+      showToast({ message: "Max product Quantity reached", variant: "error" });
     } else {
       setLocalLoading(true);
       await updateQanity(cartItem.cartItem_id, newQ);
@@ -57,7 +58,7 @@ const Quantity = ({ cartItem }) => {
           disabled={q === 1}
           id="decrement-button"
           data-input-counter-decrement="counter-input"
-          className="inline-flex h-7 w-7 items-center justify-center  border-r"
+          className="inline-flex h-9 w-9 items-center justify-center  border-r bg-blueGray-400 disabled:opacity-50"
           onClick={() => quantityChange("decrement")}
         >
           <svg
@@ -80,7 +81,7 @@ const Quantity = ({ cartItem }) => {
           type="text"
           id="counter-input"
           data-input-counter
-          className="w-10 border-0 bg-transparent text-center font-medium focus:outline-0"
+          className="w-20 border-0 bg-transparent text-center font-medium focus:outline-0"
           placeholder=""
           value={q < 9 ? "0" + q : q}
           required
@@ -89,7 +90,7 @@ const Quantity = ({ cartItem }) => {
           type="button"
           id="increment-button"
           data-input-counter-increment="counter-input"
-          className="inline-flex h-7 w-7 items-center justify-center border-l"
+          className="inline-flex h-9 w-9 items-center justify-center border-l bg-blueGray-400"
           onClick={() => quantityChange("increment")}
         >
           <svg

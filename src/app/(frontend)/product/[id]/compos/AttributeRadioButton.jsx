@@ -10,14 +10,15 @@ export default function AttributeRadioButton({
 }) {
   const style = {};
   if (bgColor) {
-    style['backgroundColor'] = bgColor;
+    style["backgroundColor"] = bgColor;
   }
+
   return (
     <label
       className={`flex items-center justify-center w-8 h-8 py-1 text-black rounded-full cursor-pointer font-normal text-[12px] leading-[14px] ${
         selectedOption === value
-          ? "ring-1  ring-offset-[3px] ring-[#F0AE11] bg-[#F0AE11]"
-          : "border border-gray-500"
+          ? `ring-1  ring-offset-[3px]  ring-primary-200  bg-primary-200`
+          : `border border-blueGray-400`
       }`}
       style={style}
     >
@@ -29,7 +30,7 @@ export default function AttributeRadioButton({
         onChange={handleRadioChange}
         className="hidden"
       />
-      {bgColor ? '' : label}
+      {bgColor ? "" : label}
     </label>
   );
 }

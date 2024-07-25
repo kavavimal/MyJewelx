@@ -184,10 +184,7 @@ const Variation = ({
 
   const variatonValidationSchema = Yup.object().shape({
     // regular_price: Yup.number().required("Regular price is required"),
-    description: Yup.string()
-      .required("Description is required")
-      .min(1)
-      .max(200),
+    description: Yup.string().required("Description is required").min(1),
     length: Yup.number().required("Length is required"),
     width: Yup.number().required("Width is required"),
     height: Yup.number().required("Height is required"),

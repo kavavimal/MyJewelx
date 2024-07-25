@@ -15,14 +15,14 @@ import {
   truncate,
 } from "@/utils/helper";
 import Engagement from "../shop/compos/Engagement";
-import { Card, CardBody, CardHeader } from "@material-tailwind/react";
+import { Button, Card, CardBody, CardHeader } from "@material-tailwind/react";
 const NewProdFeatureProd = ({ products }) => {
   return (
     <>
       <section className="py-10">
-        <div className="max-w-screen-xl mx-auto">
+        <div className="container">
           <div className="flex items-start justify-center gap-5">
-            <div className="new-products w-[450px]">
+            <div className="new-products w-[550px]">
               <h3 className="text-2xl font-playfairdisplay font-semibold tracking-wide mb-5">
                 New Products
               </h3>
@@ -33,14 +33,13 @@ const NewProdFeatureProd = ({ products }) => {
                     prevEl: ".prev",
                   }}
                   loop
-                  spaceBetween={0}
                   modules={[Navigation]}
                 >
                   {products.slice(0, 5).map((product, index) => {
                     const variation = product?.variations[0];
                     return (
                       <SwiperSlide key={index}>
-                        <Card className="overflow-hidden font-normal text-left">
+                        <Card className="realative overflow-hidden font-normal text-left h-[758px]">
                           <CardHeader
                             floated={false}
                             shadow={false}
@@ -57,7 +56,7 @@ const NewProdFeatureProd = ({ products }) => {
                                   alt="image for design"
                                   width={450}
                                   height={437}
-                                  className="w-full hover:scale-105 transition-all duration-300"
+                                  className="w-full h-auto hover:scale-105 transition-all duration-300"
                                 />
                               </Link>
                             </div>
@@ -96,6 +95,13 @@ const NewProdFeatureProd = ({ products }) => {
                                       product?.user?.lastName}
                                 </p>
                               )}
+
+                              <div
+                                className="mt-.5"
+                                dangerouslySetInnerHTML={{
+                                  __html: truncate(variation?.description, 480),
+                                }}
+                              />
                             </div>
                           </CardBody>
                         </Card>
@@ -103,7 +109,7 @@ const NewProdFeatureProd = ({ products }) => {
                     );
                   })}
                 </Swiper>
-                <button className="prev absolute -translate-y-1/2 top-1/2 cursor-pointer z-[15] flex justify-center items-center left-[30px] rounded-full border h-[35px] w-[35px] border-gray-300">
+                <button className="prev absolute -translate-y-1/3 top-1/3 cursor-pointer z-[15] flex justify-center items-center left-[30px] rounded-full border h-[35px] w-[35px] bg-[#F9F2E1]">
                   <svg
                     width="16"
                     height="16"
@@ -117,7 +123,7 @@ const NewProdFeatureProd = ({ products }) => {
                     />
                   </svg>
                 </button>
-                <button className="next absolute -translate-y-1/2 top-1/2 cursor-pointer z-[15] flex justify-center items-center right-[30px] rounded-full border h-[35px] w-[35px] border-gray-300">
+                <button className="next absolute -translate-y-1/3 top-1/3 cursor-pointer z-[15] flex justify-center items-center right-[30px] rounded-full border h-[35px] w-[35px] bg-[#F9F2E1]">
                   <svg
                     width="16"
                     height="16"
@@ -133,13 +139,20 @@ const NewProdFeatureProd = ({ products }) => {
                 </button>
               </div>
             </div>
-            <div className="feature-products w-[calc(100%-470px)]">
-              <h3 className="text-2xl font-playfairdisplay font-semibold tracking-wide mb-5">
-                Feature Products
-              </h3>
+            <div className="feature-products w-[calc(100%-570px)]">
+              <div className="flex justify-between items-center mb-2.5">
+                <h3 className="text-2xl font-playfairdisplay font-semibold tracking-wide">
+                  Feature Products
+                </h3>
+                <div>
+                  <Link href="/shop">
+                    <Button variant="outlined">View All</Button>
+                  </Link>
+                </div>
+              </div>
               <div>
                 <Swiper
-                  slidesPerView={3}
+                  slidesPerView={2}
                   spaceBetween={20}
                   modules={[Grid, Pagination]}
                   grid={{ rows: 2, fill: "row" }}
@@ -148,14 +161,14 @@ const NewProdFeatureProd = ({ products }) => {
                     const variation = product?.variations[0];
                     return (
                       <SwiperSlide key={product.product_id}>
-                        <Card className="overflow-hidden w-64 font-normal text-left">
+                        <Card className="overflow-hidden font-normal text-left">
                           <CardHeader
                             floated={false}
                             shadow={false}
                             color="transparent"
                             className="m-0 rounded-none"
                           >
-                            <div className="w-auto overflow-hidden h-[192px]">
+                            <div className="w-auto overflow-hidden">
                               <Link
                                 href={`/product/${product?.product_id}`}
                                 className="font-normal text-left w-full"
@@ -170,8 +183,8 @@ const NewProdFeatureProd = ({ products }) => {
                                   }
                                   alt="image for design"
                                   width={256}
-                                  height={192}
-                                  className="w-full h-full hover:scale-105 transition-all duration-300"
+                                  height={268}
+                                  className="w-full h-[268px] hover:scale-105 transition-all duration-300"
                                 />
                               </Link>
                             </div>

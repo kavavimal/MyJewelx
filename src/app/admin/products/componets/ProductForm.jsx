@@ -23,7 +23,7 @@ import {
   additionalValidationSchema,
   productValidationSchema,
 } from "@/schemas/ValidationSchema";
-import { attributeIDs } from "@/utils/constants";
+import { attributeIDs, theme } from "@/utils/constants";
 import ProductAttributeItem from "./ProductAttributeItem";
 import { Router } from "next/router";
 import { CharsType } from "@prisma/client";
@@ -47,7 +47,7 @@ const ProductForm = ({
   styles,
   themes,
   trends,
-  allproducts
+  allproducts,
 }) => {
   const router = useRouter();
   const [currentProduct, setCurrentProduct] = useState(product ?? {});
@@ -258,39 +258,21 @@ const ProductForm = ({
   };
 
   const style = {
-    control: (provided, state) => ({
+    control: (provided) => ({
       ...provided,
       borderWidth: "1px",
-      borderColor: "#9ca3af",
       backgroundColor: "#fff",
-      padding: ".2rem",
       color: "#222",
-      boxShadow: state.isFocused
-        ? "0 0 0 calc(1px + #fff) rgb(255 255 255)"
-        : "",
-      ":hover": {
-        borderColor: "#9ca3af",
-      },
+      padding: 2,
+      borderRadius: 4,
     }),
-    option: (provided, state) => ({
+
+    multiValue: (provided) => ({
       ...provided,
-      backgroundColor: state.isSelected ? "#000" : "white",
-      color: state.isSelected ? "white" : "#1E293B",
-      borderRadius: ".5rem",
-      ":hover": {
-        backgroundColor: state.isSelected
-          ? "#222"
-          : "rgba(145, 158, 171, 0.16)",
-      },
-    }),
-    menu: (provided) => ({
-      ...provided,
-      padding: ".7rem",
-      zIndex: 99,
-    }),
-    singleValue: (provided, state) => ({
-      ...provided,
-      color: state.isSelected ? "#fff" : "",
+      backgroundColor: "transparent",
+      borderWidth: "1px",
+      borderRadius: "4px",
+      borderColor: "#F0AE11",
     }),
   };
 
@@ -411,7 +393,9 @@ const ProductForm = ({
       delivery_includes: product ? product?.delivery_includes ?? "" : "",
       return_policy: product ? product?.return_policy ?? "" : "",
       purchase_note: product ? product?.purchase_note ?? "" : "",
-      relatedProducts: product ? product?.relatedProducts?.map((item) => item?.relatedProductId) : []
+      relatedProducts: product
+        ? product?.relatedProducts?.map((item) => item?.relatedProductId)
+        : [],
     },
 
     enableReinitialize: true,
@@ -552,7 +536,7 @@ const ProductForm = ({
                 states: values.states,
                 genders: values.genders.join(","),
                 offline_reason: values.offline_reason,
-                relatedProducts:values.relatedProducts.join(","),
+                relatedProducts: values.relatedProducts.join(","),
                 characteristics: [
                   productBrand,
                   productStyle,
@@ -945,6 +929,7 @@ const ProductForm = ({
                   <ReactSelect
                     label="Category"
                     options={categoryOptions}
+                    theme={theme}
                     styles={style}
                     placeholder="Category"
                     value={
@@ -965,6 +950,7 @@ const ProductForm = ({
                 <div>
                   <ReactSelect
                     options={subcategoryOptions}
+                    theme={theme}
                     styles={style}
                     placeholder="Subcategory"
                     name="subCategory"
@@ -1018,13 +1004,14 @@ const ProductForm = ({
                       // setSelectedProductAttributes(options);
                       setAttributes(options.map((option) => option.value));
                     }}
+                    theme={theme}
+                    styles={style}
                     options={productAttributesOptions}
                     value={
                       productAttributesOptions.filter((option) =>
                         formik.values.attributes.includes(option.value)
                       ) ?? []
                     }
-                    styles={style}
                     name="attributes"
                     placeholder="Attributes"
                   />
@@ -1262,6 +1249,7 @@ const ProductForm = ({
                     <Typography>Tags</Typography>
                     <ReactSelect
                       isMulti
+                      theme={theme}
                       onChange={(options) =>
                         formik.setFieldValue(
                           "tags",
@@ -1286,6 +1274,7 @@ const ProductForm = ({
                       isMulti
                       options={featuredCollectionOptions}
                       styles={style}
+                      theme={theme}
                       value={
                         featuredCollectionOptions.filter((option) =>
                           formik.values.collections.includes(option.value)
@@ -1313,6 +1302,7 @@ const ProductForm = ({
                     <ReactSelect
                       isMulti
                       options={patternOptions}
+                      theme={theme}
                       value={
                         patternOptions.filter((option) =>
                           formik.values.patterns.includes(option.value)
@@ -1339,6 +1329,7 @@ const ProductForm = ({
                       isMulti
                       placeholder="Gender"
                       name="genders"
+                      theme={theme}
                       options={gendersOptions}
                       value={
                         gendersOptions.filter((option) =>
@@ -1359,6 +1350,7 @@ const ProductForm = ({
                     <Typography>Brand</Typography>
                     <ReactSelect
                       placeholder="Brand"
+                      theme={theme}
                       name="brand"
                       options={brandsOptions}
                       styles={style}
@@ -1376,6 +1368,7 @@ const ProductForm = ({
                       placeholder="Style"
                       name="style"
                       options={stylesOptions}
+                      theme={theme}
                       styles={style}
                       value={stylesOptions.filter((option) =>
                         productStyle.includes(option.value)
@@ -1391,6 +1384,7 @@ const ProductForm = ({
                     <ReactSelect
                       isMulti
                       placeholder="Theme"
+                      theme={theme}
                       name="theme"
                       options={themeOptions}
                       styles={style}
@@ -1409,6 +1403,7 @@ const ProductForm = ({
                       isMulti
                       placeholder="Trends"
                       name="trends"
+                      theme={theme}
                       options={trendsOptions}
                       styles={style}
                       value={trendsOptions.filter((option) =>
@@ -1473,12 +1468,22 @@ const ProductForm = ({
                     <ReactSelect
                       isMulti
                       placeholder="Related Products"
+                      theme={theme}
                       name="relatedProducts"
-                      options={allproducts.filter((p) => p.product_id !== product.product_id)?.map((p) => {return {label: p.product_name, value: p.product_id}})}
+                      options={allproducts
+                        .filter((p) => p.product_id !== product.product_id)
+                        ?.map((p) => {
+                          return { label: p.product_name, value: p.product_id };
+                        })}
                       styles={style}
-                      value={allproducts.filter((p) => p.product_id !== product.product_id)?.map((p) => {return {label: p.product_name, value: p.product_id}})?.filter((option) =>
-                        formik.values.relatedProducts.includes(option.value)
-                      )}
+                      value={allproducts
+                        .filter((p) => p.product_id !== product.product_id)
+                        ?.map((p) => {
+                          return { label: p.product_name, value: p.product_id };
+                        })
+                        ?.filter((option) =>
+                          formik.values.relatedProducts.includes(option.value)
+                        )}
                       onChange={(options) =>
                         formik.setFieldValue(
                           "relatedProducts",

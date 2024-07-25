@@ -16,7 +16,6 @@ import { showToast } from '@/utils/helper';
 import React, { useEffect, useState } from 'react';
 import * as Yup from 'yup';
 import OTP from './OTP';
-import { isCompanyEmail } from 'company-email-validator';
 import { useCountries } from 'use-react-countries';
 import FileUploadIcon from '@/components/FileUploadIcon';
 import { post } from '@/utils/api';
@@ -156,7 +155,7 @@ const RegistrationForm = ({ storeURLs, emails }) => {
         if (!open) {
             setData(countries);
         }
-    }, [open]);
+    }, [countries, open]);
 
     return (
         <div className="py-20 bg-[#FFFCF5] w-full overflow-auto">

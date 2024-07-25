@@ -10,7 +10,7 @@ const shippingAddressValidationSchema = Yup.object({
   firstName: Yup.string().required("First Name is required"),
   lastName: Yup.string().required("Last Name is required"),
   email: Yup.string().email().required("Email is required"),
-  address: Yup.string().required("Address is required"),
+  street: Yup.string().required("Address is required"),
   phone: Yup.string().required("Phone is required"),
   country: Yup.string().required("Country is required"),
   city: Yup.string().required("City is required"),
@@ -37,8 +37,8 @@ export default function ShippingAddress({
           >
             Edit
           </button>
-          <strong>{shippingAddress?.name}</strong>
-          <p>{shippingAddress?.address}</p>
+          <strong>{shippingAddress?.firstName} {shippingAddress?.lastName}</strong>
+          <p>{[shippingAddress?.street, shippingAddress?.address_2].join(", ")}</p>
           <p>
             {[
               shippingAddress?.city,
@@ -53,9 +53,8 @@ export default function ShippingAddress({
           initialValues={shippingAddress !== "" ? shippingAddress : {}}
           validationSchema={shippingAddressValidationSchema}
           onSubmit={(values, actions) => {
-            setEditAddress(false);
             updateShippingAddress(values);
-            showToast({ message: "Address Saved created successfully" });
+            setEditAddress(false);
           }}
         >
           {(props) => (
@@ -157,7 +156,7 @@ export default function ShippingAddress({
                 </div>
                 <div className="w-full p-4">
                   <label
-                    for="address-input"
+                    for="street-input"
                     className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
                   >
                     Address *
@@ -165,17 +164,17 @@ export default function ShippingAddress({
                   <div className="flex items-center">
                     <div className="relative w-full">
                       <textarea
-                        id="address-input"
+                        id="street-input"
                         className="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:border-s-gray-700  dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500"
-                        placeholder="address"
-                        name="address"
+                        placeholder="street"
+                        name="street"
                         onChange={props.handleChange}
                         onBlur={props.handleBlur}
                       >
-                        {props.values.address}
+                        {props.values.street}
                       </textarea>
-                      {props.errors.address && props.touched.address && (
-                        <p className="text-red-400">{props?.errors?.address}</p>
+                      {props.errors.street && props.touched.street && (
+                        <p className="text-red-400">{props?.errors?.street}</p>
                       )}
                     </div>
                   </div>

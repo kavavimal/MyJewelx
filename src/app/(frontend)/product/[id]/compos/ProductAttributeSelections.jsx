@@ -30,7 +30,8 @@ export default function ProductAttributeSelections({
   useEffect(() => {
     if (
       selectedOption &&
-      selectedOption?.length === filteredAttributes.length
+      selectedOption?.length ===
+        filteredAttributes.filter((a) => a.length > 1).length
     ) {
       const selectedAttributes = selectedOption.map((att) => {
         return {
@@ -43,7 +44,8 @@ export default function ProductAttributeSelections({
         setVariation(findv);
       }
     }
-  }, [selectedOption]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedOption, filteredAttributes, product]);
 
   const handleRadioChange = (attribute_id, value_id) => {
     setSelectedOption([

@@ -108,7 +108,14 @@ export async function GET() {
           image: true,
         },
       },
-      user: true,
+      user: {
+        include: {
+          vendor: true,
+        },
+      },
+    },
+    where: {
+      status: "PUBLISHED",
     },
   });
   return NextResponse.json({ products, success: true }, { status: 200 });

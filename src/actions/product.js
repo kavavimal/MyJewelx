@@ -12,6 +12,12 @@ export const getProducts = (data = false) => {
       status: { in: data?.status },
     };
   }
+  if (data !== false && data?.featured) {
+    where = {
+      ...where,
+      featured: data?.featured,
+    };
+  }
   return prisma.product.findMany({
     where: where,
     include: {
@@ -273,26 +279,12 @@ export const searchProducts = async (data) => {
               in: data.categories,
             },
           }),
-
-        // ...(data.vendors &&
-        //   data.vendors.length > 0 && {
-        //     user: {
-        //       AND: [
-        //         {
-        //           firstName: {
-        //             in: firstNames,
-        //             mode: "insensitive",
-        //           },
-        //         },
-        //         {
-        //           lastName: {
-        //             in: lastName,
-        //             mode: "insensitive",
-        //           },
-        //         },
-        //       ],
-        //     },
-        //   }),
+        ...(data?.subCategories &&
+          data?.subCategories?.length > 0 && {
+            subCategoryId: {
+              in: data.subCategories,
+            },
+          }),
 
         ...(data?.vendors &&
           data?.vendors?.length > 0 && {

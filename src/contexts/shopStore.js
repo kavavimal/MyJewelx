@@ -1,6 +1,8 @@
 import { searchProducts } from "@/actions/product";
 import { create } from "zustand";
-export const initFilterData = { categories: [],
+export const initFilterData = {
+  categories: [],
+  subCategories: [],
   vendors: [],
   metals: [],
   patterns: [],

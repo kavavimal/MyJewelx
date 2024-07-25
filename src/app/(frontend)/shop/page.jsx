@@ -15,11 +15,7 @@ const getFilterableDatas = async () => {
     },
   });
 
-  const categories = await prisma.category.findMany({
-    where: {
-      parent_id: null,
-    },
-  });
+  const categories = await prisma.category.findMany({});
 
   const metals = await prisma.attributeValue.findMany({
     where: {
@@ -42,7 +38,6 @@ const getFilterableDatas = async () => {
 };
 
 export default async function Shop({ searchParams }) {
-  console.log("searchParams", searchParams);
   let searchFilter = {};
   if (searchParams?.q) {
     searchFilter = { ...searchFilter, q: searchParams.q };
@@ -52,6 +47,7 @@ export default async function Shop({ searchParams }) {
   }
   const products = await searchProducts(searchFilter);
   const filterdDatas = await getFilterableDatas();
+
   return (
     <>
       <ShopTopComponent />

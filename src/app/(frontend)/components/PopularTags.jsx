@@ -18,7 +18,7 @@ const PopularTags = () => {
   }, []);
   return (
     tags?.length > 0 && (
-      <div className="w-full py-5 px-[15px] border border-secondary-400 rounded-sm max-h-[133px] overflow-auto">
+      <div className="w-full py-5 px-[15px] border border-secondary-400 rounded-sm min-h-[305px] overflow-auto">
         <div className="flex justify-start items-center gap-2.5 flex-wrap">
           {tags.map((tag, index) => (
             <button

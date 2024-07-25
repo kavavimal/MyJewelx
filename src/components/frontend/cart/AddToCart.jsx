@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Quantity from "./Quantity";
 import LoadingDots from "@/components/loading-dots";
 import ButtonComponent from "../ButtonComponent";
+import { Button } from "@material-tailwind/react";
 
 export default function AddToCart({ variation }) {
   const Router = useRouter();
@@ -55,17 +56,35 @@ export default function AddToCart({ variation }) {
     }
   };
 
+  if (!isProductInstock) {
+    return (
+      <p className="error text-red-500">
+        Product is not available at the moment
+      </p>
+    );
+  }
+
   if (cartItems && cartItems.length > 0 && findCartItem) {
     return <Quantity cartItem={findCartItem} maxQ={maxQ} />;
   }
   return (
-    <ButtonComponent onClick={onAddtoCart}>
-      {loading === true && (
-        <span className="px-2">
-          <LoadingDots />
-        </span>
-      )}
-      Add to Cart
-    </ButtonComponent>
+    // <ButtonComponent onClick={onAddtoCart}>
+    //   {loading === true && (
+    //     <span className="px-2">
+    //       <LoadingDots />
+    //     </span>
+    //   )}
+    //   Add to Cart
+    // </ButtonComponent>
+    <div className="w-3/5">
+      <Button
+        onClick={onAddtoCart}
+        fullWidth
+        loading={loading}
+        className="shadow-none hover:shadow-none flex justify-center items-center"
+      >
+        Add to Cart
+      </Button>
+    </div>
   );
 }

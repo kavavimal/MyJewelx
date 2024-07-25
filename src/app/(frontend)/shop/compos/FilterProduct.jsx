@@ -8,14 +8,15 @@ import {
   Checkbox,
 } from "@material-tailwind/react";
 import { CharsType } from "@prisma/client";
-import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
 const FilterProduct = ({ filterdDatas }) => {
   const selectedFilters = useShopStore((store) => store.filters);
   const setSelectedFilters = useShopStore((store) => store.setFilters);
+  const category = useSearchParams().get("category");
 
   const vendors = filterdDatas.vendors;
-  console.log(vendors);
   const metals = filterdDatas.metals;
   const patterns = filterdDatas.patterns;
   const characteristics = filterdDatas.characteristics;
@@ -106,6 +107,29 @@ const FilterProduct = ({ filterdDatas }) => {
     setSelectedFilters(filters);
   };
 
+  const handleSubCategoryChange = (event) => {
+    const id = parseInt(event.target.value);
+    let filters = selectedFilters;
+    filters = {
+      ...filters,
+      subCategories: event.target.checked
+        ? [...filters.subCategories, id]
+        : [...filters.subCategories.filter((c) => c !== id)],
+    };
+
+    setSelectedFilters(filters);
+  };
+
+  useEffect(() => {
+    const id = categories?.find((c) => c.name === category)?.category_id;
+    if (category) {
+      setSelectedFilters({
+        ...selectedFilters,
+        categories: [parseInt(id)],
+      });
+    }
+  }, [category]);
+
   return (
     <div>
       <div className="mb-4">
@@ -147,6 +171,7 @@ const FilterProduct = ({ filterdDatas }) => {
         <AccordionBody>
           <div className="min-w-0 pt-2 p-0 px-0 flex flex-col gap-3">
             {categories
+              .filter((category) => category.parent_id === null)
               ?.slice(0, isShowMore ? categories?.length : 5)
               .map((category, index) => {
                 return (
@@ -170,6 +195,41 @@ const FilterProduct = ({ filterdDatas }) => {
                         label={category.name}
                       />
                     </label>
+
+                    <div>
+                      <div className="min-w-0 p-0 px-0 flex flex-col">
+                        {categories
+                          .filter(
+                            (subcategory) =>
+                              subcategory.parent_id === category.category_id
+                          )
+                          .map((subcategory, i) => {
+                            return (
+                              <label
+                                key={i}
+                                htmlFor={subcategory.name}
+                                className="flex w-full pt-3 cursor-pointer items-center ms-7"
+                              >
+                                <Checkbox
+                                  value={subcategory.category_id}
+                                  onChange={handleSubCategoryChange}
+                                  checked={
+                                    selectedFilters?.subCategories &&
+                                    selectedFilters?.subCategories?.some(
+                                      (selectedSubcategory) =>
+                                        selectedSubcategory ===
+                                        subcategory.category_id
+                                    )
+                                  }
+                                  id={subcategory.name}
+                                  ripple={false}
+                                  label={subcategory.name}
+                                />
+                              </label>
+                            );
+                          })}
+                      </div>
+                    </div>
                   </div>
                 );
               })}

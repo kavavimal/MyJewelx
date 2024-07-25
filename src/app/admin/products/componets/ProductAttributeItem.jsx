@@ -1,4 +1,4 @@
-import { attributeIDs } from "@/utils/constants";
+import { attributeIDs, theme } from "@/utils/constants";
 import { Typography } from "@material-tailwind/react";
 import React from "react";
 import ReactSelect from "react-select";
@@ -36,6 +36,7 @@ export default function ProductAttributeItem({
               isMulti={productAttribute?.isMultiple}
               options={options}
               styles={style}
+              theme={theme}
               name={productAttribute?.name}
               placeholder={productAttribute?.name}
               value={
@@ -66,6 +67,7 @@ export default function ProductAttributeItem({
           <Typography className="">Karats</Typography>
           <ReactSelect
             options={karatOptions}
+            theme={theme}
             isMulti
             name="karats"
             value={karatOptions.filter((gc) => goldCarate.includes(gc.value))}
@@ -79,6 +81,7 @@ export default function ProductAttributeItem({
           <Typography className="">Asian Size</Typography>
           <ReactSelect
             isMulti
+            theme={theme}
             options={asianSizeOptions}
             styles={style}
             value={asianSizeOptions.filter((a) => asianSizes.includes(a.value))}
@@ -92,6 +95,7 @@ export default function ProductAttributeItem({
           <Typography className="">US Size</Typography>
           <ReactSelect
             isMulti
+            theme={theme}
             options={USSizeOptions}
             styles={style}
             value={USSizeOptions.filter((a) => usSizes.includes(a.value))}

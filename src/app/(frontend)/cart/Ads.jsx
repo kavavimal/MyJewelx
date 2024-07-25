@@ -18,6 +18,7 @@ const Ads = ({ ads }) => {
                     height={100}
                     width={100}
                     className="h-[100%] w-[100%]"
+                    alt={adslist.ads_desc}
                   />
                   <div className="absolute left-10 top-14">
                     <h3 className="font-playfairdisplay font-semibold text-2xl">

@@ -115,7 +115,7 @@ export default async function OrderDetailsPage({ params, searchParams }) {
                                             <div className="img-box max-lg:w-full">
                                                 <img
                                                     src="/assets/images/image.png"
-                                                    alt="Premium Watch image"
+                                                    alt="Premium Watch"
                                                     className="aspect-square w-full lg:max-w-[140px]"
                                                 />
                                             </div>

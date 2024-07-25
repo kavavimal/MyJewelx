@@ -1,12 +1,10 @@
 "use client";
-import { useCartStore } from "@/contexts/cartStore";
 import { useChekcoutStore } from "@/contexts/checkoutStore";
 import { post } from "@/utils/api";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ShippingAddress from "./ShippingAddress";
 
+import { showToast } from "@/utils/helper";
 import {
   Accordion,
   AccordionBody,
@@ -15,9 +13,6 @@ import {
 import { AddressType } from "@prisma/client";
 
 export default function Checkout({ user, addresses}) {
-  const router = useRouter();
-  const { data: session } = useSession();
-
   const { paymentMethod, errors } = useChekcoutStore((state) => state);
   const setShippingAddress = useChekcoutStore(
     (state) => state.setShippingAddress
@@ -42,12 +37,13 @@ export default function Checkout({ user, addresses}) {
       phone: address.phone ? address.phone : ' ', 
       email: address.email ? address.email : ' ',
     });
-    console.log("save address res", addressRes);
-    updateShippingAddress(addressRes.address);
+    updateShippingAddress(addressRes.data?.address);
+    showToast({ message: "Address Saved created successfully" });
   }
 
   useEffect(() => {
     setShippingAddress(shippingAddress);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shippingAddress]);
 
   return (

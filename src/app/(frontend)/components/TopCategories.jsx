@@ -2,8 +2,8 @@
 import Image from "next/image";
 import React from "react";
 import Link from "next/link";
-import { Swiper, SwiperSlide, useSwiper } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
 import "swiper/swiper-bundle.css";
 
 const Topcategories = ({ categories }) => {
@@ -37,6 +37,7 @@ const Topcategories = ({ categories }) => {
                         height={100}
                         width={100}
                         className="h-full w-full"
+                        alt=''
                       />
                     </div>{" "}
                   </SwiperSlide>

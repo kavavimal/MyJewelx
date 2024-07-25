@@ -27,7 +27,7 @@ export default function Paypal({ user, cart, amount, handlePlaceOrder }) {
       if (response.data.success) {
         // Order is successful
         // Your custom code
-        handlePlaceOrder();
+        handlePlaceOrder(response);
         // Like showing a success toast:
         // toast.success('Amount Added to Wallet')
         // And/Or Adding Balance to Redux Wallet

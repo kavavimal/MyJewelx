@@ -23,7 +23,7 @@ const ProductCard = ({ product }) => {
         <div className="w-auto overflow-hidden">
           <Link
             href={`/product/${product?.product_id}`}
-            className="font-normal text-left"
+            className="font-normal text-left block"
           >
             <Image
               src={
@@ -36,7 +36,7 @@ const ProductCard = ({ product }) => {
               alt="image for design"
               width={350}
               height={350}
-              className="max-w-full max-h-[300px] hover:scale-105 transition-all duration-300"
+              className="w-full h-[252px] hover:scale-105 transition-all duration-300"
             />
           </Link>
         </div>

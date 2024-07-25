@@ -121,7 +121,7 @@ export default function FrontendHeader({ categories }) {
           </div>
         </div>
       </div>
-      <nav className="bg-white border-gray-200 dark:bg-gray-900 shadow-xxs sticky top-0 z-20">
+      <nav className="bg-white border-gray-200 dark:bg-gray-900 shadow-xxs sticky top-0 z-[999]">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto pt-5">
           <div>
             <Link
