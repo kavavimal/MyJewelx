@@ -10,6 +10,7 @@ import Container from "@/components/frontend/Container";
 import moment from "moment";
 import RelatedProduct from "./compos/RelatedProduct";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import CustomerReviews from "./compos/CustomerReviews";
 async function get_productBy_id(id) {
   if (id) {
     const product = await prisma.product.findFirst({
@@ -185,10 +186,20 @@ export default async function ProductDetails({ params: { id } }) {
         filteredAttributes={productData?.filteredAttributes}
         avgRating={productData?.avgRating}
       />
+      <section className="pt-[50px] pb-[43px]">
+        <Container>
+          <CustomerReviews reviews={productData?.reviews} />
+        </Container>
+      </section>
       <Container>
-        <div>Review</div>
-        {user.id && <ReviewForm user_id={user.id} product_id={id} />}
-        <div className="pb-[46px]">
+        {user.id && (
+          <div className="pb-[15px] border-b border-blueGray-300">
+            <div className="w-[620px]">
+              <ReviewForm user_id={user.id} product_id={id} />
+            </div>
+          </div>
+        )}
+        <div className="pb-[46px] pt-[50px]">
           {productData?.reviews &&
             productData?.reviews?.map((review, index) => {
               return (
@@ -236,14 +247,15 @@ export default async function ProductDetails({ params: { id } }) {
                         );
                       })}
                   </div>
-                  {review?.replay && review.replay != "" ? (
-                    <div className="border-t mt-3 pt-2 pl-5">
-                      <div className="p2 bg-blue-gray-50">
-                        Replay from seller: {review.replay}
+                  {review?.replay && review.replay != "" && (
+                    <div className="border rounded-sm ml-[30px] bg-[#FFFCF5] py-[7px] px-2.5">
+                      <span className="block text-primary-200 text-sm">
+                        Seller response
+                      </span>
+                      <div className="text-secondary-100 text-sm">
+                        {review.replay}
                       </div>
                     </div>
-                  ) : (
-                    ""
                   )}
                 </div>
               );
@@ -251,9 +263,7 @@ export default async function ProductDetails({ params: { id } }) {
         </div>
       </Container>
 
-      <Container>
-        <RelatedProduct product={productData} />
-      </Container>
+      <RelatedProduct product={productData} />
     </>
   );
 }

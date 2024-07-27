@@ -50,8 +50,7 @@ const Quantity = ({ cartItem }) => {
   };
 
   return (
-    <>
-      {localLoading === true && <LoadingDots />}
+    <div className="flex gap-1 items-center">
       <div className="flex items-center border rounded-sm text-md pointer">
         <button
           type="button"
@@ -110,7 +109,8 @@ const Quantity = ({ cartItem }) => {
           </svg>
         </button>
       </div>
-    </>
+      {localLoading === true && <LoadingDots />}
+    </div>
   );
 };
 

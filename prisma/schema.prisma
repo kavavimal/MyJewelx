@@ -505,8 +505,13 @@ model Order {
   billingAddress  String
   paymentMethod   String
   paymentResponse String?
+  orderTotal  Float @default(0)
+  paidAmount Float @default(0)
+  orderDiscountTitle  String?
+  orderDiscount Float @default(0)
 
   status     OrderStatus           @default(PENDING)
+  cancelNote String?
   createdAt  DateTime              @default(now())
   updatedAt  DateTime              @updatedAt
   seller     OrderSellerRelation[]
@@ -529,6 +534,11 @@ model OrderItem {
   name               String
   quantity           Int
   price              Float
+
+  sellerId            String?
+  discountTitle  String?
+  discount Float @default(0)
+
   variationData      String
   // Relationships
   order              Order            @relation(fields: [orderId], references: [id])

@@ -8,6 +8,7 @@ import Paragraph from "@/components/Paragraph";
 import { printPrice } from "@/utils/helper";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Button } from "@material-tailwind/react";
 
 const CartSidebar = () => {
   const router = useRouter();
@@ -31,7 +32,7 @@ const CartSidebar = () => {
 
   const closeSidebar = () => {
     setIsOpen(false);
-  }
+  };
 
   const handleClickOutside = (event) => {
     if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
@@ -101,7 +102,9 @@ const CartSidebar = () => {
                           <div className="flex justify-between text-base font-medium text-gray-900">
                             <div className="w-20 mr-2">
                               <Image
-                                src={cartItem.productVariation?.image?.[0]?.path}
+                                src={
+                                  cartItem.productVariation?.image?.[0]?.path
+                                }
                                 width={150}
                                 height={150}
                                 alt={
@@ -113,7 +116,10 @@ const CartSidebar = () => {
                             </div>
                             <div>
                               <h3>
-                                <Link onClick={closeSidebar} href={`/product/${cartItem.productVariation?.product_id}`}>
+                                <Link
+                                  onClick={closeSidebar}
+                                  href={`/product/${cartItem.productVariation?.product_id}`}
+                                >
                                   {
                                     cartItem.productVariation?.product
                                       ?.product_name
@@ -121,7 +127,7 @@ const CartSidebar = () => {
                                 </Link>
                               </h3>
                               <Paragraph>
-                                {cartItem.productVariation.variation_name}
+                                {cartItem?.productVariation?.variation_name}
                               </Paragraph>
                             </div>
                           </div>
@@ -148,19 +154,11 @@ const CartSidebar = () => {
                   <p>{printPrice(totalAmount)}</p>
                 </div>
                 <div className="mt-6 flex justify-between items-center">
-                  <Link
-                  onClick={closeSidebar}
-                    href="/cart"
-                    className="flex items-center justify-center text-center text-[#F0AE11] bg-white border py-2 px-4 border-[#F0AE11] focus:outline-none hover:bg-yellow-600 hover:text-white rounded"
-                  >
-                    View Cart
+                  <Link onClick={closeSidebar} href="/cart">
+                    <Button>View Cart</Button>
                   </Link>
-                  <Link
-                  onClick={closeSidebar}
-                    href="/checkout"
-                    className="flex items-center justify-center text-center text-[#F0AE11] bg-white border py-2 px-4 border-[#F0AE11] focus:outline-none hover:bg-yellow-600 hover:text-white rounded"
-                  >
-                    Checkout
+                  <Link onClick={closeSidebar} href="/checkout">
+                    <Button>Checkout</Button>
                   </Link>
                 </div>
               </div>

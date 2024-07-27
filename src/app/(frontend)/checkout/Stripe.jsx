@@ -16,7 +16,7 @@ const SubscribeComponent = ({
     return {
       name: item.productVariation?.product?.product_name,
       description: item.productVariation?.product?.product_name,
-      image: item.productVariation?.image?.[0]?.path,
+      image: item.productVariation?.image && item.productVariation?.image?.[0] ? item.productVariation?.image?.[0]?.path : false,
       quantity: item.quantity,
       price: item.price,
     };

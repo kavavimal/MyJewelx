@@ -124,14 +124,7 @@ const ShopComponent = ({ products, categories, promolist }) => {
         </div>
       </div>
       <div className="flex items-start gap-[11px]">
-        <div
-          className="w-[224px]"
-          // style={{
-          //   position: "sticky",
-          //   top: 120,
-          //   left: 0,
-          // }}
-        >
+        <div className="w-[224px]">
           <FilterProduct
             categories={categories}
             setSelectedFilters={setSelectedFilters}

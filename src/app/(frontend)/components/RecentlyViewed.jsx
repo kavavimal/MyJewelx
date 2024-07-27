@@ -3,6 +3,7 @@ import { get } from "@/utils/api";
 import { truncate } from "@/utils/helper";
 import { Avatar } from "@material-tailwind/react";
 import Image from "next/image";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 const RecentlyViewed = () => {
@@ -30,7 +31,7 @@ const RecentlyViewed = () => {
                   index < 3 ? "pb-[15px] border-b border-secondary-400" : ""
                 }`}
               >
-                <div className="">
+                <Link href={`/product/${product?.product_id}`}>
                   <Image
                     src={
                       product?.variations &&
@@ -42,12 +43,15 @@ const RecentlyViewed = () => {
                     height={65}
                     className="w-[65px] h-[65px] border border-secondary-400 rounded"
                   />
-                </div>
-                <div className="flex flex-col ms-2.5 text-center justify-center items-start gap-0.5 mb-[17px]">
-                  <p className="text-sm font-normal leading-[23.87px]">
+                </Link>
+                <div className="flex flex-col ms-2.5 text-center justify-center items-start gap-0.5">
+                  <Link
+                    href={`/product/${product?.product_id}`}
+                    className="text-sm font-normal leading-[23.87px] hover:underline"
+                  >
                     {product?.product_name &&
                       truncate(product?.product_name, 30)}
-                  </p>
+                  </Link>
                   <span className="block text-secondary-100 text-xs leading-[18px]">
                     Dhs 5000 - 8000
                   </span>

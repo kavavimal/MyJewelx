@@ -4,7 +4,7 @@ import ProductCard from "../shop/compos/ProductCard";
 import RecentlyViewed from "./RecentlyViewed";
 import PopularTags from "./PopularTags";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Grid, Pagination } from "swiper/modules";
+import { Grid, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/grid";
@@ -117,7 +117,11 @@ const PopularProducts = ({ products }) => {
               <Swiper
                 slidesPerView={3}
                 spaceBetween={20}
-                modules={[Grid, Pagination]}
+                autoplay={{
+                  delay: 5000,
+                  disableOnInteraction: false,
+                }}
+                modules={[Grid, Pagination, Autoplay]}
                 grid={{ rows: 2, fill: "row" }}
               >
                 {filterProducts.map((product) => (

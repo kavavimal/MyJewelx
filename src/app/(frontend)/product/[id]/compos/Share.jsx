@@ -1,10 +1,21 @@
 import React from "react";
+import {
+  FacebookShareButton,
+  InstapaperShareButton,
+  LinkedinShareButton,
+  WhatsappIcon,
+  WhatsappShareButton,
+} from "react-share";
 
 export default function Share() {
   return (
     <span className="flex items-center gap-2 mt-3 text-secondary-100">
       Share on :
-      <a className="">
+      <FacebookShareButton
+        url="https://tailwindcss.com/"
+        title="Hello"
+        separator=": "
+      >
         <svg
           width="24"
           height="24"
@@ -17,8 +28,12 @@ export default function Share() {
             fill="#4D4D4D"
           />
         </svg>
-      </a>
-      <a className="">
+      </FacebookShareButton>
+      <LinkedinShareButton
+        url="https://tailwindcss.com/"
+        title="Hello"
+        separator=": "
+      >
         <svg
           width="20"
           height="20"
@@ -38,8 +53,12 @@ export default function Share() {
             </clipPath>
           </defs>
         </svg>
-      </a>
-      <a className="">
+      </LinkedinShareButton>
+      <InstapaperShareButton
+        url="https://tailwindcss.com/"
+        title="Hello"
+        separator=": "
+      >
         <svg
           width="24"
           height="24"
@@ -60,7 +79,7 @@ export default function Share() {
             fill="#4D4D4D"
           />
         </svg>
-      </a>
+      </InstapaperShareButton>
     </span>
   );
 }

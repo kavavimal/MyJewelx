@@ -7,11 +7,12 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import FrontendHeader from "@/components/frontend/common/Header";
 import Footer from "@/components/frontend/common/Footer";
+import { authOptions } from "../api/auth/[...nextauth]/route";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const checkUserSession = async () => {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   if (session?.user?.email) {
     const user = await prisma.user.findUnique({
       where: {

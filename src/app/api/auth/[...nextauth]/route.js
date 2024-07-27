@@ -87,7 +87,7 @@ import { AcountType } from "@prisma/client";
 //   },
 // };
 
-const authOptions = {
+export const authOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",

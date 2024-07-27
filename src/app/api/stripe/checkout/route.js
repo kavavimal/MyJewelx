@@ -41,7 +41,7 @@ export async function POST(request) {
         price_data: {
           currency: CURRENCY_SYMBOL,
           product_data: {
-            images: [process.env.NEXT_BASE_URL + item.image],
+            images: item.image ? [process.env.NEXT_BASE_URL + item.image] : [],
             name: item.name,
             description: item.description,
           },

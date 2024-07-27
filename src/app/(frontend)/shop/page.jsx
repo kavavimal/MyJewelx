@@ -54,11 +54,11 @@ export default async function Shop({ searchParams }) {
       <div className="flex items-start gap-[11px]">
         <div
           className="w-[224px]"
-          style={{
-            position: "sticky",
-            top: 120,
-            left: 0,
-          }}
+          // style={{
+          //   position: "sticky",
+          //   top: 120,
+          //   left: 0,
+          // }}
         >
           <FilterProduct filterdDatas={filterdDatas} />
         </div>

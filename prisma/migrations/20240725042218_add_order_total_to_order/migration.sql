@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE "Order" ADD COLUMN     "orderDiscount" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "orderDiscountTitle" TEXT,
+ADD COLUMN     "orderTotal" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "paidAmount" DOUBLE PRECISION NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "OrderItem" ADD COLUMN     "discount" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "discountTitle" TEXT;

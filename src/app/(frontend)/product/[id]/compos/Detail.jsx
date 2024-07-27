@@ -44,7 +44,7 @@ const Detail = ({
     <>
       <section className="body-font overflow-hidden">
         <div className="container mx-auto">
-          <div className="border-b border-primary-200 py-[15px] mb-[30px]">
+          <div className="border-b border-primary-200 py-[20px] mb-[30px]">
             <Breadcrumbs
               items={[
                 { link: "/product", label: "Product" },

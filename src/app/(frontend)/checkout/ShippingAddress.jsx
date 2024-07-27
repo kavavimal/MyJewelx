@@ -5,6 +5,13 @@ import ButtonComponent from "@/components/frontend/ButtonComponent";
 import { showToast } from "@/utils/helper";
 import { Formik } from "formik";
 import { useState } from "react";
+import {
+  Button,
+  Input,
+  Option,
+  Select,
+  Textarea,
+} from "@material-tailwind/react";
 
 const shippingAddressValidationSchema = Yup.object({
   firstName: Yup.string().required("First Name is required"),
@@ -37,8 +44,12 @@ export default function ShippingAddress({
           >
             Edit
           </button>
-          <strong>{shippingAddress?.firstName} {shippingAddress?.lastName}</strong>
-          <p>{[shippingAddress?.street, shippingAddress?.address_2].join(", ")}</p>
+          <strong>
+            {shippingAddress?.firstName} {shippingAddress?.lastName}
+          </strong>
+          <p>
+            {[shippingAddress?.street, shippingAddress?.address_2].join(", ")}
+          </p>
           <p>
             {[
               shippingAddress?.city,
@@ -59,19 +70,14 @@ export default function ShippingAddress({
         >
           {(props) => (
             <form onSubmit={props.handleSubmit}>
-              <div className="border p-2 flex flex-wrap items-center justify-start">
-                <div className="w-1/2 p-4">
-                  <label
-                    for="firstName"
-                    className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    First Name
-                  </label>
-                  <input
+              <div className="border p-5 grid grid-cols-2 items-start gap-5">
+                <div>
+                  <Input
+                    label="First Name"
+                    size="lg"
                     type="text"
                     id="firstName"
                     name="firstName"
-                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
                     placeholder="First Name"
                     onChange={props.handleChange}
                     onBlur={props.handleBlur}
@@ -82,18 +88,13 @@ export default function ShippingAddress({
                   )}
                 </div>
 
-                <div className="w-1/2 p-4">
-                  <label
-                    for="lastName"
-                    className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Last Name
-                  </label>
-                  <input
+                <div>
+                  <Input
+                    size="lg"
+                    label="Last Name"
                     type="text"
                     id="lastName"
                     name="lastName"
-                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
                     placeholder="Last Name"
                     value={props.values.lastName}
                     onChange={props.handleChange}
@@ -103,165 +104,116 @@ export default function ShippingAddress({
                     <p className="text-red-400">{props?.errors?.lastName}</p>
                   )}
                 </div>
-                <div className="w-1/2 p-4">
-                  <label
-                    for="email"
-                    className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Email
-                  </label>
-                  <div className="flex items-center">
-                    <div className="relative w-full">
-                      <input
-                        type="email"
-                        id="email"
-                        className="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:border-s-gray-700  dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500"
-                        placeholder="Email"
-                        name="email"
-                        value={props.values.email}
-                        onChange={props.handleChange}
-                        onBlur={props.handleBlur}
-                      />
-                      {props.errors.email && props.touched.email && (
-                        <p className="text-red-400">{props?.errors?.email}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="w-1/2 p-4">
-                  <label
-                    for="phone-input-3"
-                    className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Phone Number*{" "}
-                  </label>
-                  <div className="flex items-center">
-                    <div className="relative w-full">
-                      <input
-                        type="text"
-                        id="phone-input"
-                        className="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:border-s-gray-700  dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500"
-                        // pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
-                        placeholder="123-456-7890"
-                        name="phone"
-                        value={props.values.phone}
-                        onChange={props.handleChange}
-                        onBlur={props.handleBlur}
-                      />
-                      {props.errors.phone && props.touched.phone && (
-                        <p className="text-red-400">{props?.errors?.phone}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="w-full p-4">
-                  <label
-                    for="street-input"
-                    className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Address *
-                  </label>
-                  <div className="flex items-center">
-                    <div className="relative w-full">
-                      <textarea
-                        id="street-input"
-                        className="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:border-s-gray-700  dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500"
-                        placeholder="street"
-                        name="street"
-                        onChange={props.handleChange}
-                        onBlur={props.handleBlur}
-                      >
-                        {props.values.street}
-                      </textarea>
-                      {props.errors.street && props.touched.street && (
-                        <p className="text-red-400">{props?.errors?.street}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="w-1/2 p-4">
-                  <div className="mb-2 flex items-center gap-2">
-                    <label
-                      for="select-country-input-3"
-                      className="block text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      Country*{" "}
-                    </label>
-                  </div>
-                  <select
-                    id="select-country-input-3"
-                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
-                    name="country"
+                <div>
+                  <Input
+                    size="lg"
+                    label="Email"
+                    type="email"
+                    id="email"
+                    placeholder="Email"
+                    name="email"
+                    value={props.values.email}
                     onChange={props.handleChange}
                     onBlur={props.handleBlur}
-                    value={props.values.country}
+                  />
+                  {props.errors.email && props.touched.email && (
+                    <p className="text-red-400">{props?.errors?.email}</p>
+                  )}
+                </div>
+                <div>
+                  <Input
+                    size="lg"
+                    label="Phone"
+                    type="text"
+                    id="phone-input"
+                    // pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                    placeholder="123-456-7890"
+                    name="phone"
+                    value={props.values.phone}
+                    onChange={props.handleChange}
+                    onBlur={props.handleBlur}
+                  />
+                  {props.errors.phone && props.touched.phone && (
+                    <p className="text-red-400">{props?.errors?.phone}</p>
+                  )}
+                </div>
+                <div className="col-span-2">
+                  <Textarea
+                    label="Street"
+                    id="street-input"
+                    placeholder="street"
+                    name="street"
+                    onChange={props.handleChange}
+                    onBlur={props.handleBlur}
+                    value={props.values.street}
+                  />
+                  {props.errors.street && props.touched.street && (
+                    <p className="text-red-400">{props?.errors?.street}</p>
+                  )}
+                </div>
+                <div>
+                  <Select
+                    size="lg"
+                    label="Country"
+                    id="select-country-input-3"
+                    name="country"
+                    onChange={(value) => props.setFieldValue("country", value)}
+                    onBlur={props.handleBlur}
+                    value={props.values.country ?? ""}
                   >
-                    <option selected>Select</option>
-                    <option value="US">United States</option>
-                    <option value="AS">Australia</option>
-                    <option value="FR">France</option>
-                    <option value="ES">Spain</option>
-                    <option value="UK">United Kingdom</option>
-                  </select>
+                    <Option value="US">United States</Option>
+                    <Option value="AS">Australia</Option>
+                    <Option value="FR">France</Option>
+                    <Option value="ES">Spain</Option>
+                    <Option value="UK">United Kingdom</Option>
+                  </Select>
                   {props.errors.country && props.touched.country && (
                     <p className="text-red-400">{props?.errors?.country}</p>
                   )}
                 </div>
 
-                <div className="w-1/2 p-4">
-                  <div className="mb-2 flex items-center gap-2">
-                    <label
-                      for="select-city-input-3"
-                      className="block text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      City*{" "}
-                    </label>
-                  </div>
-                  <select
+                <div>
+                  <Select
+                    size="lg"
+                    label="City"
                     id="select-city-input-3"
-                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
                     name="city"
-                    onChange={props.handleChange}
+                    onChange={(value) => props.setFieldValue("city", value)}
                     onBlur={props.handleBlur}
-                    value={props.values.city}
+                    value={props.values.city ?? ""}
                   >
-                    <option selected>San Francisco</option>
-                    <option value="NY">New York</option>
-                    <option value="LA">Los Angeles</option>
-                    <option value="CH">Chicago</option>
-                    <option value="HU">Houston</option>
-                  </select>
+                    <Option selected>San Francisco</Option>
+                    <Option value="NY">New York</Option>
+                    <Option value="LA">Los Angeles</Option>
+                    <Option value="CH">Chicago</Option>
+                    <Option value="HU">Houston</Option>
+                  </Select>
                   {props.errors.city && props.touched.city && (
                     <p className="text-red-400">{props?.errors?.city}</p>
                   )}
                 </div>
 
-                <div className="w-1/2 p-4">
-                  <label
-                    for="zipCode-input"
-                    className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Zipcode *
-                  </label>
+                <div>
                   <div className="flex items-center">
-                    <div className="relative w-full">
-                      <input
-                        type="text"
-                        id="zipCode-input"
-                        className="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:border-s-gray-700  dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500"
-                        placeholder="zipCode"
-                        name="zipCode"
-                        value={props.values.zipCode}
-                        onChange={props.handleChange}
-                        onBlur={props.handleBlur}
-                      />
-                      {props.errors.zipCode && props.touched.zipCode && (
-                        <p className="text-red-400">{props?.errors?.zipCode}</p>
-                      )}
-                    </div>
+                    <Input
+                      label="Zip Code"
+                      type="text"
+                      id="zipCode-input"
+                      className="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:border-s-gray-700  dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500"
+                      placeholder="zipCode"
+                      name="zipCode"
+                      value={props.values.zipCode}
+                      onChange={props.handleChange}
+                      onBlur={props.handleBlur}
+                    />
+                    {props.errors.zipCode && props.touched.zipCode && (
+                      <p className="text-red-400">{props?.errors?.zipCode}</p>
+                    )}
                   </div>
                   <div className="w-full mt-5">
-                    <ButtonComponent type="submit">Save</ButtonComponent>
+                    <Button variant="outlined" type="submit">
+                      Save
+                    </Button>
                   </div>
                 </div>
               </div>

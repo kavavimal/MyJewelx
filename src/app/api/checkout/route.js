@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { sendOrderEmail } from "@/lib/sendMails";
 import { OrderStatus } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -87,9 +88,11 @@ export async function createOrder(user, requestData) {
     shippingAddress,
     billingAddress: shippingAddress,
     paymentMethod,
+    orderTotal: userCart.cartItems.reduce((sum, item) => sum + item.price, 0),
     status: OrderStatus.PENDING,
     orderItems: {
       create: userCart.cartItems.map((item) => ({
+        sellerId: item.productVariation.product.user_id,
         variationData: JSON.stringify(item.productVariation),
         name: item.productVariation?.product?.product_name,
         productVariationId: item.variation_id,
@@ -98,12 +101,26 @@ export async function createOrder(user, requestData) {
       })),
     },
   };
-  if (paymentResponse && paymentResponse !== null) {
+  if (paymentResponse && paymentResponse !== null && paymentResponse !== '') {
+    console.log("PaymentResponse : ", paymentResponse);
     orderData.status = OrderStatus.PROCESSING;
     orderData.paymentResponse = JSON.stringify(paymentResponse);
   }
   const order = await prisma.order.create({
-    data: orderData
+    data: orderData,
+    include: {
+      orderItems: true,
+      seller: {
+        include: {
+          user: {
+            include: {
+              vendor: true,
+            },
+          },
+        },
+      },
+      user: true,
+    },
   });
   if (order) {
     if (productItemsUpdate.length > 0) {
@@ -115,6 +132,11 @@ export async function createOrder(user, requestData) {
       });
     }
     await prisma.cart.delete({ where: { cart_id: userCart.cart_id } });
+
+    // send mail
+    if (order.status === OrderStatus.PROCESSING) {
+      sendOrderEmail(user, order);
+    }
     return order;
   }
   return false;
@@ -124,14 +146,16 @@ export async function POST(request) {
   const shippingAddress = requestData.get("shippingAddress");
   const billingAddress = requestData.get("billingAddress");
   const paymentMethod = requestData.get("paymentMethod");
-  const paymentResponse = requestData.get("paymentResponse") ? requestData.get("paymentResponse") : null;
+  const paymentResponse = requestData.get("paymentResponse")
+    ? requestData.get("paymentResponse")
+    : null;
   try {
     const user = await checkUserSession();
     const order = await createOrder(user, {
       shippingAddress,
       billingAddress,
       paymentMethod,
-      paymentResponse
+      paymentResponse,
     });
     if (order && order.id) {
       return NextResponse.json(

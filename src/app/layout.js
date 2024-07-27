@@ -5,6 +5,7 @@ import ThemeWrapper from "@/components/ThemeWrapper";
 import SnackbarWrapper from "@/components/SnackbarWrapper";
 import LoaderRoute from "@/components/frontend/common/progressbar";
 import Hydration from "@/contexts/hydration";
+import Script from "next/script";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -24,6 +25,7 @@ export default function RootLayout({ children }) {
           </ThemeWrapper>
         </SessionWrapper>
       </body>
+      <Script src="/ripple.js" />
     </html>
   );
 }

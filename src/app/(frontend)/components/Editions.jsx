@@ -6,6 +6,8 @@ import ProductCard from "../shop/compos/ProductCard";
 import "swiper/css";
 import ReactSelect from "react-select";
 import { theme } from "@/utils/constants";
+import { AnimatePresence, motion } from "framer-motion";
+import { Autoplay } from "swiper/modules";
 
 const Editions = () => {
   const [products, setProducts] = useState([]);
@@ -57,65 +59,88 @@ const Editions = () => {
     getCategories();
   }, []);
   return (
-    <section className="py-[50px]">
-      <div className="container">
-        <div>
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="text-2xl font-playfairdisplay font-semibold">
-              Limited Editions
-            </h3>
-            <div className="min-w-[176px]">
-              <ReactSelect
-                isMulti
-                options={options}
-                styles={{
-                  control: (provided, state) => ({
-                    ...provided,
-                    borderWidth: "1px",
-                    backgroundColor: "#fff",
-                    color: "#222",
-                    borderRadius: 4,
-                  }),
+    <AnimatePresence mode="wait">
+      <motion.section
+        className="py-[50px]"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        viewport={{ once: true }}
+      >
+        <div className="container">
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-2xl font-playfairdisplay font-semibold">
+                Limited Editions
+              </h3>
+              <div className="min-w-[176px]">
+                <ReactSelect
+                  isMulti
+                  options={options}
+                  styles={{
+                    control: (provided, state) => ({
+                      ...provided,
+                      borderWidth: "1px",
+                      backgroundColor: "#fff",
+                      color: "#222",
+                      borderRadius: 4,
+                    }),
 
-                  multiValue: (provided, state) => ({
-                    ...provided,
-                    backgroundColor: "transparent",
-                    borderWidth: "1px",
-                    borderRadius: "4px",
-                    borderColor: "#F0AE11",
-                  }),
-                }}
-                theme={theme}
-                value={options.filter((option) =>
-                  selectedCategory.includes(option.value)
-                )}
-                onChange={(options) => {
-                  setSelectedCategory(options.map((option) => option.value));
-                }}
-                menuPortalTarget={
-                  typeof window !== "undefined" && document.body
-                }
-              />
+                    multiValue: (provided, state) => ({
+                      ...provided,
+                      backgroundColor: "transparent",
+                      borderWidth: "1px",
+                      borderRadius: "4px",
+                      borderColor: "#F0AE11",
+                    }),
+                  }}
+                  theme={theme}
+                  value={options.filter((option) =>
+                    selectedCategory.includes(option.value)
+                  )}
+                  onChange={(options) => {
+                    setSelectedCategory(options.map((option) => option.value));
+                  }}
+                  menuPortalTarget={
+                    typeof window !== "undefined" && document.body
+                  }
+                />
+              </div>
+            </div>
+            <div className="overflow-hidden">
+              {filterProducts?.length === 0 ? (
+                <h1>No Products</h1>
+              ) : (
+                <Swiper
+                  modules={[Autoplay]}
+                  autoplay={{
+                    delay: 5000,
+                    disableOnInteraction: false,
+                  }}
+                  slidesPerView={4}
+                  spaceBetween={20}
+                >
+                  {filterProducts?.map((product, index) => {
+                    return (
+                      <SwiperSlide key={index}>
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.4 }}
+                          viewport={{ once: true }}
+                        >
+                          <ProductCard product={product} />
+                        </motion.div>
+                      </SwiperSlide>
+                    );
+                  })}
+                </Swiper>
+              )}
             </div>
           </div>
-          <div className="overflow-hidden">
-            {filterProducts?.length === 0 ? (
-              <h1>No Products</h1>
-            ) : (
-              <Swiper slidesPerView={4} spaceBetween={20}>
-                {filterProducts?.map((product, index) => {
-                  return (
-                    <SwiperSlide key={index}>
-                      <ProductCard product={product} />
-                    </SwiperSlide>
-                  );
-                })}
-              </Swiper>
-            )}
-          </div>
         </div>
-      </div>
-    </section>
+      </motion.section>
+    </AnimatePresence>
   );
 };
 
