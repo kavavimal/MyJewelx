@@ -136,7 +136,7 @@ const Trending = () => {
                 >
                   {products?.map((product, index) => {
                     return (
-                      <SwiperSlide>
+                      <SwiperSlide key={index}>
                         <motion.div
                           key={product.product_id}
                           initial={{ opacity: 0, y: 20 }}

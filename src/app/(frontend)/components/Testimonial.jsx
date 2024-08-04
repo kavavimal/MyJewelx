@@ -104,7 +104,7 @@ const Testimonial = ({ homeSlide }) => {
                               <path
                                 d="M8.00006 1.33398L10.0694 5.81932L14.9747 6.40132L11.3481 9.75465L12.3107 14.6L8.00006 12.1873L3.68939 14.6007L4.65206 9.75532L1.02539 6.40065L5.93139 5.81865L8.00006 1.33398Z"
                                 stroke="#F0AE11"
-                                stroke-linejoin="round"
+                                strokeLinejoin="round"
                               />
                             </svg>
                           }

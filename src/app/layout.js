@@ -1,11 +1,11 @@
 import SessionWrapper from "@/components/SessionWrapper";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import ThemeWrapper from "@/components/ThemeWrapper";
 import SnackbarWrapper from "@/components/SnackbarWrapper";
+import ThemeWrapper from "@/components/ThemeWrapper";
 import LoaderRoute from "@/components/frontend/common/progressbar";
 import Hydration from "@/contexts/hydration";
+import { Inter } from "next/font/google";
 import Script from "next/script";
+import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {

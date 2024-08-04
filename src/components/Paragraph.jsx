@@ -1,9 +1,8 @@
-
 export default function Paragraph({ children, classes, size, color, block }) {
   return (
     <span
-      className={` text-${color ? color : "gray-500"} text-${
-        size ? size : "sm"
+      className={` text-${color ? color : "blueGray-300"} text-${
+        size ? size : "18px"
       } ${classes} `}
     >
       {children}

@@ -29,6 +29,7 @@ model Account {
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
+  emailVerified DateTime?
   password     String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
@@ -48,31 +49,32 @@ model User {
   reviews      Review[]
   myreviews    Review[]   @relation("myreviews")
 
-  orders       Order[]               @relation("buyerOrders")
-  sellerOrders OrderSellerRelation[]
-  wishlist     Wishlist[]
-  likes        Like[]
-  viewProducts ViewedProduct[]
-  addresses   Address[]
+  orders          Order[]               @relation("buyerOrders")
+  sellerOrders    OrderSellerRelation[]
+  wishlist        Wishlist[]
+  likes           Like[]
+  viewProducts    ViewedProduct[]
+  addresses       Address[]
+  ProductOnDemand ProductOnDemand[]
 }
 
 model Address {
-  id          Int       @id @default(autoincrement())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-  type        AddressType
-  firstName   String
-  lastName    String
-  street      String?
-  address_2   String?
-  city        String
-  state       String
-  zipCode     String
-  country     String
-  phone       String?
-  email       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        Int         @id @default(autoincrement())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  type      AddressType
+  firstName String
+  lastName  String
+  street    String?
+  address_2 String?
+  city      String
+  state     String
+  zipCode   String
+  country   String
+  phone     String?
+  email     String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 }
 
 model Role {
@@ -427,7 +429,9 @@ model Image {
   user_id          String?           @unique
   category_id      Int?              @unique
   review_id        Int?
+  pod_id           Int?
   productvariation ProductVariation? @relation(fields: [variation_id], references: [variation_id], onDelete: Cascade)
+  productOnDemand  ProductOnDemand?  @relation(fields: [pod_id], references: [id], onDelete: Cascade)
   category         Category?         @relation(fields: [category_id], references: [category_id], onDelete: Cascade)
   user             User?             @relation(fields: [user_id], references: [id], onDelete: Cascade)
   review           Review?           @relation(fields: [review_id], references: [id], onDelete: Cascade)
@@ -500,15 +504,15 @@ model OtpVerification {
 
 // Define the data model for orders
 model Order {
-  id              Int     @id @default(autoincrement())
-  shippingAddress String
-  billingAddress  String
-  paymentMethod   String
-  paymentResponse String?
-  orderTotal  Float @default(0)
-  paidAmount Float @default(0)
-  orderDiscountTitle  String?
-  orderDiscount Float @default(0)
+  id                 Int     @id @default(autoincrement())
+  shippingAddress    String
+  billingAddress     String
+  paymentMethod      String
+  paymentResponse    String?
+  orderTotal         Float   @default(0)
+  paidAmount         Float   @default(0)
+  orderDiscountTitle String?
+  orderDiscount      Float   @default(0)
 
   status     OrderStatus           @default(PENDING)
   cancelNote String?
@@ -518,6 +522,7 @@ model Order {
   user       User                  @relation(fields: [userId], references: [id], "buyerOrders")
   userId     String
   orderItems OrderItem[]
+  logs       Logs[]
 }
 
 model OrderSellerRelation {
@@ -530,14 +535,14 @@ model OrderSellerRelation {
 }
 
 model OrderItem {
-  id                 Int              @id @default(autoincrement())
-  name               String
-  quantity           Int
-  price              Float
+  id       Int    @id @default(autoincrement())
+  name     String
+  quantity Int
+  price    Float
 
-  sellerId            String?
-  discountTitle  String?
-  discount Float @default(0)
+  sellerId      String?
+  discountTitle String?
+  discount      Float   @default(0)
 
   variationData      String
   // Relationships
@@ -588,6 +593,38 @@ model Like {
   @@unique([userId, productId])
 }
 
+model ProductOnDemand {
+  id          Int       @id @default(autoincrement())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  name        String
+  description String?
+  metal_type  String
+  karat       String?
+  weight_type String
+  min_weight  String?
+  max_weight  String?
+  price_type  String
+  min_price   Float?
+  max_price   Float?
+  made_in     String
+  contact     String
+  Images      Image[]
+  Status      PODStatus @default(DRAFT)
+  Note        String?
+}
+
+model Logs {
+  id        Int      @id @default(autoincrement())
+  type      LOGTYPES @default(LOG)
+  details   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orderId Int?
+  order   Order? @relation(fields: [orderId], references: [id])
+}
+
 enum AcountType {
   CUSTOMER
   ADMIN
@@ -630,6 +667,23 @@ enum ProductStatus {
   ARCHIVED
 }
 
+enum PODStatus {
+  DRAFT
+  REQUESTED
+  PUBLISHED
+  ACCEPTEDBYSELLER
+  SOLD
+  CANCELED
+  ARCHIVED
+}
+
+enum LOGTYPES {
+  LOG
+  SUCCESS
+  ERROR
+  DEV
+}
+
 enum CharsType {
   BRAND
   STYLE
@@ -657,12 +711,12 @@ model Promotional {
 }
 
 enum adsType {
-	HOME
+  HOME
   HOME_B
-	POD
+  POD
   SHOP
   STORE
-  CART 
+  CART
   WISHLIST
 }
 

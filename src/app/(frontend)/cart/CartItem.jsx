@@ -1,12 +1,25 @@
-import { printPrice } from "@/actions/cart";
+"use client";
 import AddToWishlist from "@/components/frontend/cart/AddToWishlist";
 import Quantity from "@/components/frontend/cart/Quantity";
 import RemoveCartItem from "@/components/frontend/cart/RemoveCartItem";
 import Paragraph from "@/components/Paragraph";
+import { printPrice } from "@/utils/helper";
 
-export default function CartItem({ item, isCart = true }) {
+export default function CartItem({ item, isCart = true, index }) {
+  const priceStr = printPrice(item.price) || "";
+
+  // Find the index of the first digit to split the currency symbol and numeric value
+  const firstNumericIndex = priceStr.search(/\d/);
+  const symbol =
+    firstNumericIndex > -1 ? priceStr.slice(0, firstNumericIndex) : "";
+  const price =
+    firstNumericIndex > -1 ? priceStr.slice(firstNumericIndex) : priceStr;
   return (
-    <div className="flex items-start border-t border-blueGray-300 bg-white py-4">
+    <div
+      className={`flex items-start ${
+        index > 0 ? "border-t border-blueGray-300 pt-4 mt-0" : ""
+      }  bg-white`}
+    >
       {/* {isCart && (
                 <input
                     type="checkbox"
@@ -33,7 +46,8 @@ export default function CartItem({ item, isCart = true }) {
           </a>
           <div className="text-end md:order-4 md:w-32">
             <p className="text-base font-bold text-yellow-600">
-              {printPrice(item.price)}
+              <span className="text-black mr-0.5">{symbol}</span>
+              {price}
             </p>
           </div>
         </div>

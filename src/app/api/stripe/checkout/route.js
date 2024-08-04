@@ -56,9 +56,14 @@ export async function POST(request) {
       paymentMethod,
     });
     if (order && order.id) {
+      const customer = await stripe.customers.create({
+        email: user.email,
+      })
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: transformedItem,
+        customer: customer.id,
+        // customer_email: user.email,
         mode: "payment",
         success_url: redirectURL + `/order-details/${order.id}?success=true&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url:

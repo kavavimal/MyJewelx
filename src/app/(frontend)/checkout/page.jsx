@@ -90,13 +90,14 @@ export default async function CheckoutPage() {
                 <h3 className="my-2 pb-2 text-2xl">
                   Cart <span>( {cart.cartData.cartItems?.length} Product)</span>
                 </h3>
-                <div className="space-y-6 border p-4">
+                <div className="space-y-[15px] py-4 px-[15px] border border-blueGray-300">
                   {cart.cartData.cartItems?.map((item, i) => {
                     return (
                       <CartItem
                         key={"cartItem" + i}
                         item={item}
                         isCart={false}
+                        index={i}
                       />
                     );
                   })}

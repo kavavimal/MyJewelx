@@ -17,6 +17,7 @@ export default withMT({
       boxShadow: {
         xxs: "0px 2px 5px 0px #0000000D",
         "3xl": "0px 0px 20px 1px #0000000D",
+        "4xl": "0px 4px 4px 0px #00000040",
       },
 
       maxWidth: {
@@ -42,13 +43,23 @@ export default withMT({
           400: "#EFEFEF",
           500: "#1A1A1A",
           600: "#999999",
+          700: "#343434",
         },
         secondary: {
           50: "#808080",
           100: "#676767",
           200: "#4D4D4D",
-          300: "#1A1A1A",
           400: "#DFDFDF",
+        },
+        red: {
+          100: "#D4180E",
+        },
+        dark: {
+          50: "#010101",
+          100: "#000B18",
+        },
+        gold: {
+          50: "#D0B68B",
         },
       },
       fontFamily: {

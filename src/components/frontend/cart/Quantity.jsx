@@ -70,7 +70,7 @@ const Quantity = ({ cartItem }) => {
             <path
               stroke="currentColor"
               strokeLinecap="round"
-              stroke-linejoin="round"
+              strokeLinejoin="round"
               strokeWidth="2"
               d="M1 1h16"
             />
@@ -102,7 +102,7 @@ const Quantity = ({ cartItem }) => {
             <path
               stroke="currentColor"
               strokeLinecap="round"
-              stroke-linejoin="round"
+              strokeLinejoin="round"
               strokeWidth="2"
               d="M9 1v16M1 9h16"
             />

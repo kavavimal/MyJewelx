@@ -7,8 +7,8 @@ export const fetchWishlist = async () => {
   if (!user) {
     return {
       message: "User is not login",
-      status: "error"
-    }
+      status: "error",
+    };
   }
   try {
     const wishlistItems = await prisma.wishlist.findMany({
@@ -16,7 +16,15 @@ export const fetchWishlist = async () => {
         userId: user.id,
       },
       include: {
-        product: true,
+        product: {
+          include: {
+            variations: {
+              include: {
+                image: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -42,8 +50,8 @@ export const addToWishlist = async (productId) => {
         productId: productId,
       },
       include: {
-        product: true
-      }
+        product: true,
+      },
     });
 
     return {

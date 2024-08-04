@@ -153,7 +153,7 @@ const FilterProduct = ({ filterdDatas }) => {
               stroke="#676767"
               strokeWidth="0.875"
               strokeLinecap="round"
-              stroke-linejoin="round"
+              strokeLinejoin="round"
             />
           </svg>
         </Button>

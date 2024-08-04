@@ -54,3 +54,56 @@ export const theme = (theme) => ({
     primary75: "#F0AE1129",
   },
 });
+
+
+export const MadeInCountries = [
+  'Brazil', 
+  'China', 
+  'France', 
+  'Germany', 
+  'India',
+  'Italy',
+  'Japan',
+  'Mexico',
+  'South Africa',
+  'Sri Lanka',
+  'Switzerland',
+  'Thailand',
+  'Turkey',
+  'United Arab Emirates',
+  'United Kingdom',
+  'United States'
+];
+
+export const productCategory = [
+  'Rings', 
+  'Necklaces', 
+  'Earrings', 
+  'Bracelets', 
+  'Brooches', 
+  'Pendants',
+  'Ankles',
+  'Chains',
+  'Charms',
+  'Watches',
+  'Set',
+  'Mangalsutra'
+];
+
+export const productMetals = [
+  'Gold', 
+  'Diamond', 
+  'Silver', 
+  'Platinum', 
+  'Palladium', 
+  'Watches'
+];
+
+export const Karats = [
+  '24 Karat', 
+  '22 Karat', 
+  '21 Karat', 
+  '18 Karat', 
+  '14 Karat', 
+  '9 Karat'
+];

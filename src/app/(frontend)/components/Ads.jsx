@@ -11,15 +11,15 @@ const Ads = ({ ads }) => {
           <div className="flex items-center justify-center gap-6">
             {ads.map((adslist, index) => {
               return (
-                <div key={index} className="relative h-[180px] w-[630px]">
+                <div key={index} className="relative ">
                   <Image
                     src={adslist.ads_img_url}
-                    layout="responsive"
-                    height={630}
-                    width={180}
-                    className="h-full w-full"
+                    // layout="responsive"
+                    height={230}
+                    width={630}
+                    className="h-[230px] w-full"
                   />
-                  <div className="absolute left-[30px] top-[45px]">
+                  <div className="absolute left-[30px] top-[45px] translate-x-0 translate-y-[40%]">
                     <h3 className="font-playfairdisplay font-semibold text-2xl">
                       {adslist.ads_desc}
                     </h3>

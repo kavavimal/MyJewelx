@@ -11,6 +11,7 @@ import VendorForm from "@/app/admin/vendors/components/VendorForm";
 import { AcountType, UserStatus } from "@prisma/client";
 import React from "react";
 import Profile from "./components/Profile";
+import Link from "next/link";
 
 const page = async () => {
   const user = await checkUserSession();
@@ -49,6 +50,7 @@ const page = async () => {
       <section>
         <div className="container">
           <h4 className="text-2xl font-semibold">Profile</h4>
+          <Link href="/profile/orders">Orders</Link>
           <Profile user={user} />
         </div>
       </section>

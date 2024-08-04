@@ -230,7 +230,7 @@ export default function FrontendHeader({ categories }) {
           <nav className="py-3">
             <ul className="flex items-center justify-center gap-12">
               <li>
-                <Link href="#" className="text-sm">
+                <Link href="/product-on-demand" className="text-sm">
                   Product on Demand
                 </Link>
               </li>

@@ -159,3 +159,11 @@ div {
 .product__description > strong {
   @apply text-base leading-[22px] text-secondary-100;
 }
+
+body .swiper-pagination-bullet-active {
+  @apply bg-primary-200;
+}
+
+body .swiper-pagination-bullet {
+  @apply bg-primary-200;
+}

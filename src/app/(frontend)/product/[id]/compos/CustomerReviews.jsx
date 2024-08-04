@@ -78,7 +78,7 @@ const CustomerReviews = ({ reviews }) => {
                         d="M12.0011 2L15.1051 8.728L22.4631 9.601L17.0231 14.631L18.4671 21.899L12.0011 18.28L5.53506 21.9L6.97906 14.632L1.53906 9.6L8.89806 8.727L12.0011 2Z"
                         stroke="#CBCBCB"
                         stroke-width="1.5"
-                        stroke-linejoin="round"
+                        strokeLinejoin="round"
                       />
                     </svg>
                   }

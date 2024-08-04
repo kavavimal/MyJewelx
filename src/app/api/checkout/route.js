@@ -101,10 +101,15 @@ export async function createOrder(user, requestData) {
       })),
     },
   };
-  if (paymentResponse && paymentResponse !== null && paymentResponse !== '') {
-    console.log("PaymentResponse : ", paymentResponse);
+  if (paymentResponse && paymentResponse !== null && paymentResponse !== "") {
     orderData.status = OrderStatus.PROCESSING;
     orderData.paymentResponse = JSON.stringify(paymentResponse);
+    if (typeof paymentResponse === "string" && paymentResponse !== "") {
+      let pr = JSON.parse(paymentResponse);
+      if (pr.paidAmount) {
+        orderData.paidAmount = parseFloat(pr.paidAmount);
+      }
+    }
   }
   const order = await prisma.order.create({
     data: orderData,
@@ -146,9 +151,7 @@ export async function POST(request) {
   const shippingAddress = requestData.get("shippingAddress");
   const billingAddress = requestData.get("billingAddress");
   const paymentMethod = requestData.get("paymentMethod");
-  const paymentResponse = requestData.get("paymentResponse")
-    ? requestData.get("paymentResponse")
-    : null;
+  const paymentResponse = requestData.get("paymentResponse");
   try {
     const user = await checkUserSession();
     const order = await createOrder(user, {

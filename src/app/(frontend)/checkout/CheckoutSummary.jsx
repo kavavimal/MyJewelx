@@ -129,17 +129,17 @@ export default function CheckoutSummary({ cart, user, showCoupon = false }) {
               placeholder="coupon code "
               className="border h-full py-1 placeholder:ps-[15px] rounded w-[220px] border-blueGray-300"
             />
-            <button className="flex-1 align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-2.5 px-6 rounded border border-primary-200 text-primary-200 hover:opacity-75 focus:ring focus:ring-gray-300 active:opacity-[0.85]">
+            <button
+              data-ripple-dark="true"
+              className="flex-1 align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-2.5 px-6 rounded border border-primary-200 text-primary-200 hover:opacity-75 focus:ring focus:ring-gray-300 active:opacity-[0.85]"
+            >
               Apply
             </button>
           </div>
         )}
         {paymentMethod === "cod" && (
-          <ButtonComponent
-            onClick={handlePlaceOrder}
-            className="block w-full border-top text-center text-[#F0AE11] bg-white border py-2 px-4 border-[#F0AE11] focus:outline-none hover:bg-yellow-600 hover:text-white rounded"
-          >
-            {loading && <LoadingDots />}
+          <ButtonComponent onClick={handlePlaceOrder}>
+            {/* {loading && <LoadingDots />} */}
             Place Order
           </ButtonComponent>
         )}

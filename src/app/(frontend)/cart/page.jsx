@@ -50,9 +50,11 @@ export default async function Cart() {
                 Item Summary
                 {/* <span>( {cart.cartData.cartItems?.length} )</span> */}
               </h3>
-              <div className="space-y-6">
+              <div className="space-y-[15px]">
                 {cart.cartData.cartItems?.map((item, i) => {
-                  return <CartItem key={"cartItem" + i} item={item} />;
+                  return (
+                    <CartItem key={"cartItem" + i} item={item} index={i} />
+                  );
                 })}
               </div>
             </div>

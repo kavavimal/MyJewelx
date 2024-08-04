@@ -1,11 +1,13 @@
 import React from "react";
-import { checkUserSession } from "../../layout";
 import { redirect } from "next/navigation";
 import Container from "@/components/frontend/Container";
 import { getOrders } from "@/actions/orders";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import Link from "next/link";
 
 export default async function OrderPage() {
-  const user = await checkUserSession();
+  const {user} = await getServerSession(authOptions);
   if (!user) {
     redirect("/login");
   }
@@ -40,6 +42,7 @@ export default async function OrderPage() {
                 );
               })}
             </div>
+            <Link href={`/order-details/${order.id}`}>View Order Details</Link>
           </div>
         );
       })}

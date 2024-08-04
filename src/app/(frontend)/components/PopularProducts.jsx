@@ -116,7 +116,7 @@ const PopularProducts = ({ products }) => {
             ) : (
               <Swiper
                 slidesPerView={3}
-                spaceBetween={20}
+                spaceBetween={15}
                 autoplay={{
                   delay: 5000,
                   disableOnInteraction: false,

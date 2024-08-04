@@ -45,7 +45,7 @@ export default function RemoveCartItem({ cartItem, variant = "" }) {
           <path
             stroke="currentColor"
             strokeLinecap="round"
-            stroke-linejoin="round"
+            strokeLinejoin="round"
             strokeWidth="2"
             d="M6 18 17.94 6M18 18 6.06 6"
           />

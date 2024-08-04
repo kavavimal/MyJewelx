@@ -10,6 +10,15 @@ export function printPrice(price = "") {
   }
 }
 
+export function printFormatPrice(price = "") {
+  if (price === "") {
+    return "";
+  } else {
+    const formatter = new Intl.NumberFormat("en-IN");
+    return formatter.format(Number(price).toFixed(2));
+  }
+}
+
 export function checkPermission(userPermissions = [], allowPermission = "") {
   return (
     userPermissions?.length > 0 &&
@@ -106,28 +115,32 @@ export const getProductPriceString = (product, variation) => {
   let price = printPrice(variation.selling_price);
   if (product) {
     let productPrices = product.variations.reduce(
-        (arr, item) => [
-          ...arr, 
-          Number(item?.selling_price ? item?.selling_price : item?.regular_price)
-        ],
-        []
+      (arr, item) => [
+        ...arr,
+        Number(item?.selling_price ? item?.selling_price : item?.regular_price),
+      ],
+      []
     );
-    productPrices = productPrices.filter((value, index, array) => array.indexOf(value) === index);
+    productPrices = productPrices.filter(
+      (value, index, array) => array.indexOf(value) === index
+    );
     let ProdPriceText = price;
     if (productPrices?.length > 1)
-      ProdPriceText = `${Number(Math.min(...productPrices)).toFixed(2)} - ${Number(Math.max(...productPrices)).toFixed(2)}`;
+      ProdPriceText = `${Number(Math.min(...productPrices)).toFixed(
+        2
+      )} - ${Number(Math.max(...productPrices)).toFixed(2)}`;
     else if (productPrices?.length === 1)
       ProdPriceText = Number(productPrices[0]).toFixed(2);
 
-    price = CURRENCY_SYMBOL + ' ' + ProdPriceText;
+    price = CURRENCY_SYMBOL + " " + ProdPriceText;
   }
   return price;
-}
+};
 
 export const getProductAverageRatings = (reviews) => {
   if (!reviews) return 0;
-  const allRating = reviews.reduce((arr, item) => [...arr, item.rating],[]);
+  const allRating = reviews.reduce((arr, item) => [...arr, item.rating], []);
   const sumRating = allRating.reduce((a, b) => a + b, 0);
-  const avgRating = (sumRating / allRating.length) || 0;
+  const avgRating = sumRating / allRating.length || 0;
   return avgRating;
-}
+};

@@ -100,12 +100,14 @@ export const authOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       profile(profile) {
+
         return {
           id: profile.sub,
           firstName: profile.given_name,
-          lastName: profile.family_name,
+          lastName: profile.family_name ? profile.family_name : ' ',
           email: profile.email,
-          image: profile.picture,
+
+          // image: profile.picture,
           role: {
             connectOrCreate: {
               where: {
@@ -128,7 +130,7 @@ export const authOptions = {
           firstName: profile.name,
           lastName: profile.name,
           email: profile.email,
-          image: profile.picture.data.url,
+          // image: profile.picture.data.url,
           role: {
             connectOrCreate: {
               where: {
@@ -150,7 +152,7 @@ export const authOptions = {
     //       id: profile.id,
     //       username: profile.name,
     //       email: profile.email,
-    //       image: profile.picture.data.url,
+    //    // image: profile.picture.data.url,
     //       role: {
     //         connectOrCreate: {
     //           where: {

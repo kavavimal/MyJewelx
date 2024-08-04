@@ -15,6 +15,9 @@ export async function PUT(request, { params }) {
         id: order_id,
         status: { in: [OrderStatus.PROCESSING, OrderStatus.PENDING] },
       },
+      include: {
+        orderItems: true,
+      },
     });
 
     if (!order) {
@@ -23,14 +26,18 @@ export async function PUT(request, { params }) {
         { status: 400 }
       );
     }
-
     const result = await prisma.order.update({
       where: { id: order_id },
       data: { status: OrderStatus.USERCANCELLED },
     });
 
     // TODO: Send mail to seller about order cancel update and update quantity to variation for order
-
+    order.orderItems.forEach(async (item) => {
+      const nq = await prisma.productVariation.update({
+        where: { variation_id: item.productVariationId },
+        data: { quantity: { increment: item.quantity } },
+      });
+    });
     return NextResponse.json(
       { message: "Order Canceled successfully", result },
       { status: 200 }
