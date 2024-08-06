@@ -115,9 +115,6 @@ const Wishlist = ({ wishlist }) => {
   };
   return (
     <>
-      <div class="flex items-center text-sm before:flex-1 before:border-t after:pr-64 before:border-primary-200 after:border-t after:border-primary-200 dark:text-white dark:before:border-neutral-600 dark:after:border-neutral-600">
-        <img src="/assets/images/divider.svg" alt="" />
-      </div>
       <h1 className="text-3xl mt-2 text-center">My Wishlist</h1>
       <DataTable
         className="pt-2"

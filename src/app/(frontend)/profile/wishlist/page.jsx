@@ -50,6 +50,7 @@ export default async function WishlistPage() {
             current: true,
           },
         ]}
+        showDevider={true}
       />
       <Wishlist wishlist={wishlist} />
       {/* {wishlist?.wishlistItems &&

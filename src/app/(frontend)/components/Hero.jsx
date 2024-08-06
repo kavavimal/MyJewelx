@@ -384,7 +384,7 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
                 >
                   {homeSlide.map((slide, index) => {
                     return (
-                      <div className="relative" key={index}>
+                      <div className="relative h-[393px]" key={index}>
                         <img
                           src={slide.image_url}
                           alt="slider hero 2"

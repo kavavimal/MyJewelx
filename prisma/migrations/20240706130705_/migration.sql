@@ -5,6 +5,10 @@
 -- multiple migrations, each migration adding only one value to
 -- the enum.
 
-
-ALTER TYPE "adsType" ADD VALUE 'SHOP';
-ALTER TYPE "adsType" ADD VALUE 'STORE';
+BEGIN;
+CREATE TYPE "adsType_new" AS ENUM ('HOME', 'POD', 'SHOP','STORE');
+ALTER TABLE "Promotional" ALTER COLUMN "ads_type" TYPE "adsType_new" USING ("ads_type"::text::"adsType_new");
+ALTER TYPE "adsType" RENAME TO "adsType_old";
+ALTER TYPE "adsType_new" RENAME TO "adsType";
+DROP TYPE "adsType_old";
+COMMIT;

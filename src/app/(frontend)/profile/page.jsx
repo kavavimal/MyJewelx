@@ -12,6 +12,7 @@ import { AcountType, UserStatus } from "@prisma/client";
 import React from "react";
 import Profile from "./components/Profile";
 import Link from "next/link";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const page = async () => {
   const user = await checkUserSession();
@@ -49,9 +50,14 @@ const page = async () => {
     return (
       <section>
         <div className="container">
-          <h4 className="text-2xl font-semibold">Profile</h4>
-          <Link href="/profile/orders">Orders</Link>
-          <Profile user={user} />
+          <div className="py-10">
+            <Breadcrumbs autoBread={true} showDevider={true} />
+            <div className="flex items-center gap-4 pb-3">
+              <h4 className="text-2xl font-semibold pb-3">Profile</h4>
+              {/* <Link href="/profile/orders">Orders</Link> */}
+            </div>
+            <Profile user={user} />
+          </div>
         </div>
       </section>
     );

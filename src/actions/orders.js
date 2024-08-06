@@ -15,6 +15,7 @@ export const getOrders = async () => {
         orderItems: true,
       },
     });
+
     return orderData;
   } catch (e) {
     return {

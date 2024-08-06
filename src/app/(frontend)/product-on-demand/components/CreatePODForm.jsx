@@ -93,6 +93,17 @@ const CreatePODForm = () => {
     }
   };
 
+  const customStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      width: "100%",
+      height: "100%",
+      minHeight: "40px",
+      borderRadius: "6px",
+      borderColor: "#b0bec5",
+    }),
+  };
+
   return (
     <Formik
       initialValues={initialValue}
@@ -104,9 +115,34 @@ const CreatePODForm = () => {
           <div className="grid items-start gap-[12px]">
             <div className="grid gap-[7px]">
               <label htmlFor="select-name">Item Name</label>
-              <Select
+              <ReactSelect
+                placeholder={
+                  <span style={{ color: "#4D4D4D" }}>
+                    Select the jewelry item name
+                  </span>
+                }
+                // placeholder="select the jewelry item name"
+                id="select-name"
+                name="name"
+                options={productCategory.map((item) => {
+                  return { value: item, label: item };
+                })}
+                styles={customStyles}
+                value={
+                  props.values.name
+                    ? { value: props.values.name, label: props.values.name }
+                    : null
+                }
+                onChange={(value) => props.setFieldValue("name", value.value)}
+                onBlur={props.handleBlur}
+                className="border-0 bg-white text-gray-900 placeholder:text-gray-500 placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10 border-t-grey-200"
+                classNamePrefix="react-select"
+              />
+              {/* <Select
                 size="lg"
-                label="select the jewelry item name"
+                placeholder="select the jewelry item name"
+                labelProps={{ className: "hidden" }}
+                className="!border bg-white text-gray-900 placeholder:text-gray-500 placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10 border-t-grey-200"
                 id="select-name"
                 name="name"
                 onChange={(value) => props.setFieldValue("name", value)}
@@ -120,7 +156,7 @@ const CreatePODForm = () => {
                     </Option>
                   );
                 })}
-              </Select>
+              </Select> */}
               {props.errors.name && props.touched.name && (
                 <p className="text-red-400">{props?.errors?.name}</p>
               )}
@@ -136,9 +172,12 @@ const CreatePODForm = () => {
               <Textarea
                 placeholder="Provide a detail description of product here..."
                 id="description"
-                className="!border !border-primary-200 bg-white text-gray-900 placeholder:text-gray-500 placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
+                className="!border !border-primary-200 bg-white text-gray-900  placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10 placeholder:font-emirates placeholder:text-[16px] placeholder:text-[#4D4D4D]"
                 // placeholder=""
                 name="description"
+                labelProps={{
+                  className: "hidden",
+                }}
                 onChange={props.handleChange}
                 onBlur={props.handleBlur}
                 value={props.values.description}
@@ -149,7 +188,7 @@ const CreatePODForm = () => {
             </div>
             <div className="grid gap-[7px] ">
               <div>
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-2 gap-5 items-start">
                   <div className="grid gap-[7px]">
                     <label
                       className="text-[18px] text-dark-50"
@@ -157,7 +196,33 @@ const CreatePODForm = () => {
                     >
                       Metal Type
                     </label>
-                    <Select
+                    <ReactSelect
+                      placeholder={
+                        <span style={{ color: "#4D4D4D" }}>Select Metal</span>
+                      }
+                      // placeholder="Select Metal"
+                      id="select-metal"
+                      name="metal"
+                      options={productMetals.map((item) => {
+                        return { value: item, label: item };
+                      })}
+                      styles={customStyles}
+                      value={
+                        props.values.metal
+                          ? {
+                              value: props.values.metal,
+                              label: props.values.metal,
+                            }
+                          : null
+                      }
+                      onChange={(value) =>
+                        props.setFieldValue("metal", value.value)
+                      }
+                      onBlur={props.handleBlur}
+                      className="border-0 bg-white text-gray-900 placeholder:text-gray-500 placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10 border-t-grey-200"
+                      classNamePrefix="react-select"
+                    />
+                    {/* <Select
                       size="lg"
                       label="Metal"
                       id="select-metal"
@@ -173,7 +238,7 @@ const CreatePODForm = () => {
                           </Option>
                         );
                       })}
-                    </Select>
+                    </Select> */}
                     {props.errors.metal && props.touched.metal && (
                       <p className="text-red-400">{props?.errors?.metal}</p>
                     )}
@@ -186,7 +251,34 @@ const CreatePODForm = () => {
                       >
                         Karat
                       </label>
-                      <Select
+
+                      <ReactSelect
+                        placeholder={
+                          <span style={{ color: "#4D4D4D" }}>Select Karat</span>
+                        }
+                        // placeholder="Select Karat"
+                        id="select-karat"
+                        name="karat"
+                        options={Karats.map((item) => {
+                          return { value: item, label: item };
+                        })}
+                        styles={customStyles}
+                        value={
+                          props.values.karat
+                            ? {
+                                value: props.values.karat,
+                                label: props.values.karat,
+                              }
+                            : null
+                        }
+                        onChange={(value) =>
+                          props.setFieldValue("karat", value.value)
+                        }
+                        onBlur={props.handleBlur}
+                        className="border-0 bg-white text-gray-900 placeholder:text-gray-500 placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10 border-t-grey-200"
+                        classNamePrefix="react-select"
+                      />
+                      {/* <Select
                         size="lg"
                         label="Karat"
                         id="select-karat"
@@ -204,7 +296,7 @@ const CreatePODForm = () => {
                             </Option>
                           );
                         })}
-                      </Select>
+                      </Select> */}
                       {props.errors.karat && (
                         <p className="text-red-400">{props?.errors?.karat}</p>
                       )}
@@ -224,10 +316,47 @@ const CreatePODForm = () => {
                   >
                     Weight Type
                   </label>
-
-                  <Select
+                  <ReactSelect
+                    id="select-weight-type"
+                    instanceId="select-weight-type"
+                    className="border-0 bg-white text-gray-900 placeholder:text-gray-500 placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
+                    classNamePrefix="react-select"
+                    placeholder={
+                      props.values.weight_type ?? (
+                        <span style={{ color: "#4D4D4D" }}>
+                          Select Weight Type
+                        </span>
+                      )
+                    }
+                    value={
+                      props.values.weight_type
+                        ? {
+                            value: props.values.weight_type,
+                            label: props.values.weight_type,
+                          }
+                        : null
+                    }
+                    styles={customStyles}
+                    onChange={(value) =>
+                      props.setFieldValue("weight_type", value.value)
+                    }
+                    onBlur={props.handleBlur}
+                    options={[
+                      { value: "min", label: "Minimum" },
+                      { value: "max", label: "Maximum" },
+                      { value: "range", label: "Range" },
+                    ]}
+                  />
+                  {/* <Select
                     size="lg"
                     id="select-weight-type"
+                    labelProps={{
+                      className: "hidden",
+                    }}
+                    placeholder={
+                      props.values.weight_type ?? "Select Weight Type"
+                    }
+                    className="!borderbg-white text-gray-900 placeholder:text-gray-500 placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10 border-t-grey-200"
                     label={props.values.weight_type ?? "Select Weight Type"}
                     name="weight_type"
                     onChange={(value) =>
@@ -246,9 +375,9 @@ const CreatePODForm = () => {
                     <Option index={2} value="range">
                       Range
                     </Option>
-                  </Select>
+                  </Select> */}
                 </div>
-                <div className="grid grid-cols-2 grid-row-1 gap-5">
+                <div className="flex gap-5">
                   {props.values.weight_type === "range" ||
                   props.values.weight_type === "min" ? (
                     <div className="w-full grid gap-[7px]">
@@ -269,8 +398,9 @@ const CreatePODForm = () => {
                         containerProps={{
                           className: "!min-w-full",
                         }}
-                        className="focus:border-t-gray-900 max-w-full lg:max-w-[183px]"
-                        placeholder="Minimum Height"
+                        className={` w-full  !border bg-white text-gray-900 placeholder:font-emirates placeholder:text-[16px] placeholder:text-[#4D4D4D] placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10 `}
+                        // className="focus:border-t-gray-900 max-w-full lg:max-w-[183px]"
+                        placeholder="Enter Minimum Height"
                         onChange={(e) =>
                           props.setFieldValue("min_weight", e.target.value)
                         }
@@ -307,8 +437,8 @@ const CreatePODForm = () => {
                         containerProps={{
                           className: "!min-w-full",
                         }}
-                        className="focus:border-t-gray-900"
-                        placeholder="Maximum Height"
+                        className={`w-full !border bg-white text-gray-900 placeholder:font-emirates placeholder:text-[16px] placeholder:text-[#4D4D4D] placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10 `}
+                        placeholder="Enter Maximum Height"
                         onChange={(e) =>
                           props.setFieldValue("max_weight", e.target.value)
                         }
@@ -339,7 +469,43 @@ const CreatePODForm = () => {
                 >
                   Price Type
                 </label>
-                <Select
+                <ReactSelect
+                  id="price_type"
+                  instanceId="price_type"
+                  className="border-0  bg-white text-gray-900 placeholder:text-gray-500 placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10 border-t-grey-200"
+                  classNamePrefix="react-select"
+                  placeholder={
+                    props.values.weight_type ?? (
+                      <span style={{ color: "#4D4D4D" }}>
+                        Select Price Type
+                      </span>
+                    )
+                  }
+                  styles={customStyles}
+                  value={
+                    props.values.price_type
+                      ? {
+                          value: props.values.price_type,
+                          label: props.values.price_type,
+                        }
+                      : null
+                  }
+                  onChange={(value) =>
+                    props.setFieldValue("price_type", value.value)
+                  }
+                  onBlur={props.handleBlur}
+                  options={[
+                    { value: "max", label: "Maximum" },
+                    { value: "range", label: "Range" },
+                  ]}
+                  size="lg"
+                />
+                {/* <Select
+                  labelProps={{
+                    className: "hidden",
+                  }}
+                  placeholder="Select Price Type"
+                  className="!border bg-white text-gray-900 placeholder:text-gray-500 placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10 border-t-grey-200"
                   label={props.values.price_type ?? "Select Price Type"}
                   id="price_type"
                   name="price_type"
@@ -355,9 +521,9 @@ const CreatePODForm = () => {
                   <Option index={4} value="range">
                     Range
                   </Option>
-                </Select>
+                </Select> */}
               </div>
-              <div className="grid grid-cols-2 grid-row-1 gap-5">
+              <div className="flex gap-5">
                 {props.values.price_type === "range" ? (
                   <div className="w-full grid gap-[7px]">
                     <label
@@ -380,8 +546,9 @@ const CreatePODForm = () => {
                       labelProps={{
                         className: "hidden",
                       }}
-                      className="focus:border-t-gray-900 max-w-full lg:max-w-[183px] "
-                      placeholder="Minimum Price"
+                      className="!border w-full bg-white text-gray-900 placeholder:font-emirates placeholder:text-[16px] placeholder:text-[#4D4D4D] placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
+                      // className="focus:border-t-gray-900 max-w-full lg:max-w-[183px] "
+                      placeholder="Enter Minimum Price"
                       onBlur={props.handleBlur}
                       value={props.values.min_price ?? ""}
                     />
@@ -403,7 +570,7 @@ const CreatePODForm = () => {
                     </label>
                     <Input
                       size="lg"
-                      // label="Max Price"
+                      label="Max Price"
                       id="max_price"
                       name="max_price"
                       containerProps={{
@@ -412,8 +579,9 @@ const CreatePODForm = () => {
                       labelProps={{
                         className: "hidden",
                       }}
-                      className="focus:border-t-gray-900 max-w-full lg:max-w-[183px]"
-                      placeholder="Maximum Price"
+                      className={`!border bg-white w-full text-gray-900 placeholder:font-emirates placeholder:text-[16px] placeholder:text-[#4D4D4D] placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10 `}
+                      // className="focus:border-t-gray-900 "
+                      placeholder="Enter Maximum Price"
                       onChange={(e) =>
                         props.setFieldValue("max_price", e.target.value)
                       }
@@ -439,13 +607,15 @@ const CreatePODForm = () => {
                   Made In
                 </Typography>
                 <ReactSelect
-                  placeholder="Select Made In County"
+                  placeholder={
+                    <span style={{ color: "#4D4D4D" }}>Select Country</span>
+                  }
                   isMulti
                   name="made-in"
                   options={MadeInCountries.map((mi) => {
                     return { value: mi, label: mi };
                   })}
-                  // styles={style}
+                  styles={customStyles}
                   value={props.values.made_in.map((mi) => {
                     return { value: mi, label: mi };
                   })}
@@ -463,6 +633,27 @@ const CreatePODForm = () => {
               <label className="text-[18px] text-dark-50" htmlFor="contact">
                 Contact Number
               </label>
+              {/* <div>
+                <Typography
+                  variant="small"
+                  className="mb-2 text-left font-medium !text-gray-900"
+                >
+                  First Name
+                </Typography>
+                <Input
+                  color="gray"
+                  size="lg"
+                  placeholder="First Name"
+                  name="first-name"
+                  className="focus:border-t-gray-900"
+                  containerProps={{
+                    className: "min-w-full",
+                  }}
+                  labelProps={{
+                    className: "hidden",
+                  }}
+                />
+              </div> */}
               <Input
                 size="lg"
                 label="Enter Your Contact Number"
@@ -471,6 +662,11 @@ const CreatePODForm = () => {
                 containerProps={{
                   className: "!min-w-full",
                 }}
+                labelProps={{
+                  className: "hidden",
+                }}
+                placeholder="Enter Your Contact Number"
+                className="!border bg-white text-gray-900  placeholder:opacity-100 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10 placeholder:font-emirates placeholder:text-[16px] placeholder:text-[#4D4D4D] "
                 onChange={(e) => props.setFieldValue("contact", e.target.value)}
                 onBlur={props.handleBlur}
                 value={props.values.contact ?? ""}
@@ -491,7 +687,7 @@ const CreatePODForm = () => {
                     : "border-blueGray-100"
                 } border-dotted rounded-lg cursor-pointer bg-white dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-blueGray-300 dark:hover:border-gray-500 dark:hover:bg-gray-600`}
               >
-                <div className="flex flex-col items-center justify-center pt-7 pb-1">
+                <div className="flex flex-col items-center justify-center">
                   <svg
                     width="40"
                     height="28"
@@ -504,8 +700,11 @@ const CreatePODForm = () => {
                       fill="#1A1A1A"
                     />
                   </svg>
-                  <span className="pt-5">
+                  <span className="pt-2.5 pb-[5px] text-secondary-100 text-[14px]">
                     Drag and drop a file here or simply click to upload imgae
+                  </span>
+                  <span className="text-secondary-100 text-[14px]">
+                    minumum 5 images required
                   </span>
                 </div>
                 <input

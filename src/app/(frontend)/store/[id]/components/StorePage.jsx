@@ -260,7 +260,7 @@ const StorePage = () => {
           <h3 className="text-[34px] text-center font-playfairdisplay font-semibold mb-[50px]">
             Featured Products
           </h3>
-          <div className="flex items-start gap-11">
+          <div className="flex items-start gap-11 mb-[124px]">
             <Swiper
               modules={[Grid]}
               slidesPerView={3}
@@ -347,6 +347,160 @@ const StorePage = () => {
                   );
                 })}
               </Swiper>
+            </div>
+          </div>
+          <h3 className="text-[34px] text-center font-playfairdisplay font-semibold mb-[50px]">
+            Best Selling Products
+          </h3>
+          <div className="flex items-start gap-11">
+            <div className="w-[476px]">
+              <Swiper>
+                {products.slice(0, 5).map((product, index) => {
+                  const variation = product?.variations[0];
+                  return (
+                    <SwiperSlide key={index}>
+                      <Card className="realative overflow-hidden font-normal text-left h-[555px] border border-dark-100">
+                        <CardHeader
+                          floated={false}
+                          shadow={false}
+                          color="transparent"
+                          className="m-0 rounded-none"
+                        >
+                          <div className="w-full overflow-hidden bg-[#FFFDF8]">
+                            <Link
+                              href={`/product/${product?.product_id}`}
+                              className="font-normal w-full h-[437px] flex justify-center items-center"
+                            >
+                              <Image
+                                src={"/assets/images/new.png"}
+                                alt="image for design"
+                                width={450}
+                                height={437}
+                                className="w-full h-auto hover:scale-105 transition-all duration-300"
+                              />
+                            </Link>
+                          </div>
+                        </CardHeader>
+                        <CardBody className="p-0 py-[19px] px-[15px]">
+                          <div className="flex flex-col gap-2">
+                            <p className="text-black text-sm">
+                              <Link
+                                href={`/product/${product?.product_id}`}
+                                className="font-normal leading-8 text-left text-xl"
+                              >
+                                {truncate(product?.product_name, 25)}
+                              </Link>
+                            </p>
+                            <div className="flex items-center justify-between">
+                              <span className="font-light text-base">
+                                {getProductPriceString(product, variation)}
+                              </span>
+                              <span className="font-light text-base">
+                                {variation.net_weight} gram
+                              </span>
+                            </div>
+                            <Engagement
+                              averateRating={getProductAverageRatings(
+                                product.reviews
+                              )}
+                              product_id={product.product_id}
+                              variation={variation}
+                            />
+                          </div>
+                        </CardBody>
+                      </Card>
+                    </SwiperSlide>
+                  );
+                })}
+              </Swiper>
+            </div>
+            <Swiper
+              modules={[Grid]}
+              slidesPerView={3}
+              spaceBetween={15}
+              grid={{ rows: 2, fill: "row" }}
+              className="flex-1"
+            >
+              {products.map((product) => (
+                <SwiperSlide
+                  key={product.product_id}
+                  style={{
+                    width: 245,
+                  }}
+                >
+                  <div className="border border-dark-100">
+                    <Image
+                      src={product?.variations[0]?.image[0].path}
+                      height={270}
+                      width={245}
+                      alt=""
+                      className="w-full h-[270px]"
+                    />
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        </div>
+      </section>
+      <section className="bg-white pt-[78px] pb-[98px]">
+        <div className="container">
+          <h3 className="text-[34px] text-center font-playfairdisplay font-semibold mb-[50px]">
+            Product Showcase
+          </h3>
+          <div>
+            <div className="grid grid-cols-4 gap-5">
+              <div className="grid gap-5">
+                <div className="bg-clip-border overflow-hidden rounded-sm">
+                  <Image
+                    src="/assets/images/Illustration16.png"
+                    alt="image for design"
+                    width={310}
+                    height={300}
+                    className="w-[305] h-[272.76] object-cover"
+                  />
+                </div>
+                <div className="bg-clip-border overflow-hidden rounded-sm">
+                  <Image
+                    src="/assets/images/Illustration17.png"
+                    alt="image for design"
+                    width={310}
+                    height={300}
+                    className="w-[305] h-[272.76] object-cover"
+                  />
+                </div>
+              </div>
+              <div className="col-span-2">
+                <div className="bg-clip-border overflow-hidden rounded-sm">
+                  <Image
+                    src="/assets/images/Illustration18.png"
+                    alt="image for design"
+                    width={700}
+                    height={600}
+                    className="w-[625px] h-[566px] object-cover"
+                  />
+                </div>
+              </div>
+              <div className="grid gap-5">
+                <div className="bg-clip-border overflow-hidden rounded-sm">
+                  <Image
+                    src="/assets/images/Illustration19.jpg"
+                    alt="image for design"
+                    width={310}
+                    height={300}
+                    className="w-[305] h-[272.76] object-cover"
+                  />
+                </div>
+                <div className="bg-clip-border overflow-hidden rounded-sm">
+                  <Image
+                    src="/assets/images/Illustration20.jpg"
+                    alt="image for design"
+                    width={310}
+                    height={300}
+                    className="w-[305] h-[272.76] object-cover"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>

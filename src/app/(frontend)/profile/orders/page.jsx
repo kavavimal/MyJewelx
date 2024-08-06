@@ -5,18 +5,22 @@ import { getOrders } from "@/actions/orders";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Link from "next/link";
-
+import OrderTable from "./components/Orders";
+import Breadcrumbs from "@/components/Breadcrumbs";
 export default async function OrderPage() {
-  const {user} = await getServerSession(authOptions);
+  const { user } = await getServerSession(authOptions);
   if (!user) {
     redirect("/login");
   }
   const orders = await getOrders();
-  console.log("orders", orders);
+  // console.log("orders", orders);
   return (
     <Container>
-      <h2>Your Orders</h2>
-      {orders.map((order) => {
+      <div className="py-7">
+        <Breadcrumbs autoBread={true} showDevider={true} />
+        <OrderTable orders={orders} />
+      </div>
+      {/* {orders.map((order) => {
         return (
           <div
             key={"order" + order.id}
@@ -42,10 +46,10 @@ export default async function OrderPage() {
                 );
               })}
             </div>
-            <Link href={`/order-details/${order.id}`}>View Order Details</Link>
+            <Link href={`/profile/orders/${order.id}`}>View Order Details</Link>
           </div>
         );
-      })}
+      })} */}
     </Container>
   );
 }

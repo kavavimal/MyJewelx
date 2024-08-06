@@ -5,10 +5,26 @@ CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'OUTOFSTOCK', 'USERCANCELLED', 'SE
 CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'SUCCESS', 'FAILED');
 
 -- AlterEnum
-ALTER TYPE "ProductStatus" ADD VALUE 'ARCHIVED';
+BEGIN;
+CREATE TYPE "ProductStatus_new" AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED');
+ALTER TABLE "Product" ALTER COLUMN "status" DROP DEFAULT;
+ALTER TABLE "Product" ALTER COLUMN "status" TYPE "ProductStatus_new" USING ("status"::text::"ProductStatus_new");
+ALTER TYPE "ProductStatus" RENAME TO "ProductStatus_old";
+ALTER TYPE "ProductStatus_new" RENAME TO "ProductStatus";
+DROP TYPE "ProductStatus_old";
+ALTER TABLE "Product" ALTER COLUMN "status" SET DEFAULT 'DRAFT';
+COMMIT;
 
 -- AlterEnum
-ALTER TYPE "UserStatus" ADD VALUE 'SUSPENDED';
+BEGIN;
+CREATE TYPE "UserStatus_new" AS ENUM ('ACTIVE', 'DISABLED', 'SUSPENDED');
+ALTER TABLE "User" ALTER COLUMN "status" DROP DEFAULT;
+ALTER TABLE "User" ALTER COLUMN "status" TYPE "UserStatus_new" USING ("status"::text::"UserStatus_new");
+ALTER TYPE "UserStatus" RENAME TO "UserStatus_old";
+ALTER TYPE "UserStatus_new" RENAME TO "UserStatus";
+DROP TYPE "UserStatus_old";
+ALTER TABLE "User" ALTER COLUMN "status" SET DEFAULT 'ACTIVE';
+COMMIT;
 
 -- AlterTable
 ALTER TABLE "Tag" ALTER COLUMN "updated_at" SET DEFAULT CURRENT_TIMESTAMP;

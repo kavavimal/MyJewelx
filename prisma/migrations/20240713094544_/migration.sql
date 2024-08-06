@@ -5,7 +5,10 @@
 -- multiple migrations, each migration adding only one value to
 -- the enum.
 
-
-ALTER TYPE "adsType" ADD VALUE 'HOME_B';
-ALTER TYPE "adsType" ADD VALUE 'CART';
-ALTER TYPE "adsType" ADD VALUE 'WISHLIST';
+-- AlterEnum
+BEGIN;
+CREATE TYPE "adsType_new" AS ENUM ('HOME', 'POD', 'SHOP','STORE','HOME_B','CART','WISHLIST');
+ALTER TYPE "adsType" RENAME TO "adsType_old";
+ALTER TYPE "adsType_new" RENAME TO "adsType";
+DROP TYPE "adsType_old";
+COMMIT;
