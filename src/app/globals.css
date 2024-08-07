@@ -165,5 +165,5 @@ body .swiper-pagination-bullet-active {
 }
 
 body .swiper-pagination-bullet {
-  @apply bg-primary-200;
+  @apply bg-primary-200 cursor-pointer;
 }

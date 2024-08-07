@@ -505,6 +505,148 @@ const StorePage = () => {
           </div>
         </div>
       </section>
+
+      <section className="pt-[81px] pb-[120px]">
+        <div className="container">
+          <h3 className="text-[34px] text-center font-playfairdisplay text-blueGray-500 font-semibold mb-[50px]">
+            Our Designs
+          </h3>
+          <div className="relative">
+            <Swiper
+              modules={[Grid, Pagination]}
+              pagination={{ clickable: true, el: ".design-pagination" }}
+              slidesPerView={4}
+              spaceBetween={20}
+              grid={{ rows: 2, fill: "row" }}
+            >
+              {[
+                "/assets/images/Illustration21.jpg",
+                "/assets/images/Illustration23.jpg",
+                "/assets/images/Illustration24.jpg",
+                "/assets/images/Illustration25.jpg",
+                "/assets/images/Illustration26.jpg",
+                "/assets/images/Illustration27.jpg",
+                "/assets/images/Illustration28.png",
+                "/assets/images/Illustration29.jpg",
+                "/assets/images/Illustration21.jpg",
+                "/assets/images/Illustration23.jpg",
+              ].map((path, index) => (
+                <SwiperSlide key={index}>
+                  <div>
+                    <Image
+                      src={path}
+                      alt="image for design"
+                      width={350}
+                      height={300}
+                      className="w-[305px] h-[210px] object-cover"
+                    />
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+            <div className="design-pagination flex justify-center items-center gap-[7px] mt-[30px]"></div>
+          </div>
+        </div>
+      </section>
+      <section className="bg-primary-250">
+        <div className="container flex justify-between items-center gap-[146px]">
+          <div className="w-[480px]">
+            <h3 className="text-[34px] font-playfairdisplay text-blueGray-500 font-semibold mb-[50px]">
+              Explore the Trending products crafted by Scintilla
+            </h3>
+          </div>
+          <div className="flex-1">
+            <div className="grid grid-cols-3 gap-5 items-start">
+              <div className="grid gap-5">
+                <div>
+                  <Image
+                    src={"/assets/images/Illustration30.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </div>
+                <div>
+                  <Image
+                    src={"/assets/images/Illustration31.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </div>
+                <div>
+                  <Image
+                    src={"/assets/images/Illustration32.png"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </div>
+              </div>
+              <div className="grid gap-5">
+                <div>
+                  <Image
+                    src={"/assets/images/Illustration33.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[131px] object-cover"
+                  />
+                </div>
+                <div>
+                  <Image
+                    src={"/assets/images/Illustration34.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </div>
+                <div>
+                  <Image
+                    src={"/assets/images/Illustration35.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </div>
+                <div>
+                  <Image
+                    src={"/assets/images/Illustration36.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[131px] object-cover"
+                  />
+                </div>
+              </div>
+              <div className="grid gap-5">
+                <div>
+                  <Image
+                    src={"/assets/images/Illustration37.png"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </div>
+                <div>
+                  <Image
+                    src={"/assets/images/Illustration38.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </div>
+                <div>
+                  <Image
+                    src={"/assets/images/Illustration39.png"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </>
   );
 };

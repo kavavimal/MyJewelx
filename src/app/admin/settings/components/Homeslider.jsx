@@ -15,13 +15,15 @@ import Image from "next/image";
 const Homeslider = ({ homeslider }) => {
   const [previewURLs, setPreviewURLs] = useState([]);
   const [image, setImage] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
   const router = useRouter();
+
   const columns = [
     {
       name: "Image",
       selector: (row) => (
         <>
-          {console.log(row.image_url)}
           <Image src={row?.image_url} width={50} height={50} />
         </>
       ),
@@ -38,11 +40,9 @@ const Homeslider = ({ homeslider }) => {
       name: "Link",
       selector: (row) => (
         <>
-          <Button>
-            <Link href={row?.link_url} className="">
-              Shop Now
-            </Link>
-          </Button>
+          <Link href={row?.link_url} className="">
+            Shop Now
+          </Link>
         </>
       ),
     },
@@ -50,8 +50,11 @@ const Homeslider = ({ homeslider }) => {
       name: "Actions",
       selector: (row) => (
         <>
-          <Button>Edit</Button>
-          <IconButton variant="text" color="red" className="rounded-full">
+          <IconButton
+            variant="text"
+            className="rounded-full"
+            onClick={() => handleEdit(row)}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width={18}
@@ -60,15 +63,30 @@ const Homeslider = ({ homeslider }) => {
             >
               <path
                 fill="currentColor"
-                d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zm2-4h2V8H9zm4 0h2V8h-2z"
+                d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83l3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"
               ></path>
             </svg>
           </IconButton>
+
           <DeleteSlide id={row?.id} />
         </>
       ),
     },
   ];
+
+  const handleEdit = (row) => {
+    setIsEditing(true);
+    setEditId(row.id);
+    setImage(null);
+    setPreviewURLs(row.image_url ? [row.image_url] : []);
+    formik.setValues({
+      title: row.title,
+      description: row.description,
+      link_url: row.link_url,
+      image_url: row.image_url,
+    });
+  };
+
   const formik = useFormik({
     initialValues: {
       title: "",
@@ -81,31 +99,44 @@ const Homeslider = ({ homeslider }) => {
       formData.append("title", values.title);
       formData.append("description", values.description);
       formData.append("link_url", values.link_url);
-      formData.append("image_url", image);
-
+      if (image) {
+        formData.append("image_url", image);
+      } else if (values.image_url) {
+        formData.append("image_url", values.image_url);
+      }
       try {
-        const response = await post("/api/home_slider", formData);
+        const response = isEditing
+          ? await update(`/api/home_slider/${editId}`, formData)
+          : await post("/api/home_slider", formData);
+
         if (response?.status === 200) {
-          enqueueSnackbar("Slide created successfully", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
+          enqueueSnackbar(
+            isEditing
+              ? "Slide updated successfully"
+              : "Slide created successfully",
+            {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            }
+          );
         }
         setImage(null);
         setPreviewURLs([]);
+        setIsEditing(false);
+        setEditId(null);
         router.refresh();
         formik.resetForm();
       } catch (error) {
@@ -130,6 +161,7 @@ const Homeslider = ({ homeslider }) => {
       }
     },
   });
+
   useEffect(() => {
     console.log("image", image);
     console.log("previewURLs", previewURLs);
@@ -210,76 +242,20 @@ const Homeslider = ({ homeslider }) => {
                     name="image_url"
                     accept="image/*"
                     onChange={(e) => {
-                      formik.setFieldValue("image_url", e.target.files[0]);
-                      setImage(e.target.files[0]);
-                      setPreviewURLs([URL.createObjectURL(e.target.files[0])]);
+                      const file = e.target.files[0];
+                      if (file) {
+                        formik.setFieldValue("image_url", file);
+                        setImage(file);
+                        setPreviewURLs([URL.createObjectURL(file)]);
+                      }
                     }}
                   />
                 </label>
               </div>
-              {/* <div className="mb-2 w-1/2"> */}
-              {/* <Input
-                    id="images"
-                    label="Images"
-                    labelProps={{ className: "hidden" }}
-                    className="!border border-t-gray-400 focus:border-black"
-                    type="file"
-                    name="image_url"
-                    accept="image/*"
-                    onChange={(e) => {
-                      formik.setFieldValue("image_url", e.target.files[0]);
-                      setImage(e.target.files[0]);
-                      setPreviewURLs([URL.createObjectURL(e.target.files[0])]);
-                    }}
-                  /> */}
-              {/* {previewURLs && (
-                    <div className="">
-                      <div className="flex flex-wrap items-center gap-5 pt-3">
-                        {previewURLs.map((url, i) => (
-                          <div key={i}>
-                            <div className="relative">
-                              <div className="absolute right-0 top-0">
-                                <IconButton
-                                  type="button"
-                                  variant="text"
-                                  size="sm"
-                                  className="rounded-full h-7 w-7"
-                                  onClick={() => {
-                                    setImage(null);
-                                    setPreviewURLs([]);
-                                  }}
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width={20}
-                                    height={20}
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      fill="currentColor"
-                                      d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"
-                                    ></path>
-                                  </svg>
-                                </IconButton>
-                              </div>
-                            </div>
-                            <Image
-                              key={i}
-                              width={100}
-                              height={100}
-                              src={url}
-                              alt={`Preview ${i}`}
-                              className="w-36 h-36 transition-all duration-300 rounded-lg"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )} */}
-              {/* </div> */}
+
               <div className="flex items-center justify-between">
                 <Button type="submit" loading={formik.isSubmitting}>
-                  Add {/* {tag ? 'Update' : 'Add'} */}
+                  {isEditing ? "Update" : "Add"}
                 </Button>
               </div>
             </div>
@@ -291,7 +267,6 @@ const Homeslider = ({ homeslider }) => {
         columns={columns}
         highlightOnHover
         pagination
-        pointerOnHover
       />
     </div>
   );

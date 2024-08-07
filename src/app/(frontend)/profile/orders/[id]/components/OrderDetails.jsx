@@ -4,10 +4,12 @@ import { get } from "@/utils/api";
 import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { log } from "handlebars";
+import Link from "next/link";
 const OrderDetails = ({ id }) => {
   const [order, setOrder] = useState({});
   const [shippingAddress, setShippingAddress] = useState({});
   const [billingAddress, setBillingAddress] = useState({});
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const getOrder = async () => {
     setLoading(true);
@@ -16,6 +18,7 @@ const OrderDetails = ({ id }) => {
     if (response.data.order.shippingAddress) {
       setShippingAddress(JSON.parse(response.data.order.shippingAddress));
       setBillingAddress(JSON.parse(response.data.order.billingAddress));
+      // setProducts(JSON.parse(response.data.order.orderItems));
     }
     setLoading(false);
     console.log(response.data);
@@ -39,6 +42,16 @@ const OrderDetails = ({ id }) => {
     );
   }
 
+  const capitalizeWords = (str) =>
+    str
+      ? str
+          .split(" ")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ")
+      : "";
+
+  const uppercase = (str) => (str ? str.toUpperCase() : " ");
+
   return (
     <section className="container mx-auto px-4 py-8">
       <Breadcrumbs
@@ -58,53 +71,80 @@ const OrderDetails = ({ id }) => {
       <h2 className="text-2xl font-bold mb-4">Order Details</h2>
       <div className="flex py-2 justify-between ">
         <div>
-          Ordered on {moment(order.createdAt).format("DD MMM YYYY")} | Order ID
-          : {id} | Order Total : {order.orderTotal}
+          Ordered On{" "}
+          <span className="font-semibold">
+            {moment(order.createdAt).format("DD MMM YYYY")}
+          </span>{" "}
+          | Order ID : <span className="font-semibold">{id}</span> | Order Total
+          : <span className="font-semibold">{order.orderTotal}</span> | Status :
+          <span className="font-semibold">{order.status}</span>
         </div>
-        <div>Payment Method : {order.paymentMethod}</div>
+        <div>
+          Payment Method :{" "}
+          <span className="font-semibold">
+            {capitalizeWords(order.paymentMethod)}
+          </span>
+        </div>
       </div>
       <div className="flex flex-col lg:flex-row flex-wrap md:flex-nowrap gap-4 row-gap-4">
-        <div className="lg:w-1/3 max-w-full border p-4 rounded-lg">
+        <div className="lg:w-1/2 max-w-full border p-4 rounded-lg">
           <h3 className="text-lg font-bold mb-2">Billing Address</h3>
           <p>
-            {billingAddress.firstName} {billingAddress.lastName}
+            {capitalizeWords(billingAddress.firstName)}
+            {capitalizeWords(billingAddress.lastName)}
           </p>
           <p>
-            {billingAddress.street} {billingAddress.address_2}
+            {capitalizeWords(billingAddress.street)}
+            {capitalizeWords(billingAddress.address_2)}
           </p>
           <p>
-            {billingAddress.city},{billingAddress.state}
-            {""}
+            {uppercase(billingAddress.city)}
+            {uppercase(billingAddress.state)}
             {billingAddress.zipCode}
           </p>
-          <p>{billingAddress.country}</p>
-          <p>phone : {billingAddress.phone}</p>
-          <p>email : {billingAddress.email}</p>
+          <p>{uppercase(billingAddress.country)}</p>
+          <p>
+            <span className="font-semibold">phone</span> :{" "}
+            {billingAddress.phone}
+          </p>
+          <p>
+            <span className="font-semibold">email</span> :{" "}
+            {billingAddress.email}
+          </p>
         </div>
-        <div className="lg:w-2/3 max-w-full border p-4 rounded-lg">
-          <h3 className="text-lg font-bold mb-2">Shipping Address</h3>
+        <div className="lg:w-1/2 max-w-full border p-4 rounded-lg">
+          <h3 className="text-lg font-bold mb-2"> Shipping Address</h3>
           <p>
-            {shippingAddress.firstName} {shippingAddress.lastName}
+            {capitalizeWords(shippingAddress.firstName)}
+            {capitalizeWords(shippingAddress.lastName)}
           </p>
           <p>
-            {shippingAddress.street} {shippingAddress.address_2}
+            {capitalizeWords(shippingAddress.street)}{" "}
+            {shippingAddress.address_2
+              ? capitalizeWords(shippingAddress.address_2)
+              : ""}
           </p>
           <p>
-            {shippingAddress.city},{shippingAddress.state}
-            {""}
+            {uppercase(shippingAddress.city)},{uppercase(shippingAddress.state)}
             {shippingAddress.zipCode}
           </p>
-          <p>{shippingAddress.country}</p>
-          <p>phone : {shippingAddress.phone}</p>
-          <p>email : {shippingAddress.email}</p>
+          <p>{uppercase(shippingAddress.country)}</p>
+          <p>
+            <span className="font-semibold">phone</span> :{" "}
+            {shippingAddress.phone}
+          </p>
+          <p>
+            <span className="font-semibold">email</span> :{" "}
+            {shippingAddress.email}
+          </p>
         </div>
       </div>
       <div className="border p-4 rounded-lg mt-4">
         <h3 className="text-lg font-bold mb-2">Order Items</h3>
-        <table className="w-full">
-          <thead>
+        <table className="w-full border border-gray-200 ">
+          <thead className="bg-gray-100 border border-gray-200">
             <tr className="text-left">
-              <th>Product</th>
+              <th className="p-1">Product</th>
               <th>Quantity</th>
               <th>Price (AED)</th>
               <th>Total (AED)</th>
@@ -112,8 +152,16 @@ const OrderDetails = ({ id }) => {
           </thead>
           <tbody>
             {order.orderItems.map((item, index) => (
-              <tr key={index}>
-                <td>{item.name}</td>
+              <tr key={index} className="border border-gray-200">
+                <td className="p-1">
+                  <Link
+                    href={`/product/${
+                      JSON.parse(item.variationData).product_id ?? "0"
+                    }`}
+                  >
+                    {item.name}
+                  </Link>
+                </td>
                 <td>{item.quantity}</td>
                 <td>{item.price}</td>
                 <td>{(item.quantity * item.price).toFixed(2)}</td>

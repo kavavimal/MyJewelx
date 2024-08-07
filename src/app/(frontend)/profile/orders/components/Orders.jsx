@@ -20,8 +20,13 @@ const OrderTable = ({ orders }) => {
         <div className="flex flex-col justify-left items-start">
           {row.orderItems?.map((item, i) => (
             <div className="flex flex-col justify-left items-start" key={i}>
-              {/* {console.log(item)} */}
-              {item.name},
+              <Link
+                href={`/product/${
+                  JSON.parse(item.variationData).product_id ?? "0"
+                }`}
+              >
+                {item.name}
+              </Link>
             </div>
           ))}
         </div>
@@ -67,9 +72,9 @@ const OrderTable = ({ orders }) => {
 
   return (
     <>
-      {/* <h4 className="text-2xl font-semibold pb-3">My Orders</h4> */}
+      <h4 className="text-2xl font-semibold pb-3 text-center">My Orders</h4>
 
-      <h2 className="pb-5">My Orders</h2>
+      {/* <h2 className="pb-5 text-center">My Orders</h2> */}
       <div className="border rounded-lg p-5">
         <DataTable
           className="pt-2"

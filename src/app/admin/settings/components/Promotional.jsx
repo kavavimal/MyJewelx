@@ -39,11 +39,9 @@ const Promotional = ({ promotional }) => {
       name: "Ads Link",
       selector: (row) => (
         <>
-          <Button>
-            <Link href={row?.ads_link} className="">
-              Shop Now
-            </Link>
-          </Button>
+          <Link href={row?.ads_link} className="">
+            Shop Now
+          </Link>
         </>
       ),
     },
@@ -55,7 +53,19 @@ const Promotional = ({ promotional }) => {
       name: "Actions",
       selector: (row) => (
         <>
-          <Button>Edit</Button>
+          <IconButton variant="text" className="rounded-full">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={18}
+              height={18}
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83l3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"
+              ></path>
+            </svg>
+          </IconButton>
           <DeleteAds ads_id={row?.ads_id} />
         </>
       ),
@@ -235,7 +245,6 @@ const Promotional = ({ promotional }) => {
         columns={columns}
         highlightOnHover
         pagination
-        pointerOnHover
       />
     </div>
   );
