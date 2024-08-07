@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "backup": "backup.bat"
+    "backup": "backup.bat",
+    "migrate": "npx prisma generate",
+    "dbmigrate": "npx prisma migrate dev",
+    "dbreset": "npx prisma migrate reset"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
