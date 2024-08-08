@@ -87,7 +87,9 @@ export default function ProfileMenu() {
                     </Typography>
                   </MenuItem>
                 </Link>
-                {AcountType.CUSTOMER === user.role.role_name && (
+                {[AcountType.ADMIN, AcountType.CUSTOMER].includes(
+                  user?.role?.role_name
+                ) && (
                   <Link
                     href="/profile/orders"
                     role="menuitem"

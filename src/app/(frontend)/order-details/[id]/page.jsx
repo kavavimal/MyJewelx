@@ -106,6 +106,7 @@ export default async function OrderDetailsPage({ params, searchParams }) {
     (total, item) => total + item.price,
     0
   );
+
   return (
     <Container>
       <section className="relative">

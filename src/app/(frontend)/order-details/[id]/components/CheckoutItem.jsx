@@ -36,7 +36,7 @@ const CheckoutItem = ({ item, variation, index }) => {
           {variationDataSplit?.map((item, index) => {
             return (
               <span
-                attribute-key={index}
+                key={index}
                 className={`size-sm text-secondary-100 pr-[6px] 
                 ${index !== variationDataSplit.length - 1 && "border-r"}
                 border-blueGray-300 text-sm`}

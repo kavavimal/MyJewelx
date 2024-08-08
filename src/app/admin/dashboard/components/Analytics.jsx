@@ -15,7 +15,7 @@ const Analytics = () => {
   }, []);
   return (
     <div className="flex gap-5 items-start">
-      <div className="flex justify-center shadow-3xl items-center gap-5 rounded-xl md:w-4/12 w-full">
+      <div className="shadow-3xl rounded-xl md:w-4/12 w-full">
         <div className="px-6 pt-8">
           <div className="mb-5">
             <h4 className="text-lg leading-6 text-blueGray-500 font-medium">
@@ -25,39 +25,39 @@ const Analytics = () => {
               Downloaded by operating system
             </span>
           </div>
-          <div>
-            <ReactApexChart
-              type="donut"
-              options={{
-                chart: {
-                  width: 200,
-                },
-                labels: ["Windows", "MacOS", "Linux"],
-                colors: ["#008FFB", "#00E396", "#FEB019"],
-                legend: { show: false },
-                dataLabels: { enabled: false },
-                plotOptions: {
-                  pie: {
-                    donut: {
-                      size: "65%",
-                      labels: {
+        </div>
+        <div className="flex justify-center items-center">
+          <ReactApexChart
+            type="donut"
+            options={{
+              chart: {
+                width: 200,
+              },
+              labels: ["Windows", "MacOS", "Linux"],
+              colors: ["#008FFB", "#00E396", "#FEB019"],
+              legend: { show: false },
+              dataLabels: { enabled: false },
+              plotOptions: {
+                pie: {
+                  donut: {
+                    size: "65%",
+                    labels: {
+                      show: true,
+                      name: {
                         show: true,
-                        name: {
-                          show: true,
-                          fontSize: "0.875rem",
-                        },
-                        value: {
-                          show: true,
-                          fontSize: "1.2rem",
-                        },
+                        fontSize: "0.875rem",
+                      },
+                      value: {
+                        show: true,
+                        fontSize: "1.2rem",
                       },
                     },
                   },
                 },
-              }}
-              series={[44, 55, 41]}
-            />
-          </div>
+              },
+            }}
+            series={[44, 55, 41]}
+          />
         </div>
       </div>
       <div className="shadow-3xl px-10 pt-8 items-center gap-5 rounded-xl flex-1">
