@@ -51,6 +51,8 @@ export async function PUT(request, { params }) {
 
       image_url = `/assets/uploads/${updateData.title}_${file.name}`;
 
+      //unlink image code
+
       if (existingSlide.image_url) {
         const oldFilePath = join(
           process.cwd(),

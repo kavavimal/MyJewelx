@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
-// import InstagramProvider from "next-auth/providers/instagram"
+import InstagramProvider from "next-auth/providers/instagram"
 import prisma from "@/lib/prisma";
 import { compare } from "bcrypt";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -144,28 +144,28 @@ export const authOptions = {
         };
       },
     }),
-    // InstagramProvider({
-    //   clientId: process.env.INSTAGRAM_CLIENT_ID,
-    //   clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
-    //   profile(profile) {
-    //     return {
-    //       id: profile.id,
-    //       username: profile.name,
-    //       email: profile.email,
-    //    // image: profile.picture.data.url,
-    //       role: {
-    //         connectOrCreate: {
-    //           where: {
-    //             role_name: AcountType.CUSTOMER
-    //           },
-    //           create: {
-    //             role_name: AcountType.CUSTOMER
-    //           }
-    //         },
-    //       },
-    //     }
-    //   },
-    // }),
+    InstagramProvider({
+      clientId: process.env.INSTAGRAM_CLIENT_ID,
+      clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
+      profile(profile) {
+        return {
+          id: profile.id,
+          username: profile.name,
+          email: profile.email,
+       // image: profile.picture.data.url,
+          role: {
+            connectOrCreate: {
+              where: {
+                role_name: AcountType.CUSTOMER
+              },
+              create: {
+                role_name: AcountType.CUSTOMER
+              }
+            },
+          },
+        }
+      },
+    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {

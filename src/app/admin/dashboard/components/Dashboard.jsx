@@ -1,5 +1,6 @@
 import Image from "next/image";
 import React from "react";
+import Analytics from "./Analytics";
 
 const Dashboard = ({ vendors, products, allUsers, allOrders }) => {
   const cards = [];
@@ -31,7 +32,7 @@ const Dashboard = ({ vendors, products, allUsers, allOrders }) => {
     <main>
       <div>
         <h4 className="text-2xl font-bold mb-14">Hi, Welcome back 👋</h4>
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-5 mb-5">
           {cards.map((card, index) => (
             <div
               key={index}
@@ -54,6 +55,7 @@ const Dashboard = ({ vendors, products, allUsers, allOrders }) => {
             </div>
           ))}
         </div>
+        <Analytics />
       </div>
     </main>
   );

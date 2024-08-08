@@ -237,7 +237,9 @@ export default function StoreVendorPage({ vendors }) {
                       <Button
                         size="sm"
                         variant="outlined"
-                        onClick={() => router.push(`/store/${list.id}`)}
+                        onClick={() =>
+                          router.push(`/${list?.vendor?.store_name}`)
+                        }
                         className="capitalize px-[25px] flex items-center gap-[5px] border-b-0 border-r-0 rounded-ss-[20px] rounded-es-none rounded-e-none"
                       >
                         Visit

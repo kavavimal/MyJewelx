@@ -5,7 +5,11 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
 
-const CustomerDetails = ({ total, user }) => {
+const CustomerDetails = ({ total, user, order }) => {
+  // Calculate Sub Total
+  const subTotal = order.orderItems.reduce((acc, item) => acc + item.price, 0);
+  const vat = subTotal * 0.05;
+  const subTotalFinal = subTotal - vat;
   const router = useRouter();
   return (
     <>
@@ -52,10 +56,10 @@ const CustomerDetails = ({ total, user }) => {
             <tbody className="border-b border-blueGray-300">
               <tr>
                 <td className="text-left text-secondary-100 font-light text-base pb-2.5">
-                  Price ( 2 Product )
+                  Price ({order.orderItems.length} Product)
                 </td>
                 <td className="text-right text-secondary-100 font-light text-base pb-2.5">
-                  12,000.00
+                  {printFormatPrice(subTotal)}
                 </td>
               </tr>
 
@@ -64,7 +68,7 @@ const CustomerDetails = ({ total, user }) => {
                   VAT 5%
                 </td>
                 <td className="text-right text-secondary-100 font-light text-base pb-2.5">
-                  600.00
+                  {printFormatPrice(vat)}
                 </td>
               </tr>
 
@@ -73,7 +77,7 @@ const CustomerDetails = ({ total, user }) => {
                   Sub Total
                 </td>
                 <td className="text-right text-secondary-100 font-light text-base pb-2.5">
-                  12,600.00
+                  {printFormatPrice(subTotal + vat)}
                 </td>
               </tr>
             </tbody>

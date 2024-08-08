@@ -37,31 +37,63 @@ const getCountsData = async (id) => {
 
 const page = async () => {
   const session = await getServerSession(authOptions);
-  if (session?.user?.role === AcountType.VENDOR) {
+  const role = session?.user?.role;
+
+  if (role === AcountType.VENDOR) {
     const counts = await getCountsData(session.user.id);
     return (
       <Dashboard
-        vendors={false}
         products={counts.products}
+        sellerOrders={counts.sellerOrders}
         allUsers={false}
-        allOrders={counts.sellerOrders}
-      />
-    );
-  } else {
-    const vendors = await getVendors();
-    const products = await getProducts();
-    const allUsers = await getUsers();
-    const allOrders = await getOrders();
-
-    return (
-      <Dashboard
-        vendors={vendors}
-        products={products}
-        allUsers={allUsers}
-        allOrders={allOrders}
+        allOrders={false}
       />
     );
   }
+
+  const [vendors, products, allUsers, allOrders] = await Promise.all([
+    getVendors(),
+    getProducts(),
+    getUsers(),
+    getOrders(),
+  ]);
+
+  return (
+    <Dashboard
+      vendors={vendors}
+      products={products}
+      allUsers={allUsers}
+      allOrders={allOrders}
+    />
+  );
 };
+// const page = async () => {
+//   const session = await getServerSession(authOptions);
+//   if (session?.user?.role === AcountType.VENDOR) {
+//     const counts = await getCountsData(session.user.id);
+//     return (
+//       <Dashboard
+//         vendors={false}
+//         products={counts.products}
+//         allUsers={false}
+//         allOrders={counts.sellerOrders}
+//       />
+//     );
+//   } else {
+//     const vendors = await getVendors();
+//     const products = await getProducts();
+//     const allUsers = await getUsers();
+//     const allOrders = await getOrders();
+
+//     return (
+//       <Dashboard
+//         vendors={vendors}
+//         products={products}
+//         allUsers={allUsers}
+//         allOrders={allOrders}
+//       />
+//     );
+//   }
+// };
 
 export default page;

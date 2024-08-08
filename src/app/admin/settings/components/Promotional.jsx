@@ -17,7 +17,10 @@ import { Select, Option } from "@material-tailwind/react";
 const Promotional = ({ promotional }) => {
   const [previewURLs, setPreviewURLs] = useState([]);
   const [image, setImage] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
   const router = useRouter();
+
   const columns = [
     {
       name: "Image",
@@ -53,7 +56,11 @@ const Promotional = ({ promotional }) => {
       name: "Actions",
       selector: (row) => (
         <>
-          <IconButton variant="text" className="rounded-full">
+          <IconButton
+            variant="text"
+            className="rounded-full"
+            onClick={() => handleEdit(row)}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width={18}
@@ -86,30 +93,42 @@ const Promotional = ({ promotional }) => {
         formData.append("ads_desc", values.ads_desc);
         formData.append("ads_link", values.ads_link);
         formData.append("ads_type", values.ads_type);
-        formData.append("ads_img_url", image);
+        if (image) {
+          formData.append("ads_img_url", image);
+        } else if (values.ads_img_url) {
+          formData.append("ads_img_url", values.ads_img_url);
+        }
 
-        const response = await post("/api/promotional", formData);
+        const response = isEditing
+          ? await update(`/api/promotional/${editId}`, formData)
+          : await post("/api/promotional", formData);
+
         if (response?.status === 200) {
-          enqueueSnackbar("Ads created successfully", {
-            variant: "success",
-            preventDuplicate: true,
-            anchorOrigin: {
-              vertical: "top",
-              horizontal: "right",
-            },
-            autoHideDuration: 3000,
-            style: {
-              background: "white",
-              color: "black",
-              borderRadius: ".5rem",
-              boxShadow:
-                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-              padding: "0 4px",
-            },
-          });
+          enqueueSnackbar(
+            isEditing ? "Ads updated successfully" : "Ads created successfully",
+            {
+              variant: "success",
+              preventDuplicate: true,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "right",
+              },
+              autoHideDuration: 3000,
+              style: {
+                background: "white",
+                color: "black",
+                borderRadius: ".5rem",
+                boxShadow:
+                  "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                padding: "0 4px",
+              },
+            }
+          );
         }
         setImage(null);
         setPreviewURLs([]);
+        setIsEditing(false);
+        setEditId(null);
         router.refresh();
         formik.resetForm();
       } catch (error) {
@@ -134,6 +153,20 @@ const Promotional = ({ promotional }) => {
       }
     },
   });
+
+  const handleEdit = (row) => {
+    setIsEditing(true);
+    setEditId(row?.ads_id);
+    setImage(null);
+    setPreviewURLs(row.ads_img_url ? [row.ads_img_url] : []);
+    formik.setValues({
+      ads_title: row?.ads_title,
+      ads_desc: row?.ads_desc,
+      ads_link: row?.ads_link,
+      ads_img_url: row?.ads_img_url,
+      ads_type: row?.ads_type,
+    });
+  };
 
   return (
     <div className="w-full">
@@ -224,16 +257,18 @@ const Promotional = ({ promotional }) => {
                     accept="image/*"
                     onChange={(e) => {
                       const files = e.target.files[0];
-                      formik.setFieldValue("ads_img_url", files);
-                      setImage(files);
-                      setPreviewURLs([URL.createObjectURL(files)]);
+                      if (files) {
+                        formik.setFieldValue("ads_img_url", files);
+                        setImage(files);
+                        setPreviewURLs([URL.createObjectURL(files)]);
+                      }
                     }}
                   />
                 </label>
               </div>
               <div className="flex items-center justify-between">
                 <Button type="submit" loading={formik.isSubmitting}>
-                  Add {/* {tag ? 'Update' : 'Add'} */}
+                  {isEditing ? "Update" : "Add"}
                 </Button>
               </div>
             </div>

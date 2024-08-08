@@ -78,9 +78,11 @@ const fetchOrder = async (id) => {
   });
   return order;
 };
+
 export default async function OrderDetailsPage({ params, searchParams }) {
   let order = await fetchOrder(params.id);
-
+  const variationData = JSON.parse(order.orderItems[0].variationData);
+  console.log(order);
   if (!order.id) {
     return "No order found";
   }
@@ -294,7 +296,7 @@ export default async function OrderDetailsPage({ params, searchParams }) {
               </div>
             </div>
             <div className="w-[400px]">
-              <CustomerDetails total={orderTotal} user={user} />
+              <CustomerDetails order={order} total={orderTotal} user={user} />
             </div>
           </div>
         </div>

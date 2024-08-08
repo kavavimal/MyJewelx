@@ -5,6 +5,8 @@ import Link from "next/link";
 import React from "react";
 
 const CheckoutItem = ({ item, variation, index }) => {
+  const variationDataSplit = variation.variation_name?.split(",");
+  console.log(variationDataSplit);
   return (
     <div
       className={`flex items-start gap-[15px] ${
@@ -31,22 +33,33 @@ const CheckoutItem = ({ item, variation, index }) => {
         </div>
         <p className="size-sm text-secondary-100 text-sm">30 Gram</p>
         <div className="py-0.5">
-          <span className="size-sm text-secondary-100 pr-[3px] border-r border-blueGray-300 text-sm">
-            Gold: 18 Karat
+          {variationDataSplit?.map((item, index) => {
+            return (
+              <span
+                attribute-key={index}
+                className={`size-sm text-secondary-100 pr-[6px] 
+                ${index !== variationDataSplit.length - 1 && "border-r"}
+                border-blueGray-300 text-sm`}
+              >
+                {item}
+              </span>
+            );
+          })}
+          {/* <span className="size-sm text-secondary-100 pr-[3px] border-r border-blueGray-300 text-sm">
+            {variationDataSplit[0]}
           </span>
           <span className="size-sm text-secondary-100 px-[3px] border-r border-blueGray-300 text-sm">
-            Color: Yellow
+            {variationDataSplit[1]}
           </span>
           <span className="size-sm text-secondary-100 px-[3px] border-r border-blueGray-300 text-sm">
-            {" "}
-            Size: 19 mm
-          </span>
-          <span className="size-sm text-secondary-100 px-[3px] border-r border-blueGray-300 text-sm">
+            {variationDataSplit[2]}
+          </span> */}
+          {/* <span className="size-sm text-secondary-100 px-[3px] border-r border-blueGray-300 text-sm">
             Gender: Female
           </span>
           <span className="size-sm text-secondary-100 ps-[3px] text-sm">
             Made in: India
-          </span>
+          </span> */}
         </div>
         <p className="size-sm text-secondary-100  text-sm">
           Seller: Malabar's Gold and Diamonds

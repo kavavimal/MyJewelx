@@ -162,11 +162,6 @@ const Homeslider = ({ homeslider }) => {
     },
   });
 
-  useEffect(() => {
-    console.log("image", image);
-    console.log("previewURLs", previewURLs);
-  }, [image, previewURLs]);
-
   return (
     <div className="w-full">
       <div className="mt-10 rounded-2xl shadow-3xl bg-white">
