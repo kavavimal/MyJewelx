@@ -1,7 +1,6 @@
-import React from "react";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { post } from "@/utils/api";
-import { CURRENCY_SYMBOL, CURRENCY_SYMBOL_PAYPAL } from "@/utils/constants";
+import { CURRENCY_SYMBOL_PAYPAL } from "@/utils/constants";
+import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 export default function Paypal({ user, cart, amount, handlePlaceOrder }) {
   const paypalCreateOrder = async () => {

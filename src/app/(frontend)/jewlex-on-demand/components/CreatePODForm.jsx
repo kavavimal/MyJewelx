@@ -1,17 +1,7 @@
 "use client";
 import * as Yup from "yup";
 
-import { Formik } from "formik";
-import {
-  Button,
-  IconButton,
-  Input,
-  Option,
-  Radio,
-  Select,
-  Textarea,
-  Typography,
-} from "@material-tailwind/react";
+import { post } from "@/utils/api";
 import {
   FILE_SIZE,
   Karats,
@@ -20,12 +10,19 @@ import {
   productMetals,
   SUPPORTED_FORMATS_IMAGES,
 } from "@/utils/constants";
-import { useState } from "react";
-import Image from "next/image";
-import ReactSelect from "react-select";
-import { post } from "@/utils/api";
 import { showToast } from "@/utils/helper";
+import {
+  Button,
+  IconButton,
+  Input,
+  Textarea,
+  Typography
+} from "@material-tailwind/react";
+import { Formik } from "formik";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import ReactSelect from "react-select";
 
 const podFormValidationSchema = Yup.object({
   name: Yup.string().required("Name is required"),
@@ -74,7 +71,6 @@ const CreatePODForm = () => {
       ...values,
       made_in: values.made_in.join(","),
     };
-    console.log("values - ", sendData);
     const createResponse = await post("/api/product/pod", sendData);
     if (createResponse && createResponse?.data?.status == 201) {
       showToast({
@@ -714,7 +710,6 @@ const CreatePODForm = () => {
                   className="hidden"
                   accept="image/*"
                   onChange={(e) => {
-                    console.log("files", e, props.values.files);
                     const files = [...props.values.files, ...e.target.files];
                     props.setFieldValue("files", files);
                     setPreviewURLs(

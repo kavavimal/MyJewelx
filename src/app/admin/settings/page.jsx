@@ -12,10 +12,8 @@ const getPromotional = () => {
 
 const settings = async () => {
   const homeslider = await getHomeSlider();
-  // console.log(homeslider);
 
   const promotional = await getPromotional();
-  console.log(promotional);
   return <Settings homeslider={homeslider} promotional={promotional} />;
 };
 

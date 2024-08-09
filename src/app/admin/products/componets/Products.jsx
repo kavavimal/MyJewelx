@@ -1,22 +1,20 @@
 "use client";
-import React from "react";
-import { Button, Chip, IconButton, Switch } from "@material-tailwind/react";
+import { updateProductFeaturedStatus, updateProductStatus } from "@/actions/product";
+import { ADMIN_ID, VENDOR_ID } from "@/utils/constants";
+import { showToast } from "@/utils/helper";
+import { Button, IconButton, Switch } from "@material-tailwind/react";
+import { ProductStatus } from "@prisma/client";
+import dynamic from "next/dynamic";
 import Link from "next/link";
+import DeleteProduct from "./DeleteProduct";
 const DataTable = dynamic(() => import("react-data-table-component"), {
   ssr: false,
 });
-import DeleteProduct from "./DeleteProduct";
-import { ADMIN_ID, CUSTOMER_ID, VENDOR_ID } from "@/utils/constants";
-import dynamic from "next/dynamic";
-import { ProductStatus } from "@prisma/client";
-import { updateProductFeaturedStatus, updateProductStatus } from "@/actions/product";
-import { showToast } from "@/utils/helper";
 
 const Products = ({ products }) => {
   if (typeof window !== "undefined") {
     localStorage.setItem("activeStep", 0);
   }
-  console.log(products);
   const columns = [
     {
       name: "Product Name",

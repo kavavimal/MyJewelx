@@ -1,12 +1,12 @@
 import { fetchWishlist } from "@/actions/wishlist";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import Container from "@/components/frontend/Container";
+import Paragraph from "@/components/Paragraph";
+import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { checkUserSession } from "../../layout";
-import Paragraph from "@/components/Paragraph";
-import Breadcrumbs from "@/components/Breadcrumbs";
-import Wishlist from "./components/WhishList";
-import prisma from "@/lib/prisma";
 import Ads from "./components/Ads";
+import Wishlist from "./components/WhishList";
 
 const getAds = () =>
   prisma.promotional.findMany({
@@ -53,21 +53,6 @@ export default async function WishlistPage() {
         showDevider={true}
       />
       <Wishlist wishlist={wishlist} />
-      {/* {wishlist?.wishlistItems &&
-                wishlist?.wishlistItems?.map((item) => {
-                    {
-                        console.log(item);
-                    }
-                    return (
-                        <div
-                            key={'wishlistitem' + item.productId}
-                            className="border rounded-lg mt-2 mb-3 p-2"
-                        >
-                            Product Id: #{item.productId}
-                            Product Name: #{item.product['product_name']}
-                        </div>
-                    );
-                })} */}
     </Container>
   );
 }

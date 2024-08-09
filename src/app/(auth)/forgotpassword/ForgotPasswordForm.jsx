@@ -18,13 +18,10 @@ export default function ForgotPasswordForm() {
   const sendOtp = (e) => {
     e.preventDefault();
     setOtpError("");
-    console.log("formdata", formData);
     setLoading(true);
     if (!formData.email || formData.email === "") {
       setOtpError("email is required");
-      console.log("error email is required");
     } else {
-      // fetch("/api/auth/sendForgotOtp", {
       startOtpTimeout();
       fetch("/api/auth/otp/send", {
         method: "POST",
@@ -38,7 +35,6 @@ export default function ForgotPasswordForm() {
       }).then(async (res) => {
         setLoading(false);
         if (res.status === 201) {
-          // toast.success("Account created! Redirecting to login...");
           setIsOtpSent(true);
         } else {
           const { error, issues } = await res.json();
@@ -46,7 +42,6 @@ export default function ForgotPasswordForm() {
             const ZodError = issues.map((issue) => issue.message);
             setOtpError(ZodError);
           } else setOtpError("send Otp Failed");
-          // toast.error(error);
         }
       });
     }
@@ -63,11 +58,9 @@ export default function ForgotPasswordForm() {
   const requestResendOtp = (e) => {
     e.preventDefault();
     setOtpError("");
-    console.log("formdata", formData);
     setLoading(true);
     if (!formData.email || formData.email === "") {
       setOtpError("email is required");
-      console.log("error email is required");
     } else {
       startOtpTimeout();
       fetch("/api/auth/otp/resend", {
@@ -100,10 +93,9 @@ export default function ForgotPasswordForm() {
     setOtpError("");
     setLoading(true);
     if (!formData.email || formData.email === "") {
-      console.log("email is required");
+      setOtpError("email is required");
     } else if (!formData.otp || formData.otp === "") {
       setOtpError("otp is required");
-      console.log("error otp is required");
     } else {
       // fetch("/api/auth/verifyForgotOtp", {
       fetch("/api/auth/otp/verify", {

@@ -86,7 +86,6 @@ export default function ProductAttributes({ productId, productAttributes, handle
                       selectedAttributes.includes(a.value)
                     )}
                     onChange={(e) => {
-                      console.log("eonchange", e);
                       setSelectedAttributes(e.map((a) => a.value));
                     }}
                   />

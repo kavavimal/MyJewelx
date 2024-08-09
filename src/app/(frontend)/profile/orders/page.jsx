@@ -1,19 +1,16 @@
-import React from "react";
-import { redirect } from "next/navigation";
-import Container from "@/components/frontend/Container";
 import { getOrders } from "@/actions/orders";
-import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import Link from "next/link";
-import OrderTable from "./components/Orders";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import Container from "@/components/frontend/Container";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import OrderTable from "./components/Orders";
 export default async function OrderPage() {
   const { user } = await getServerSession(authOptions);
   if (!user) {
     redirect("/login");
   }
   const orders = await getOrders();
-  // console.log("orders", orders);
   return (
     <Container>
       <div className="py-7">

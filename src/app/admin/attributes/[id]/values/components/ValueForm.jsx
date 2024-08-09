@@ -11,7 +11,6 @@ import DeleteValue from "./DeleteValue";
 import { attributeIDs } from "@/utils/constants";
 
 const ValueForm = ({ attribute_values, attribute_id }) => {
-  console.log('attribute_values', attribute_values);
   const router = useRouter();
   const [value, setValue] = useState(false);
   let columns = [

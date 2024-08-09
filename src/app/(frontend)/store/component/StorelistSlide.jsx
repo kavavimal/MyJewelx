@@ -5,7 +5,6 @@ import { Carousel, Typography } from "@material-tailwind/react";
 import Link from "next/link";
 
 export default function StorelistSlide({ promolist }) {
-  console.log(promolist);
   return (
     <div className="">
       <Carousel className="rounded">

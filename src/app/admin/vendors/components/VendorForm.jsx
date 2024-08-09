@@ -1,5 +1,8 @@
 "use client";
+import FileUploadIcon from "@/components/FileUploadIcon";
+import { post, update } from "@/utils/api";
 import { VENDOR_ID } from "@/utils/constants";
+import { showToast } from "@/utils/helper";
 import {
   Button,
   Input,
@@ -11,13 +14,9 @@ import {
 import { Form, Formik, useFormik } from "formik";
 import { useRouter } from "next/navigation";
 import { enqueueSnackbar } from "notistack";
-import React, { useEffect, useState } from "react";
-import * as Yup from "yup";
-import { isCompanyEmail } from "company-email-validator";
-import { post, update } from "@/utils/api";
+import { useEffect, useState } from "react";
 import { useCountries } from "use-react-countries";
-import FileUploadIcon from "@/components/FileUploadIcon";
-import { showToast } from "@/utils/helper";
+import * as Yup from "yup";
 
 const VendorForm = ({ vendor, storeURLs, emails, FormHeader = true }) => {
   const { countries } = useCountries();
@@ -161,7 +160,6 @@ const VendorForm = ({ vendor, storeURLs, emails, FormHeader = true }) => {
         (item) =>
           item.countryCallingCode === vendor?.phone_number?.split(" ")[0]
       );
-      console.log(country);
       setCountry(country?.name);
       if (vendor?.image?.path) {
         setPreviewURL(vendor?.image?.path);

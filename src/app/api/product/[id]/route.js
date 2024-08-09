@@ -120,7 +120,6 @@ export async function PUT(request, { params }) {
           ? []
           : null;
       const isOnlineBuyable = req.get("isOnlineBuyable") === "true";
-      console.log("isonlineBuyable", isOnlineBuyable);
       const collections =
         req.get("collections") !== ""
           ? req.get("collections").split(",")

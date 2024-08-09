@@ -1,11 +1,9 @@
-import prisma from "@/lib/prisma";
-import { CURRENCY_SYMBOL, CURRENCY_SYMBOL_PAYPAL } from "@/utils/constants";
 import client from "@/lib/paypal";
+import { CURRENCY_SYMBOL_PAYPAL } from "@/utils/constants";
 import paypal from "@paypal/checkout-server-sdk";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
-  console.log("request order create");
   try {
     const req = await request.formData();
     const order_price = req.get("order_price");
@@ -33,7 +31,6 @@ export async function POST(request) {
       ],
     });
     const response = await PaypalClient.execute(reqN);
-    console.log("RES: ", response);
     if (response.statusCode !== 201) {
       return NextResponse.json(
         { error: "Some Error Occured at backend" },

@@ -66,7 +66,6 @@ export async function POST(request) {
     // const price = res.get("price");
     let quantity = Number(res.get("quantity"));
     const discount = parseFloat(res.get("discount") ? res.get("discount") : 0);
-    console.log("discount", discount);
     const discount_type = res.get("discount_type")
       ? res.get("discount_type")
       : "fixedAmount";
@@ -92,15 +91,12 @@ export async function POST(request) {
         data: cartData,
       });
 
-      console.log("cart", cart.cart_id);
-
       const cartItemData = cartItemSchema.parse({
         cart_id: cart.cart_id,
         variation_id,
         price,
         quantity,
       });
-      console.log("cartItemData", cartItemData);
 
       const cartItem = await prisma.cartItem.create({
         data: {

@@ -3,7 +3,6 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { get } from "@/utils/api";
 import React, { useEffect, useState } from "react";
 import moment from "moment";
-import { log } from "handlebars";
 import Link from "next/link";
 const OrderDetails = ({ id }) => {
   const [order, setOrder] = useState({});
@@ -21,7 +20,6 @@ const OrderDetails = ({ id }) => {
       // setProducts(JSON.parse(response.data.order.orderItems));
     }
     setLoading(false);
-    console.log(response.data);
   };
 
   useEffect(() => {
@@ -66,8 +64,6 @@ const OrderDetails = ({ id }) => {
         ]}
         showDevider={true}
       />
-      {console.log(order)}
-
       <h2 className="text-2xl font-bold mb-4">Order Details</h2>
       <div className="flex py-2 justify-between ">
         <div>

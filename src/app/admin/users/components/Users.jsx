@@ -1,12 +1,10 @@
 "use client";
 import { Button, IconButton } from "@material-tailwind/react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import DeleteUser from "./DeleteUser";
 
 const Users = ({ users }) => {
-  console.log(users);
   const columns = [
     {
       name: "Name",

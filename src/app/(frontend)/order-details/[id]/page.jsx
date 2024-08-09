@@ -4,13 +4,9 @@ import prisma from "@/lib/prisma";
 import { sendOrderEmail } from "@/lib/sendMails";
 import { stripe } from "@/lib/stripe";
 import { OrderStatus } from "@prisma/client";
-import SendInvoice from "./SendInvoice";
-import CancelOrder from "./CancelOrder";
-import { redirect } from "next/navigation";
-import CustomerDetails from "./components/CustomerDetails";
-import Image from "next/image";
 import Link from "next/link";
 import CheckoutItem from "./components/CheckoutItem";
+import CustomerDetails from "./components/CustomerDetails";
 
 const getSessionAndSetOrder = async (sessionId, orderId) => {
   const session = await stripe.checkout.sessions.retrieve(sessionId);
@@ -81,8 +77,6 @@ const fetchOrder = async (id) => {
 
 export default async function OrderDetailsPage({ params, searchParams }) {
   let order = await fetchOrder(params.id);
-  const variationData = JSON.parse(order.orderItems[0].variationData);
-  console.log(order);
   if (!order.id) {
     return "No order found";
   }

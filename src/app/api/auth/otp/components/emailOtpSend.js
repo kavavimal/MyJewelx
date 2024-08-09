@@ -1,7 +1,6 @@
 // import { generateOTP } from "@/utils/helper";
 import { mailOptions, transporter } from "@/config/nodemailer";
 import prisma from "@/lib/prisma";
-import logo from "../../../../../../public/logo.svg";
 export function generateOTP() {
   let OTP = "";
   for (let i = 0; i < 6; i++) {
@@ -17,8 +16,6 @@ export default async function emailOtpSend(
   otpResend = false
 ) {
   const otp = generateOTP();
-  const logoUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/logo.svg`;
-  console.log(logoUrl);
   const generateEmailContent = (otp, mode, otpResend) => {
     let stringData;
     let htmlData;

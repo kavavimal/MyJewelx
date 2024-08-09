@@ -34,12 +34,6 @@ export default function Contact() {
       await sendContactForm(values);
       setTouched({});
       setState(initState);
-      console.log({
-        title: "Message sent.",
-        status: "success",
-        duration: 2000,
-        position: "top",
-      });
     } catch (error) {
       setState((prev) => ({
         ...prev,

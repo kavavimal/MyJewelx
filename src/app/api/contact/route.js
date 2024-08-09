@@ -1,5 +1,5 @@
 import { mailOptions, transporter } from "@/config/nodemailer";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 const CONTACT_MESSAGE_FIELDS = {
   name: "Name",
@@ -25,7 +25,6 @@ const generateEmailContent = (data) => {
 };
 export async function POST(req) {
   const data = await req.json();
-  console.log("datainbody", data);
   if (!data || !data.name || !data.email || !data.subject || !data.message) {
     return NextResponse.json({ message: "Bad request" }, { status: 500 });
   }

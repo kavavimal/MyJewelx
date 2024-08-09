@@ -1,10 +1,9 @@
 "use client";
-import React, { useState } from "react";
-import { useFormik } from "formik";
-import * as Yup from "yup";
 import { post } from "@/utils/api";
-import LoadingDots from "@/components/loading-dots";
 import { Button, Rating } from "@material-tailwind/react";
+import { useFormik } from "formik";
+import { useState } from "react";
+import * as Yup from "yup";
 
 const ReviewForm = ({ product_id, user_id }) => {
   const [rating, setRating] = useState(0); // State to manage rating
@@ -19,9 +18,8 @@ const ReviewForm = ({ product_id, user_id }) => {
       review: Yup.string().required("Review is required"),
     }),
     onSubmit: async (values) => {
-      console.log(values);
       setLoading(true);
-      const saveres = await post("/api/review/product", {
+      await post("/api/review/product", {
         productId: product_id,
         userId: user_id,
         rating: rating,
@@ -30,7 +28,6 @@ const ReviewForm = ({ product_id, user_id }) => {
         files: values.files,
       });
       setLoading(false);
-      console.log("response", saveres);
     },
   });
 

@@ -22,7 +22,6 @@ const DeleteProduct = ({ product_id }) => {
     setLoading(true);
     try {
       await del(`/api/product/${product_id}`).then((resp) => {
-        console.log(resp);
         if (resp.status === 201) {
           enqueueSnackbar("Product deleted successfully", {
             variant: "success",

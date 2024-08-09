@@ -24,7 +24,6 @@ export async function PUT(request, { params }) {
       );
     }
     const req = await request.formData();
-    console.log("response", req);
     const name = req.get("name");
 
     const exists = await prisma.collection.findFirst({
@@ -37,7 +36,6 @@ export async function PUT(request, { params }) {
       });
     }
     const description = req.get("description");
-    console.log("description", description, name);
 
     const collectionData = collectionSchema.parse({ name, description });
 

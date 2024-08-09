@@ -61,7 +61,6 @@ export async function PUT(request, { params }) {
         },
       },
     });
-console.log("attribute update", attributeData, attribute_id, exists);
 
     if (exists) {
       return NextResponse.json(

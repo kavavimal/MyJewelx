@@ -228,10 +228,9 @@ export default function Form({ type, emails }) {
     setOtpError("");
     setLoading(true);
     if (!formik.values.email || formik.values.email === "") {
-      console.log("email is required");
+      setOtpError("email is required");
     } else if (!formData.otp || formData.otp === "") {
       setOtpError("otp is required");
-      console.log("error otp is required");
     } else {
       fetch("/api/auth/otp/verify", {
         method: "POST",
