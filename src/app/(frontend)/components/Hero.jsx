@@ -270,7 +270,7 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
                             color-interpolation-filters="sRGB"
                           >
                             <feFlood
-                              flood-opacity="0"
+                              floodOpacity="0"
                               result="BackgroundImageFix"
                             />
                             <feGaussianBlur
@@ -325,7 +325,7 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
                               color-interpolation-filters="sRGB"
                             >
                               <feFlood
-                                flood-opacity="0"
+                                floodOpacity="0"
                                 result="BackgroundImageFix"
                               />
                               <feGaussianBlur

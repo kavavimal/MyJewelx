@@ -116,7 +116,7 @@ const Testimonial = ({ homeSlide }) => {
                               fill="none"
                               xmlns="http://www.w3.org/2000/svg"
                             >
-                              <g clip-path="url(#clip0_510_5658)">
+                              <g clipPath="url(#clip0_510_5658)">
                                 <path
                                   fill-rule="evenodd"
                                   clip-rule="evenodd"

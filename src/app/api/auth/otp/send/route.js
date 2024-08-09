@@ -98,9 +98,6 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-    return NextResponse.json(
-      { message: "Something went Wrong!" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

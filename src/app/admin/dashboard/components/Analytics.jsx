@@ -5,14 +5,29 @@ import ReactApexChart from "react-apexcharts";
 
 const Analytics = () => {
   const [orders, setOrders] = useState([]);
+  const [series, setSeries] = useState([]);
+
   const getOrders = async () => {
-    const repsonse = await get("/api/order");
-    setOrders(repsonse?.data?.orders);
+    const response = await get("/api/order");
+    setOrders(response?.data?.orders);
   };
 
   useEffect(() => {
     getOrders();
   }, []);
+
+  useEffect(() => {
+    const monthWiseOrders = Array(12).fill(0);
+    orders.forEach((order) => {
+      const date = new Date(order.createdAt);
+      const monthIndex = date.getMonth();
+      monthWiseOrders[monthIndex]++;
+    });
+
+    const data = monthWiseOrders.map((count) => count);
+    setSeries([{ name: "Orders", data }]);
+  }, [orders]);
+
   return (
     <div className="flex gap-5 items-start">
       <div className="shadow-3xl rounded-xl md:w-4/12 w-full">
@@ -123,7 +138,7 @@ const Analytics = () => {
                   labels: {
                     show: false,
                     formatter: function (val) {
-                      return val + "%";
+                      return val;
                     },
                   },
                 },
@@ -138,7 +153,7 @@ const Analytics = () => {
                 dataLabels: {
                   enabled: true,
                   formatter: function (val) {
-                    return val + "%";
+                    return val;
                   },
                   offsetY: -20,
                   style: {
@@ -148,14 +163,7 @@ const Analytics = () => {
                 },
                 colors: ["#F0AE11"],
               }}
-              series={[
-                {
-                  name: "Series 1",
-                  data: [
-                    2.3, 3.1, 4.0, 10.1, 4.0, 3.6, 3.2, 2.3, 1.4, 0.8, 0.5, 0.2,
-                  ],
-                },
-              ]}
+              series={series}
             />
           </div>
         </div>

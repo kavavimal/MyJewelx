@@ -106,7 +106,7 @@ export default function StoreVendorPage({ vendors }) {
                                 fill="none"
                                 xmlns="http://www.w3.org/2000/svg"
                               >
-                                <g clip-path="url(#clip0_2203_6278)">
+                                <g clipPath="url(#clip0_2203_6278)">
                                   <path
                                     fill-rule="evenodd"
                                     clip-rule="evenodd"
@@ -129,7 +129,7 @@ export default function StoreVendorPage({ vendors }) {
                                 fill="none"
                                 xmlns="http://www.w3.org/2000/svg"
                               >
-                                <g clip-path="url(#clip0_2203_6280)">
+                                <g clipPath="url(#clip0_2203_6280)">
                                   <path
                                     d="M7.00127 1.16602L8.81194 5.09068L13.1041 5.59993L9.93077 8.5341L10.7731 12.7738L7.00127 10.6627L3.22944 12.7743L4.07177 8.53468L0.898438 5.59935L5.19119 5.0901L7.00127 1.16602Z"
                                     stroke="#F0AE11"
