@@ -2,7 +2,7 @@
 import { useShopStore } from "@/contexts/shopStore";
 import { Option, Select } from "@material-tailwind/react";
 import PriceFilter from "./PriceFilter";
-export default function ShopTopComponent() {
+export default function ShopTopComponent({ max }) {
   const selectedFilters = useShopStore((store) => store.filters);
   const setSelectedFilters = useShopStore((store) => store.setFilters);
 
@@ -15,7 +15,7 @@ export default function ShopTopComponent() {
   return (
     <div className="flex justify-end items-center mb-5">
       <div className="w-full">
-        <PriceFilter filterByPrice={filterByPrice} />
+        <PriceFilter filterByPrice={filterByPrice} max={max} />
       </div>
       <div className="flex">
         <Select

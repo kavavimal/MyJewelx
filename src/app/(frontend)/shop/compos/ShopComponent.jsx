@@ -72,7 +72,7 @@ const ShopComponent = ({ products, categories, promolist }) => {
                   <img
                     src={promo.ads_img_url}
                     alt="promo 2"
-                    className="h-full w-full object-cover"
+                    className="!min-h-[350px] w-full object-cover"
                   />
                   <div className="absolute inset-0 flex flex-col justify-center items-center gap-4 bg-black/25">
                     <Typography

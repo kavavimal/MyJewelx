@@ -6,6 +6,8 @@ import React from "react";
 
 const CheckoutItem = ({ item, variation, index }) => {
   const variationDataSplit = variation.variation_name?.split(",");
+  // console.log(item);
+
   return (
     <div
       className={`flex items-start gap-[15px] ${
@@ -30,7 +32,6 @@ const CheckoutItem = ({ item, variation, index }) => {
             AED {printFormatPrice(item.price)}
           </p>
         </div>
-        <p className="size-sm text-secondary-100 text-sm">30 Gram</p>
         <div className="py-0.5">
           {variationDataSplit?.map((item, index) => {
             return (

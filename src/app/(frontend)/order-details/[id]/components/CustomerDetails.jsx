@@ -6,10 +6,12 @@ import { useRouter } from "next/navigation";
 import React from "react";
 
 const CustomerDetails = ({ total, user, order }) => {
+  console.log(order);
+
   // Calculate Sub Total
   const subTotal = order.orderItems.reduce((acc, item) => acc + item.price, 0);
   const vat = subTotal * 0.05;
-  const subTotalFinal = subTotal - vat;
+  const subTotalFinal = subTotal + vat;
   const router = useRouter();
   return (
     <>

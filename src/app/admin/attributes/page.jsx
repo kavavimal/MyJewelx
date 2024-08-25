@@ -2,6 +2,8 @@ import React from "react";
 import AttributeForm from "./components/AttributeForm";
 import prisma from "@/lib/prisma";
 
+export const revalidate = 0;
+
 const getAttriubutes = () => {
   return prisma.attribute.findMany();
 };

@@ -67,11 +67,11 @@ export default function FrontendHeader({ categories }) {
     <>
       <div className="top-bar bg-black py-2">
         <div className="container">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center flex-col sm:flex-row justify-between">
+            <div className="hidden sm:block">
               <Link
                 href="mailto:contact@myjewlex.com"
-                className="flex items-center gap-2 text-white text-sm"
+                className="flex items-center gap-2 text-white text-sm hover:text-primary-200"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -99,10 +99,10 @@ export default function FrontendHeader({ categories }) {
                 Your Dream Jewelry, Realized by my Jewlex
               </label>
             </div>
-            <div>
+            <div className="hidden sm:block">
               <Link
                 href="tel:+917555176153"
-                className="flex items-center gap-2 text-white text-sm"
+                className="flex items-center gap-2 text-white text-sm  hover:text-primary-200"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -230,32 +230,38 @@ export default function FrontendHeader({ categories }) {
           <nav className="py-3">
             <ul className="flex items-center justify-center gap-12">
               <li>
-                <Link href="/jewlex-on-demand" className="text-sm">
+                <Link
+                  href="/jewlex-on-demand"
+                  className="text-sm hover:text-primary-200"
+                >
                   Jewlex on Demand
                 </Link>
               </li>
               <li>
-                <Link href="/shop" className="text-sm">
+                <Link href="/shop" className="text-sm hover:text-primary-200">
                   Shop
                 </Link>
               </li>
               <li>
-                <Link href="/store" className="text-sm">
+                <Link href="/store" className="text-sm hover:text-primary-200">
                   Store list
                 </Link>
               </li>
               <li>
-                <Link href="/vendor/registration" className="text-sm">
+                <Link
+                  href="/vendor/registration"
+                  className="text-sm hover:text-primary-200"
+                >
                   Store Registration
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-sm">
+                <Link href="#" className="text-sm hover:text-primary-200">
                   Community
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-sm">
+                <Link href="#" className="text-sm hover:text-primary-200">
                   Blog
                 </Link>
               </li>

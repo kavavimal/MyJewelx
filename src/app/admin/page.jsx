@@ -1,6 +1,5 @@
-
 const Page = () => {
-  return <>Jewlex</>
+  return <>Jewlex</>;
 };
 
 export default Page;

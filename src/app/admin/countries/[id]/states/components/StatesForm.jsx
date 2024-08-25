@@ -7,14 +7,22 @@ import React, { useState } from "react";
 import DataTable from "react-data-table-component";
 import { useRouter } from "next/navigation";
 import DeleteState from "./DeleteState";
-
+import moment from "moment";
 const StatesForm = ({ states, id }) => {
   const router = useRouter();
+  const [filteredStates, setFilteredStates] = useState(states);
   const [state, setState] = useState(false);
+
   const columns = [
     {
       name: "Name",
       selector: (row) => row?.name,
+      sortable: true,
+    },
+    {
+      name: "Date",
+      selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortable: true,
     },
     {
       name: "Action",
@@ -43,6 +51,7 @@ const StatesForm = ({ states, id }) => {
       ),
     },
   ];
+
   const formik = useFormik({
     initialValues: {
       name: state ? state.name : "",
@@ -142,32 +151,60 @@ const StatesForm = ({ states, id }) => {
       }
     },
   });
+
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    const filtered = states.filter((state) => {
+      const { name } = state;
+      return name && name.toLowerCase().includes(value);
+    });
+    setFilteredStates(filtered);
+  };
+
+  const customStyles = {
+    cells: {
+      style: {
+        fontSize: "15px",
+      },
+    },
+  };
+
   return (
     <>
-      <div className="flex items-center justify-between mb-10 intro-y">
+      <div className="flex items-center justify-between mb-5 intro-y">
         <h2 className="text-2xl font-semibold">States / City</h2>
-        <Button
-          size="md"
-          className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={24}
-            height={24}
-            viewBox="0 0 24 24"
+        <div className="flex gap-3 items-end">
+          <Input
+            placeholder="Search States"
+            label="Search"
+            style={{ fontSize: "15px" }}
+            type="text"
+            onChange={handleSearch}
+            containerProps={{ className: "!w-[300px]" }}
+          />
+          <Button
+            size="md"
+            className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
           >
-            <path
-              fill="currentColor"
-              d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
-            ></path>
-          </svg>
-          Add State / City
-        </Button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={24}
+              height={24}
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
+              ></path>
+            </svg>
+            Add State / City
+          </Button>{" "}
+        </div>
       </div>
 
-      <div className="mt-5 rounded-2xl shadow-3xl bg-white">
+      <div className="rounded-lg shadow border bg-white border-dark-200 mb-5">
         <Formik initialValues={formik.initialValues}>
-          <form onSubmit={formik.handleSubmit} className=" rounded p-7 mb-4">
+          <form onSubmit={formik.handleSubmit} className=" rounded p-7">
             <div className="flex flex-col gap-5">
               <div className="flex gap-5 items-center">
                 <div className="w-full">
@@ -175,6 +212,7 @@ const StatesForm = ({ states, id }) => {
                     className="w-full"
                     label="Name"
                     type="text"
+                    style={{ fontSize: "15px" }}
                     name="name"
                     value={formik.values?.name || ""}
                     onChange={formik.handleChange}
@@ -196,8 +234,16 @@ const StatesForm = ({ states, id }) => {
           </form>
         </Formik>
       </div>
-
-      <DataTable data={states} columns={columns} highlightOnHover />
+      <div className="rounded-lg shadow border bg-white border-dark-200 py-5">
+        <DataTable
+          data={filteredStates}
+          columns={columns}
+          customStyles={customStyles}
+          pagination
+          highlightOnHover
+          striped
+        />
+      </div>
     </>
   );
 };

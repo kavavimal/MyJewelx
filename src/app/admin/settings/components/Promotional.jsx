@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { post, update } from "@/utils/api";
-import { Button, IconButton, Input } from "@material-tailwind/react";
+import { Button, IconButton, Input, Textarea } from "@material-tailwind/react";
 import { Formik, useFormik } from "formik";
 import { enqueueSnackbar } from "notistack";
 import React, { useState, useEffect } from "react";
@@ -13,12 +13,14 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import DeleteAds from "./DeleteAds";
 import { Select, Option } from "@material-tailwind/react";
+import moment from "moment";
 
-const Promotional = ({ promotional }) => {
+const Promotional = ({ promotional, searchQuery, onSearchChange }) => {
   const [previewURLs, setPreviewURLs] = useState([]);
   const [image, setImage] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [filteredData, setFilteredData] = useState(promotional);
   const router = useRouter();
 
   const columns = [
@@ -26,17 +28,24 @@ const Promotional = ({ promotional }) => {
       name: "Image",
       selector: (row) => (
         <>
-          <Image src={row?.ads_img_url} width={50} height={50} />
+          <Image
+            src={row?.ads_img_url}
+            width={50}
+            height={50}
+            alt="ads image"
+          />
         </>
       ),
     },
     {
       name: "Ads Title",
       selector: (row) => row?.ads_title,
+      sortable: true,
     },
     {
       name: "Ads Description",
       selector: (row) => row?.ads_desc,
+      sortable: true,
     },
     {
       name: "Ads Link",
@@ -51,6 +60,12 @@ const Promotional = ({ promotional }) => {
     {
       name: "Ads Type",
       selector: (row) => row?.ads_type,
+      sortable: true,
+    },
+    {
+      name: "Date",
+      selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortable: true,
     },
     {
       name: "Actions",
@@ -168,11 +183,52 @@ const Promotional = ({ promotional }) => {
     });
   };
 
+  useEffect(() => {
+    if (searchQuery) {
+      const lowercasedFilter = searchQuery.toLowerCase();
+      const filtered = promotional.filter((promotion) => {
+        const { ads_title, ads_desc, ads_type } = promotion;
+
+        return (
+          ads_title.toLowerCase().includes(value) ||
+          (ads_desc && ads_desc.toLowerCase().includes(value)) ||
+          (ads_type && ads_type.toLowerCase().includes(value))
+        );
+      });
+      setFilteredData(filtered);
+    } else {
+      setFilteredData(promotional);
+    }
+  }, [searchQuery, promotional]);
+
+  // const handleSearch = (e) => {
+  //   const value = e.target.value.toLowerCase();
+  //   const filtered = promotional.filter((promotion) => {
+  //     const { ads_title, ads_desc, ads_type } = promotion;
+
+  //     return (
+  //       ads_title.toLowerCase().includes(value) ||
+  //       (ads_desc && ads_desc.toLowerCase().includes(value)) ||
+  //       (ads_type && ads_type.toLowerCase().includes(value))
+  //     );
+  //   });
+  //   setFilteredData(filtered);
+  // };
+
+  const customStyles = {
+    cells: {
+      style: {
+        padding: "10px",
+        fontSize: "15px",
+      },
+    },
+  };
+
   return (
     <div className="w-full">
-      <div className="mt-10 rounded-2xl shadow-3xl bg-white">
+      <div className="rounded-lg shadow border border-dark-200 mb-5 bg-white">
         <Formik initialValues={formik.initialValues}>
-          <form onSubmit={formik.handleSubmit} className=" rounded p-7 mb-4">
+          <form onSubmit={formik.handleSubmit} className=" rounded p-7">
             <div className="flex flex-col gap-5">
               <div className="flex gap-5">
                 <div className="mb-2 w-1/2">
@@ -184,17 +240,6 @@ const Promotional = ({ promotional }) => {
                     onChange={formik.handleChange}
                   />
                 </div>
-                <div className="mb-2 w-1/2">
-                  <Input
-                    label="Ads Description"
-                    type="text"
-                    value={formik.values?.ads_desc || ""}
-                    name="ads_desc"
-                    onChange={formik.handleChange}
-                  />
-                </div>
-              </div>
-              <div className="flex gap-5">
                 <div className="mb-2 w-1/2">
                   <Input
                     label="Ads Link"
@@ -211,61 +256,77 @@ const Promotional = ({ promotional }) => {
                       formik.setFieldValue("ads_type", e);
                     }}
                     value={formik.values?.ads_type || ""}
+                    label="Ads Type"
                   >
-                    <Option value="">Select Type</Option>
-                    <Option value="HOME">HOME</Option>
-                    <Option value="POD">POD</Option>
-                    <Option value="SHOP">SHOP</Option>
-                    <Option value="STORE">STORE</Option>
+                    {/* <Option value="">Select Type</Option> */}
+                    <Option value="HOME">Home</Option>
+                    <Option value="HOME_B">Home Bottom</Option>
+                    <Option value="POD">JOD</Option>
+                    <Option value="SHOP">Shop</Option>
+                    <Option value="STORE">Store</Option>
+                    <Option value="CART">Cart</Option>
+                    <Option value="WISHLIST">Wishlist</Option>
                   </Select>
                 </div>
               </div>
-              <div className="mb-2 w-1/2">
-                <label
-                  htmlFor="images"
-                  className="flex h-24 w-24 flex-col items-center justify-center border-2 border-blueGray-100 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                >
-                  {previewURLs[0] ? (
-                    <img
-                      src={previewURLs}
-                      alt=""
-                      className="w-full h-64 rounded-lg"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width={24}
-                        height={24}
-                        viewBox="0 0 24 24"
-                        className="text-blueGray-200"
-                      >
-                        <path
-                          fill="currentColor"
-                          fillRule="evenodd"
-                          d="M9.778 21h4.444c3.121 0 4.682 0 5.803-.735a4.408 4.408 0 0 0 1.226-1.204c.749-1.1.749-2.633.749-5.697c0-3.065 0-4.597-.749-5.697a4.407 4.407 0 0 0-1.226-1.204c-.72-.473-1.622-.642-3.003-.702c-.659 0-1.226-.49-1.355-1.125A2.064 2.064 0 0 0 13.634 3h-3.268c-.988 0-1.839.685-2.033 1.636c-.129.635-.696 1.125-1.355 1.125c-1.38.06-2.282.23-3.003.702A4.405 4.405 0 0 0 2.75 7.667C2 8.767 2 10.299 2 13.364c0 3.064 0 4.596.749 5.697c.324.476.74.885 1.226 1.204C5.096 21 6.657 21 9.778 21M12 9.273c-2.301 0-4.167 1.831-4.167 4.09c0 2.26 1.866 4.092 4.167 4.092c2.301 0 4.167-1.832 4.167-4.091c0-2.26-1.866-4.091-4.167-4.091m0 1.636c-1.38 0-2.5 1.099-2.5 2.455c0 1.355 1.12 2.454 2.5 2.454s2.5-1.099 2.5-2.454c0-1.356-1.12-2.455-2.5-2.455m4.722-.818c0-.452.373-.818.834-.818h1.11c.46 0 .834.366.834.818a.826.826 0 0 1-.833.818h-1.111a.826.826 0 0 1-.834-.818"
-                          clipRule="evenodd"
-                        ></path>
-                      </svg>
-                    </div>
-                  )}
-                  <input
-                    id="images"
-                    className="hidden"
-                    type="file"
-                    name="ads_img_url"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const files = e.target.files[0];
-                      if (files) {
-                        formik.setFieldValue("ads_img_url", files);
-                        setImage(files);
-                        setPreviewURLs([URL.createObjectURL(files)]);
-                      }
-                    }}
+              <div className="flex gap-5">
+                <div className="mb-2 w-1/2">
+                  <Textarea
+                    label="Ads Description"
+                    type="text"
+                    value={formik.values?.ads_desc || ""}
+                    name="ads_desc"
+                    onChange={formik.handleChange}
                   />
-                </label>
+                </div>
+                <div className="mb-2 w-1/2">
+                  <label
+                    htmlFor="images"
+                    className="flex h-24 w-24 flex-col items-center justify-center border-2 border-blueGray-100 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                  >
+                    {previewURLs[0] ? (
+                      <img
+                        src={previewURLs}
+                        alt=""
+                        className="w-full h-64 rounded-lg"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width={24}
+                          height={24}
+                          viewBox="0 0 24 24"
+                          className="text-blueGray-200"
+                        >
+                          <path
+                            fill="currentColor"
+                            fillRule="evenodd"
+                            d="M9.778 21h4.444c3.121 0 4.682 0 5.803-.735a4.408 4.408 0 0 0 1.226-1.204c.749-1.1.749-2.633.749-5.697c0-3.065 0-4.597-.749-5.697a4.407 4.407 0 0 0-1.226-1.204c-.72-.473-1.622-.642-3.003-.702c-.659 0-1.226-.49-1.355-1.125A2.064 2.064 0 0 0 13.634 3h-3.268c-.988 0-1.839.685-2.033 1.636c-.129.635-.696 1.125-1.355 1.125c-1.38.06-2.282.23-3.003.702A4.405 4.405 0 0 0 2.75 7.667C2 8.767 2 10.299 2 13.364c0 3.064 0 4.596.749 5.697c.324.476.74.885 1.226 1.204C5.096 21 6.657 21 9.778 21M12 9.273c-2.301 0-4.167 1.831-4.167 4.09c0 2.26 1.866 4.092 4.167 4.092c2.301 0 4.167-1.832 4.167-4.091c0-2.26-1.866-4.091-4.167-4.091m0 1.636c-1.38 0-2.5 1.099-2.5 2.455c0 1.355 1.12 2.454 2.5 2.454s2.5-1.099 2.5-2.454c0-1.356-1.12-2.455-2.5-2.455m4.722-.818c0-.452.373-.818.834-.818h1.11c.46 0 .834.366.834.818a.826.826 0 0 1-.833.818h-1.111a.826.826 0 0 1-.834-.818"
+                            clipRule="evenodd"
+                          ></path>
+                        </svg>
+                      </div>
+                    )}
+                    <input
+                      id="images"
+                      className="hidden"
+                      type="file"
+                      name="ads_img_url"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const files = e.target.files[0];
+                        if (files) {
+                          formik.setFieldValue("ads_img_url", files);
+                          setImage(files);
+                          setPreviewURLs([URL.createObjectURL(files)]);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
               </div>
+
               <div className="flex items-center justify-between">
                 <Button type="submit" loading={formik.isSubmitting}>
                   {isEditing ? "Update" : "Add"}
@@ -275,12 +336,25 @@ const Promotional = ({ promotional }) => {
           </form>
         </Formik>
       </div>
-      <DataTable
-        data={promotional}
-        columns={columns}
-        highlightOnHover
-        pagination
-      />
+      <div className="pb-5 flex-col items-end hidden">
+        <Input
+          label="Search"
+          placeholder="Search Promotionals"
+          value={searchQuery}
+          onChange={onSearchChange}
+          containerProps={{ className: "!w-[300px]" }}
+        />
+      </div>
+      <div className="rounded-lg shadow border bg-white border-dark-200 py-5">
+        <DataTable
+          striped
+          data={filteredData}
+          columns={columns}
+          highlightOnHover
+          pagination
+          customStyles={customStyles}
+        />
+      </div>
     </div>
   );
 };

@@ -7,13 +7,13 @@ import {
   WhatsappShareButton,
 } from "react-share";
 
-export default function Share() {
+export default function Share({ product }) {
   return (
     <span className="flex items-center gap-2 mt-3 text-secondary-100">
       Share on :
       <FacebookShareButton
         url="https://tailwindcss.com/"
-        title="Hello"
+        title={product?.product_name}
         separator=": "
       >
         <svg
@@ -31,7 +31,7 @@ export default function Share() {
       </FacebookShareButton>
       <LinkedinShareButton
         url="https://tailwindcss.com/"
-        title="Hello"
+        title={product?.product_name}
         separator=": "
       >
         <svg
@@ -54,7 +54,7 @@ export default function Share() {
           </defs>
         </svg>
       </LinkedinShareButton>
-      <InstapaperShareButton
+      {/* <InstapaperShareButton
         url="https://tailwindcss.com/"
         title="Hello"
         separator=": "
@@ -79,7 +79,7 @@ export default function Share() {
             fill="#4D4D4D"
           />
         </svg>
-      </InstapaperShareButton>
+      </InstapaperShareButton> */}
     </span>
   );
 }

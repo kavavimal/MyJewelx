@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-1.0.x"]
 }
 
@@ -27,42 +27,55 @@ model Account {
   @@map("accounts")
 }
 
-model User {
-  id           String     @id @default(cuid())
-  email        String     @unique
-  emailVerified DateTime?
-  password     String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  account_type AcountType @default(CUSTOMER)
-  status       UserStatus @default(ACTIVE)
-  role_id      Int
-  phone_number String?
-  otp          String?
-  firstName    String
-  lastName     String
-  products     Product[]
-  role         Role       @relation(fields: [role_id], references: [role_id])
-  vendor       Vendor?
-  accounts     Account[]
-  image        Image?
-  carts        Cart?
-  reviews      Review[]
-  myreviews    Review[]   @relation("myreviews")
+model StoreLikes {
+  id         Int      @id @default(autoincrement())
+  likerId    String
+  likedId    String
+  likedAt    DateTime @default(now())
 
+  liker      User     @relation("LikesGiven", fields: [likerId], references: [id])
+  liked      User     @relation("LikesReceived", fields: [likedId], references: [id])
+
+  @@unique([likerId, likedId])
+}
+
+model User {
+  id              String                @id @default(cuid())
+  email           String                @unique
+  password        String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  account_type    AcountType            @default(CUSTOMER)
+  role_id         Int
+  phone_number    String?
+  otp             String?
+  firstName       String
+  lastName        String
+  status          UserStatus            @default(ACTIVE)
+  emailVerified   DateTime?
+  addresses       Address[]
+  carts           Cart?
+  image           Image?
+  likes           Like[]
   orders          Order[]               @relation("buyerOrders")
   sellerOrders    OrderSellerRelation[]
-  wishlist        Wishlist[]
-  likes           Like[]
-  viewProducts    ViewedProduct[]
-  addresses       Address[]
+  products        Product[]
   ProductOnDemand ProductOnDemand[]
+  myreviews       Review[]              @relation("myreviews")
+  reviews         Review[]
+  role            Role                  @relation(fields: [role_id], references: [role_id])
+  vendor          Vendor?
+  viewProducts    ViewedProduct[]
+  wishlist        Wishlist[]
+  accounts        Account[]
+
+  likesGiven    StoreLikes[] @relation("LikesGiven")
+  likesReceived StoreLikes[] @relation("LikesReceived")
 }
 
 model Address {
   id        Int         @id @default(autoincrement())
   userId    String
-  user      User        @relation(fields: [userId], references: [id])
   type      AddressType
   firstName String
   lastName  String
@@ -72,10 +85,11 @@ model Address {
   state     String
   zipCode   String
   country   String
-  phone     String?
-  email     String?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+  email     String?
+  phone     String?
+  user      User        @relation(fields: [userId], references: [id])
 }
 
 model Role {
@@ -109,57 +123,52 @@ model Product {
   user_id               String
   product_name          String
   isOnlineBuyable       Boolean                 @default(false)
-  featured              Boolean                 @default(false)
   country_id            Int?
+  categoryId            Int
+  subCategoryId         Int?
+  delivery_includes     String?
+  offline_reason        String?
+  purchase_note         String?
+  return_policy         String?
+  featured              Boolean                 @default(false)
+  labels                String?
+  likes                 Like[]
+  category              Category                @relation("CategoryProducts", fields: [categoryId], references: [category_id])
   country               Country?                @relation(fields: [country_id], references: [country_id])
+  subcategory           Category?               @relation("SubCategoryProducts", fields: [subCategoryId], references: [category_id])
   user                  User                    @relation(fields: [user_id], references: [id])
   attributes            ProductAttribute[]
   ProductAttributeValue ProductAttributeValue[]
-  categoryId            Int
-  subCategoryId         Int?
-  offline_reason        String?
-  delivery_includes     String?
-  return_policy         String?
-  purchase_note         String?
-
-  // Define relations to Category
-  category    Category  @relation("CategoryProducts", fields: [categoryId], references: [category_id])
-  subcategory Category? @relation("SubCategoryProducts", fields: [subCategoryId], references: [category_id])
-
-  relatedProducts RelatedProduct[] @relation("RelatedProducts")
-  relatedTo       RelatedProduct[] @relation("RelatedTo")
-
-  collections  ProductCollection[]
-  genders      ProductGender[]
-  patterns     ProductPatten[]
-  states       ProductState[]
-  tags         ProductTag[]
-  variations   ProductVariation[]
-  productChars ProductChars[]
-  reviews      Review[]
-  wishlist     Wishlist[]
-  likes        Like[]
-  viewedBy     ViewedProduct[]
+  productChars          ProductChars[]
+  collections           ProductCollection[]
+  genders               ProductGender[]
+  patterns              ProductPatten[]
+  states                ProductState[]
+  tags                  ProductTag[]
+  variations            ProductVariation[]
+  relatedProducts       RelatedProduct[]        @relation("RelatedProducts")
+  relatedTo             RelatedProduct[]        @relation("RelatedTo")
+  reviews               Review[]
+  viewedBy              ViewedProduct[]
+  wishlist              Wishlist[]
 }
 
 model ViewedProduct {
-  id        Int    @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   userId    String
   productId Int
-
-  user    User    @relation(fields: [userId], references: [id])
-  product Product @relation(fields: [productId], references: [product_id])
+  product   Product @relation(fields: [productId], references: [product_id])
+  user      User    @relation(fields: [userId], references: [id])
 
   @@unique([userId, productId])
 }
 
 model RelatedProduct {
-  id               Int @id @default(autoincrement())
+  id               Int     @id @default(autoincrement())
   productId        Int
   relatedProductId Int
-
-  product        Product @relation("RelatedProducts", fields: [productId], references: [product_id], onDelete: Cascade)
-  relatedProduct Product @relation("RelatedTo", fields: [relatedProductId], references: [product_id], onDelete: Cascade)
+  product          Product @relation("RelatedProducts", fields: [productId], references: [product_id], onDelete: Cascade)
+  relatedProduct   Product @relation("RelatedTo", fields: [relatedProductId], references: [product_id], onDelete: Cascade)
 
   @@unique([productId, relatedProductId])
 }
@@ -172,7 +181,6 @@ model Vendor {
   license_number   String?   @unique
   issued_at        String?
   issued_date      DateTime?
-  expiry_date      DateTime?
   licence_address  String?
   licence_city     String?
   licence_state    String?
@@ -181,29 +189,29 @@ model Vendor {
   account_name     String?
   account_number   String?   @unique
   bank_name        String?
-  routing_number   String?
   bank_iban        String?
   bank_swift_code  String?
   bank_address     String?
   bank_city        String?
-  bank_state       String?
   bank_zip_code    String?
   bank_country     String?
+  expiry_date      DateTime?
+  routing_number   String?
+  bank_state       String?
   user             User      @relation(fields: [user_id], references: [id])
 }
 
 model Category {
-  category_id    Int      @id @default(autoincrement())
-  name           String   @unique
-  description    String?
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
-  category_image String?
-  parent_id      Int?
-
+  category_id         Int       @id @default(autoincrement())
+  name                String    @unique
+  description         String?
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  category_image      String?
+  parent_id           Int?
+  image               Image?
   products            Product[] @relation("CategoryProducts")
   subCategoryProducts Product[] @relation("SubCategoryProducts")
-  image               Image?
 }
 
 model Country {
@@ -251,10 +259,10 @@ model Attribute {
 model AttributeValue {
   id                     Int                     @id @default(autoincrement())
   name                   String
-  colorCode              String?
   attribute_id           Int
   created_at             DateTime                @default(now())
   updated_at             DateTime                @updatedAt
+  colorCode              String?
   attribute              Attribute               @relation(fields: [attribute_id], references: [attribute_id])
   ProductAttributeValue  ProductAttributeValue[]
   attributeValuePricings attributeValuePricing[]
@@ -284,28 +292,27 @@ model attributeValuePricing {
   pricing_id        Int            @id @default(autoincrement())
   name              String         @unique
   attributeValue_id Int
-  attributeValue    AttributeValue @relation(fields: [attributeValue_id], references: [id])
   price             Float
   base_q            Float
   unit              String
   purity            String?
+  attributeValue    AttributeValue @relation(fields: [attributeValue_id], references: [id])
 }
 
 model PricingHistory {
-  pricingHistory_id Int    @id @default(autoincrement())
-  date              String @unique
+  pricingHistory_id Int      @id @default(autoincrement())
+  date              String   @unique
   karat24           Float
   karat22           Float
   karat21           Float
-  karat18           Float
   karat14           Float
   karat09           Float
   silver            Float
   platinum          Float
   palladium         Float
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  karat18           Float
 }
 
 model Collection {
@@ -380,11 +387,10 @@ model Characteristic {
 }
 
 model ProductChars {
-  chars_id   Int
-  product_id Int
-
-  product        Product        @relation(fields: [product_id], references: [product_id])
+  chars_id       Int
+  product_id     Int
   characteristic Characteristic @relation(fields: [chars_id], references: [chars_id])
+  product        Product        @relation(fields: [product_id], references: [product_id])
 
   @@id([chars_id, product_id])
 }
@@ -392,9 +398,7 @@ model ProductChars {
 model ProductVariation {
   variation_id              Int                         @id @default(autoincrement())
   product_id                Int
-  variation_name            String
   description               String
-  // images                    String[]
   sku                       String                      @unique
   stock_management          Boolean                     @default(false)
   stock_status              Boolean                     @default(false)
@@ -411,15 +415,16 @@ model ProductVariation {
   other_charges             String?
   regular_price             Float
   selling_price             Float?
+  variation_name            String
   isDiscount                Boolean                     @default(false)
   variation_discount        Float?
   variation_discount_type   Int?
-  product                   Product                     @relation(fields: [product_id], references: [product_id], onDelete: Cascade)
-  productAttributeValues    ProductVariationAttribute[]
   cartItems                 CartItem[]
-  orderItems                OrderItem[]
   gemstoneProductVariations GemstoneProductVariation[]
   image                     Image[]
+  orderItems                OrderItem[]
+  product                   Product                     @relation(fields: [product_id], references: [product_id], onDelete: Cascade)
+  productAttributeValues    ProductVariationAttribute[]
 }
 
 model Image {
@@ -431,11 +436,11 @@ model Image {
   category_id      Int?              @unique
   review_id        Int?
   pod_id           Int?
-  productvariation ProductVariation? @relation(fields: [variation_id], references: [variation_id], onDelete: Cascade)
-  productOnDemand  ProductOnDemand?  @relation(fields: [pod_id], references: [id], onDelete: Cascade)
   category         Category?         @relation(fields: [category_id], references: [category_id], onDelete: Cascade)
-  user             User?             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  productOnDemand  ProductOnDemand?  @relation(fields: [pod_id], references: [id], onDelete: Cascade)
   review           Review?           @relation(fields: [review_id], references: [id], onDelete: Cascade)
+  user             User?             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  productvariation ProductVariation? @relation(fields: [variation_id], references: [variation_id], onDelete: Cascade)
 }
 
 model Gemstone {
@@ -464,30 +469,23 @@ model ProductVariationAttribute {
 }
 
 model Cart {
-  cart_id Int @id @default(autoincrement())
-
-  user_id String @unique
-  user    User   @relation(fields: [user_id], references: [id])
-
-  cart_total Float
-
-  discount      Float
+  cart_id       Int        @id @default(autoincrement())
+  user_id       String     @unique
+  cart_total    Float
   discount_type String
-
-  cartItems CartItem[]
+  discount      Float
+  user          User       @relation(fields: [user_id], references: [id])
+  cartItems     CartItem[]
 }
 
 model CartItem {
-  cartItem_id Int @id @default(autoincrement())
-
-  cart_id Int
-  cart    Cart @relation(fields: [cart_id], references: [cart_id], onDelete: Cascade)
-
+  cartItem_id      Int              @id @default(autoincrement())
+  cart_id          Int
   variation_id     Int
+  price            Float
+  quantity         Int
+  cart             Cart             @relation(fields: [cart_id], references: [cart_id], onDelete: Cascade)
   productVariation ProductVariation @relation(fields: [variation_id], references: [variation_id], onDelete: Cascade)
-
-  price    Float
-  quantity Int
 }
 
 model OtpVerification {
@@ -503,27 +501,25 @@ model OtpVerification {
   @@unique([email, phone_number])
 }
 
-// Define the data model for orders
 model Order {
-  id                 Int     @id @default(autoincrement())
+  id                 Int                   @id @default(autoincrement())
   shippingAddress    String
   billingAddress     String
   paymentMethod      String
+  status             OrderStatus           @default(PENDING)
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  userId             String
   paymentResponse    String?
-  orderTotal         Float   @default(0)
-  paidAmount         Float   @default(0)
+  orderDiscount      Float                 @default(0)
   orderDiscountTitle String?
-  orderDiscount      Float   @default(0)
-
-  status     OrderStatus           @default(PENDING)
-  cancelNote String?
-  createdAt  DateTime              @default(now())
-  updatedAt  DateTime              @updatedAt
-  seller     OrderSellerRelation[]
-  user       User                  @relation(fields: [userId], references: [id], "buyerOrders")
-  userId     String
-  orderItems OrderItem[]
-  logs       Logs[]
+  orderTotal         Float                 @default(0)
+  paidAmount         Float                 @default(0)
+  cancelNote         String?
+  logs               Logs[]
+  user               User                  @relation("buyerOrders", fields: [userId], references: [id])
+  orderItems         OrderItem[]
+  seller             OrderSellerRelation[]
 }
 
 model OrderSellerRelation {
@@ -536,50 +532,43 @@ model OrderSellerRelation {
 }
 
 model OrderItem {
-  id       Int    @id @default(autoincrement())
-  name     String
-  quantity Int
-  price    Float
-
-  sellerId      String?
-  discountTitle String?
-  discount      Float   @default(0)
-
+  id                 Int              @id @default(autoincrement())
+  name               String
+  quantity           Int
+  price              Float
   variationData      String
-  // Relationships
-  order              Order            @relation(fields: [orderId], references: [id])
   orderId            Int
-  productVariation   ProductVariation @relation(fields: [productVariationId], references: [variation_id])
   productVariationId Int
+  discount           Float            @default(0)
+  discountTitle      String?
+  sellerId           String?
+  order              Order            @relation(fields: [orderId], references: [id])
+  productVariation   ProductVariation @relation(fields: [productVariationId], references: [variation_id])
 }
 
-// Define the data model for reviews
 model Review {
   id             Int          @id @default(autoincrement())
-  rating         Int // 1 to 5 stars
+  rating         Int
   text           String?
-  recommandation String?
-  images         Image[]
   createdAt      DateTime     @default(now())
+  userId         String?
+  productId      Int?
+  fromUserId     String
+  recommandation String?
   status         ReviewStatus @default(PUBLISHED)
   replay         String?
-
-  // Relationships
-  fromUser   User   @relation(fields: [fromUserId], references: [id], "myreviews")
-  fromUserId String
-
-  user      User?    @relation(fields: [userId], references: [id])
-  userId    String?
-  product   Product? @relation(fields: [productId], references: [product_id])
-  productId Int?
+  images         Image[]
+  fromUser       User         @relation("myreviews", fields: [fromUserId], references: [id])
+  product        Product?     @relation(fields: [productId], references: [product_id])
+  user           User?        @relation(fields: [userId], references: [id])
 }
 
 model Wishlist {
   id        Int     @id @default(autoincrement())
   userId    String
   productId Int
-  user      User    @relation(fields: [userId], references: [id])
   product   Product @relation(fields: [productId], references: [product_id])
+  user      User    @relation(fields: [userId], references: [id])
 
   @@unique([userId, productId])
 }
@@ -588,8 +577,8 @@ model Like {
   id        Int     @id @default(autoincrement())
   userId    String
   productId Int
-  user      User    @relation(fields: [userId], references: [id])
   product   Product @relation(fields: [productId], references: [product_id])
+  user      User    @relation(fields: [userId], references: [id])
 
   @@unique([userId, productId])
 }
@@ -597,7 +586,6 @@ model Like {
 model ProductOnDemand {
   id          Int       @id @default(autoincrement())
   userId      String
-  user        User      @relation(fields: [userId], references: [id])
   name        String
   description String?
   metal_type  String
@@ -610,9 +598,10 @@ model ProductOnDemand {
   max_price   Float?
   made_in     String
   contact     String
-  Images      Image[]
   Status      PODStatus @default(DRAFT)
   Note        String?
+  Images      Image[]
+  user        User      @relation(fields: [userId], references: [id])
 }
 
 model Logs {
@@ -621,10 +610,37 @@ model Logs {
   details   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  orderId Int?
-  order   Order? @relation(fields: [orderId], references: [id])
+  orderId   Int?
+  order     Order?   @relation(fields: [orderId], references: [id])
 }
+
+model HomeSlider {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  image_url   String
+  link_url    String
+  createdAt   DateTime @default(now())
+}
+
+model Promotional {
+  ads_id      Int      @id @default(autoincrement())
+  ads_title   String
+  ads_desc    String
+  ads_link    String
+  ads_img_url String
+  ads_type    adsType
+  createdAt   DateTime @default(now())
+}
+
+// model StoreLike {
+//   id         Int      @id @default(autoincrement())
+//   likerId    Int
+//   likedId    Int
+//   likedAt    DateTime @default(now())
+
+//   @@unique([likerId, likedId])  // Ensure a user can only like another user once
+// }
 
 enum AcountType {
   CUSTOMER
@@ -692,31 +708,12 @@ enum CharsType {
   TREND
 }
 
-model HomeSlider {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  image_url   String
-  link_url    String
-  createdAt   DateTime @default(now())
-}
-
-model Promotional {
-  ads_id      Int      @id @default(autoincrement())
-  ads_title   String
-  ads_desc    String
-  ads_link    String
-  ads_img_url String
-  ads_type    adsType
-  createdAt   DateTime @default(now())
-}
-
 enum adsType {
   HOME
-  HOME_B
   POD
   SHOP
   STORE
+  HOME_B
   CART
   WISHLIST
 }

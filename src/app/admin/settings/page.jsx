@@ -2,6 +2,8 @@ import React from "react";
 import Settings from "./components/Settings";
 import prisma from "@/lib/prisma";
 
+export const revalidate = 0;
+
 const getHomeSlider = () => {
   return prisma.homeSlider.findMany();
 };

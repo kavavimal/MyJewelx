@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "next build",
-    "start": "next start",
+    "build": "npm run db:generate && next build",
+    "start": "set NODE_ENV=production & node index.js",
     "lint": "next lint",
-    "backup": "backup.bat",
-    "migrate": "npx prisma generate",
-    "dbmigrate": "npx prisma migrate dev",
-    "dbreset": "npx prisma migrate reset"
+    "db:generate": "npx prisma generate",
+    "db:push": "npx prisma db push",
+    "db:migrate:dev": "npx prisma migrate dev",
+    "db:reset": "npx prisma migrate reset",
+    "backup": "backup.bat"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -25,13 +26,16 @@
     "@stripe/react-stripe-js": "^2.7.3",
     "@stripe/stripe-js": "^4.1.0",
     "@tinymce/tinymce-react": "^5.0.1",
+    "apexcharts": "^3.52.0",
     "axios": "^1.6.8",
     "bcrypt": "^5.1.1",
     "company-email-validator": "^1.1.0",
     "date-fns": "^3.6.0",
+    "dotenv": "^16.4.5",
     "formik": "^2.4.6",
     "framer-motion": "^11.3.13",
     "handlebars": "^4.7.8",
+    "juice": "^10.0.0",
     "moment": "^2.30.1",
     "next": "^14.2.4",
     "next-auth": "^4.24.7",
@@ -41,6 +45,7 @@
     "prisma": "^5.13.0",
     "puppeteer": "^22.14.0",
     "react": "^18",
+    "react-apexcharts": "^1.4.1",
     "react-awesome-reveal": "^4.2.13",
     "react-data-table-component": "^7.6.2",
     "react-day-picker": "^8.10.1",
@@ -51,10 +56,12 @@
     "react-share": "^5.1.0",
     "react-slick": "^0.30.2",
     "react-stripe-js": "^1.1.5",
+    "simplebar-react": "^3.2.4",
     "slick-carousel": "^1.8.1",
     "stripe": "^16.1.0",
     "styled-components": "^6.1.11",
     "swiper": "^11.1.4",
+    "tailwindcss": "^3.4.1",
     "use-react-countries": "^2.0.1",
     "uuid": "^10.0.0",
     "yup": "^1.4.0",
@@ -63,10 +70,8 @@
   },
   "devDependencies": {
     "eslint": "^8",
-    "eslint-config-next": "14.2.3",
+    "eslint-config-next": "14.1.4",
     "eslint-plugin-react-hooks": "^4.6.2",
-    "postcss": "^8",
-    "simplebar-react": "^3.2.4",
-    "tailwindcss": "^3.4.1"
+    "postcss": "^8"
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import ProductCard from "../shop/compos/ProductCard";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -17,7 +17,17 @@ import {
 import Engagement from "../shop/compos/Engagement";
 import { Button, Card, CardBody, CardHeader } from "@material-tailwind/react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
 const NewProdFeatureProd = ({ products }) => {
+  const [filteredproduct, setFilteredproduct] = useState(products);
+
+  useEffect(() => {
+    const filteredbyLabel = products.filter(
+      (product) => product.labels && product.labels.includes("Featured")
+    );
+    setFilteredproduct(filteredbyLabel);
+  }, [products]);
+
   return (
     <>
       <AnimatePresence mode="wait">
@@ -26,12 +36,12 @@ const NewProdFeatureProd = ({ products }) => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
           viewport={{ once: true }}
-          className="py-10"
+          className="p-0 sm:py-10"
         >
           <div className="container">
-            <div className="flex items-start justify-center gap-5">
-              <div className="new-products w-[550px]">
-                <h3 className="text-2xl font-playfairdisplay font-semibold tracking-wide mb-5">
+            <div className="flex flex-col sm:flex-row items-start justify-center gap-5">
+              <div className="new-products w-full sm:w-[550px]">
+                <h3 className="text-2xl font-playfairdisplay font-semibold tracking-wide mb-2.5 sm:mb-5">
                   New Products
                 </h3>
                 <div className="relative">
@@ -45,7 +55,16 @@ const NewProdFeatureProd = ({ products }) => {
                       delay: 5000,
                       disableOnInteraction: false,
                     }}
-                    modules={[Navigation, Autoplay]}
+                    modules={[Navigation, Autoplay, Grid]}
+                    slidesPerView={1}
+                    grid={{ rows: 1, fill: "row" }}
+                    breakpoints={{
+                      540: {
+                        slidesPerView: 1,
+                        spaceBetween: 15,
+                        grid: { rows: 1, fill: "row" },
+                      },
+                    }}
                   >
                     {products.slice(0, 5).map((product, index) => {
                       const variation = product?.variations[0];
@@ -61,14 +80,14 @@ const NewProdFeatureProd = ({ products }) => {
                               <div className="w-full overflow-hidden bg-[#FFFDF8]">
                                 <Link
                                   href={`/product/${product?.product_id}`}
-                                  className="font-normal w-full h-[437px] flex justify-center items-center"
+                                  className="font-normal w-full h-[459px] sm:h-[437px] flex justify-center items-center"
                                 >
                                   <Image
                                     src={"/assets/images/new.png"}
                                     alt="image for design"
                                     width={450}
                                     height={437}
-                                    className="w-full h-auto hover:scale-105 transition-all duration-300"
+                                    className="w-full h-[398px] sm:h-auto hover:scale-105 transition-all duration-300"
                                   />
                                 </Link>
                               </div>
@@ -78,7 +97,7 @@ const NewProdFeatureProd = ({ products }) => {
                                 <p className="text-black text-sm">
                                   <Link
                                     href={`/product/${product?.product_id}`}
-                                    className="font-normal leading-8 text-left text-[22px]"
+                                    className="font-normal leading-8 text-left text-[22px] hover:text-primary-200"
                                   >
                                     {truncate(product?.product_name, 25)}
                                   </Link>
@@ -154,29 +173,42 @@ const NewProdFeatureProd = ({ products }) => {
                   </button>
                 </div>
               </div>
-              <div className="feature-products w-[calc(100%-570px)]">
+              <div className="feature-products w-full sm:w-[calc(100%-570px)]">
                 <div className="flex justify-between items-center mb-2.5">
                   <h3 className="text-2xl font-playfairdisplay font-semibold tracking-wide">
                     Feature Products
                   </h3>
                   <div>
                     <Link href="/shop">
-                      <Button variant="outlined">View All</Button>
+                      <Button
+                        className="hover:bg-primary-200 hover:text-black"
+                        variant="outlined"
+                      >
+                        View All
+                      </Button>
                     </Link>
                   </div>
                 </div>
                 <div>
                   <Swiper
                     slidesPerView={2}
-                    spaceBetween={20}
+                    spaceBetween={15}
                     autoplay={{
                       delay: 5000,
                       disableOnInteraction: false,
                     }}
                     modules={[Grid, Pagination, Autoplay]}
-                    grid={{ rows: 2, fill: "row" }}
+                    grid={{ rows: 3, fill: "row" }}
+                    breakpoints={{
+                      540: {
+                        slidesPerView: 2,
+                        spaceBetween: 15,
+                        grid: { rows: 2, fill: "row" },
+                      },
+                    }}
+                    // pagination={{ clickable: true }}
                   >
-                    {products.map((product) => {
+                    {filteredproduct.map((product) => {
                       const variation = product?.variations[0];
                       return (
                         <SwiperSlide key={product.product_id}>
@@ -213,7 +245,7 @@ const NewProdFeatureProd = ({ products }) => {
                                 <p className="text-black text-sm">
                                   <Link
                                     href={`/product/${product?.product_id}`}
-                                    className="font-normal text-left"
+                                    className="font-normal text-left hover:text-primary-200"
                                   >
                                     {truncate(product?.product_name, 25)}
                                   </Link>
@@ -226,7 +258,7 @@ const NewProdFeatureProd = ({ products }) => {
                                     {variation.net_weight} gram
                                   </span>
                                 </div>
-                                <div className="leading-6">
+                                <div className="leading-6 hidden sm:block">
                                   <Engagement
                                     averateRating={getProductAverageRatings(
                                       product.reviews
@@ -236,7 +268,7 @@ const NewProdFeatureProd = ({ products }) => {
                                   />
                                 </div>
                                 {product?.user && (
-                                  <p className="text-black text-sm">
+                                  <p className="text-black text-sm hidden sm:block">
                                     Seller:{" "}
                                     {product?.user?.vendor?.store_name ??
                                       product?.user?.firstName +

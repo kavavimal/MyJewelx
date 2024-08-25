@@ -506,7 +506,7 @@ const RegistrationForm = ({ storeURLs, emails }) => {
                       fullWidth
                       size="lg"
                       type="submit"
-                      className="flex justify-center items-center"
+                      className="flex justify-center items-center border border-primary-200 hover:bg-transparent hover:text-primary-200 hover:shadow-none "
                       loading={formik.isSubmitting}
                     >
                       Registration

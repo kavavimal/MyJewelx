@@ -14,6 +14,8 @@ import Profile from "./components/Profile";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
+export const revalidate = 0;
+
 const page = async () => {
   const user = await checkUserSession();
   const accountNumbers = await getAccountNumbers();
@@ -26,7 +28,7 @@ const page = async () => {
     return (
       <section>
         <div className="container">
-          <h4 className="text-2xl font-semibold">Profile</h4>
+          <h4 className="text-2xl font-semibold mt-3">Profile</h4>
           <div className="grid gap-7 items-start py-7 grid-cols-2">
             <div className="col-span-2">
               <VendorForm

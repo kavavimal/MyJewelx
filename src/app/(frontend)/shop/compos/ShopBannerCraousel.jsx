@@ -1,4 +1,3 @@
-
 "use client";
 import { Button, Carousel, Typography } from "@material-tailwind/react";
 import Link from "next/link";
@@ -16,7 +15,7 @@ export default function ShopBannerCraousel({ promolist }) {
                 <img
                   src={promo.ads_img_url}
                   alt="image 2"
-                  className="h-full w-full object-cover"
+                  className="!min-h-[350px] w-full object-cover"
                 />
                 <div className="absolute inset-0 flex flex-col justify-center items-center gap-4 bg-black/25">
                   <Typography

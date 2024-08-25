@@ -34,13 +34,19 @@ const PopularProducts = ({ products }) => {
   };
 
   useEffect(() => {
+    const filteredbyLabel = products.filter(
+      (product) => product.labels && product.labels.includes("Popular")
+    );
+
+    console.log(filteredbyLabel);
+
     if (selectedCategory.length === 0) {
-      setFilterProducts(products);
+      setFilterProducts(filteredbyLabel);
     } else {
       setFilterProducts(
-        products.filter((product) => {
-          return selectedCategory.includes(product.categoryId);
-        })
+        filteredbyLabel.filter((product) =>
+          selectedCategory.includes(product.categoryId)
+        )
       );
     }
   }, [products, selectedCategory]);
@@ -49,17 +55,17 @@ const PopularProducts = ({ products }) => {
     getCategories();
   }, []);
   return (
-    <div className="py-[53px]">
-      <div className="flex items-start container gap-5">
-        <div className="w-[320px]">
-          <h3 className="mb-2.5 mt-3 text-lg font-playfairdisplay font-semibold tracking-wide">
+    <div className="pt-5 pb-[15px] sm:py-[53px]">
+      <div className="flex items-start container sm:gap-5 sm:flex-row flex-col-reverse">
+        <div className="w-full sm:w-[320px]">
+          <h3 className="my-2.5  sm:mb-2.5 sm:mt-3 text-lg font-playfairdisplay font-semibold tracking-wide">
             Recently Viewed
           </h3>
           <div className="">
             <RecentlyViewed />
           </div>
           <div>
-            <div className="pt-[15px] pb-2.5">
+            <div className="mt-[15px] mb-2.5 sm:m-0 sm:pt-[15px] sm:pb-2.5">
               <h3 className="text-lg font-playfairdisplay font-semibold tracking-wide">
                 Popular tags
               </h3>
@@ -69,12 +75,12 @@ const PopularProducts = ({ products }) => {
             </div>
           </div>
         </div>
-        <div className="w-[calc(100%-340px)]">
-          <div className="mb-3 flex justify-between items-center">
-            <h3 className="text-2xl font-playfairdisplay font-semibold tracking-wide">
+        <div className="w-full sm:w-[calc(100%-340px)]">
+          <div className="mb-0 sm:mb-3 flex justify-between items-center">
+            <h3 className="text-2xl  font-playfairdisplay font-semibold tracking-wide">
               Popular Products
             </h3>
-            <div className="min-w-[176px]">
+            <div className="sm:min-w-[176px]">
               <ReactSelect
                 isMulti
                 options={options}
@@ -108,21 +114,29 @@ const PopularProducts = ({ products }) => {
               />
             </div>
           </div>
-          <div>
+          <div className="py-2.5 sm:p-0 ">
             {filterProducts.length === 0 ? (
               <div className="text-center">
                 <p>No products found</p>
               </div>
             ) : (
               <Swiper
-                slidesPerView={3}
+                slidesPerView={2}
                 spaceBetween={15}
                 autoplay={{
                   delay: 5000,
                   disableOnInteraction: false,
+                  pauseOnMouseEnter: true,
                 }}
                 modules={[Grid, Pagination, Autoplay]}
-                grid={{ rows: 2, fill: "row" }}
+                grid={{ rows: 3, fill: "row" }}
+                breakpoints={{
+                  540: {
+                    slidesPerView: 3,
+                    spaceBetween: 15,
+                    grid: { rows: 2, fill: "row" },
+                  },
+                }}
               >
                 {filterProducts.map((product) => (
                   <SwiperSlide key={product.product_id}>

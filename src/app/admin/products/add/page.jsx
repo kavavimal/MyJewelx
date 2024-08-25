@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma";
 import { attributeIDs } from "@/utils/constants";
 import { CharsType } from "@prisma/client";
 
+export const revalidate = 0;
+
 const getCategories = async () => {
   return await prisma.category.findMany({});
 };

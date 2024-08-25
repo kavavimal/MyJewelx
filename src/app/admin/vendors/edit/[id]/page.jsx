@@ -10,6 +10,8 @@ import { getEmails } from "@/actions/users";
 import StoreSetup from "@/app/(auth)/vendor/details/components/StoreSetup";
 import PaymentSetup from "@/app/(auth)/vendor/details/components/PaymentSetup";
 
+export const revalidate = 0;
+
 const getVendorById = (id) => {
   return prisma.user.findUnique({
     where: {

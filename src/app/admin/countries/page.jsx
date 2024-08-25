@@ -2,6 +2,8 @@ import React from "react";
 import CountryForm from "./components/CountryForm";
 import prisma from "@/lib/prisma";
 
+export const revalidate = 0;
+
 const getCountries = () => {
   return prisma.country.findMany();
 };

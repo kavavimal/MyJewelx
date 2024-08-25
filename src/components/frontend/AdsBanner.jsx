@@ -39,7 +39,7 @@ export default function AdsBanner({ image, title, link }) {
         </p>
         {link && link !== false ? (
           <Link
-            className="border border-white pt-[8px] pb-[6px] pl-[25px] pr-[24px] rounded-sm text-center text-white"
+            className="border border-white pt-[8px] pb-[6px] pl-[25px] pr-[24px] rounded-sm text-center text-white hover:text-black hover:bg-white"
             href={link.link}
           >
             {link.label}

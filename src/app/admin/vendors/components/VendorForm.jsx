@@ -24,7 +24,7 @@ const VendorForm = ({ vendor, storeURLs, emails, FormHeader = true }) => {
   const [open, setOpen] = useState(false);
   const [country, setCountry] = useState("India");
   const { name, flags, countryCallingCode } = countries?.find(
-    (item) => item.name === country
+    (item) => item?.name === country
   );
   const router = useRouter();
   const [previewURL, setPreviewURL] = useState("");
@@ -155,12 +155,19 @@ const VendorForm = ({ vendor, storeURLs, emails, FormHeader = true }) => {
 
   useEffect(() => {
     if (vendor) {
-      let country = {};
-      country = countries.find(
-        (item) =>
-          item.countryCallingCode === vendor?.phone_number?.split(" ")[0]
-      );
-      setCountry(country?.name);
+      if (vendor?.phone_number) {
+        let country = {};
+        country = countries.find(
+          (item) =>
+            item?.countryCallingCode === vendor?.phone_number?.split(" ")[0]
+        );
+
+        if (Object.keys(country).length > 0) {
+          setCountry(country?.name);
+        } else {
+          setCountry("India");
+        }
+      }
       if (vendor?.image?.path) {
         setPreviewURL(vendor?.image?.path);
       }

@@ -9,25 +9,37 @@ import {
 } from "@material-tailwind/react";
 import { Formik, useFormik } from "formik";
 import { enqueueSnackbar } from "notistack";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 const DataTable = dynamic(() => import("react-data-table-component"), {
   ssr: false,
 });
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import DeleteCharacteristic from "./DeleteCharacteristic";
+import moment from "moment";
 
 const CharacteristicsForm = ({ characteristics, charTypes }) => {
   const router = useRouter();
   const [characteristic, setCharacteristic] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredCharacteristics, setFilteredCharacteristics] =
+    useState(characteristics);
+
   const columns = [
     {
       name: "Name",
       selector: (row) => row?.name,
+      sortable: true,
     },
     {
       name: "Type",
       selector: (row) => row?.chars_type,
+      sortable: true,
+    },
+    {
+      name: "Date",
+      selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortable: true,
     },
     {
       name: "Action",
@@ -55,6 +67,7 @@ const CharacteristicsForm = ({ characteristics, charTypes }) => {
       ),
     },
   ];
+
   const formik = useFormik({
     initialValues: {
       name: characteristic ? characteristic.name : "",
@@ -175,46 +188,77 @@ const CharacteristicsForm = ({ characteristics, charTypes }) => {
     },
   });
 
+  // Function to handle search
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchTerm(value);
+
+    const filtered = characteristics.filter(
+      (char) =>
+        char.name.toLowerCase().includes(value) ||
+        char.chars_type.toLowerCase().includes(value)
+    );
+    setFilteredCharacteristics(filtered);
+  };
+  const customStyles = {
+    cells: {
+      style: {
+        fontSize: "15px",
+      },
+    },
+  };
   return (
     <>
-      <div className="flex items-center justify-between mb-10 intro-y">
+      <div className="flex items-center justify-between mb-5 intro-y">
         <h2 className="text-2xl font-semibold">Characteristics</h2>
-        <Button
-          size="md"
-          className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
-          onClick={() => setCharacteristic(false)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={24}
-            height={24}
-            viewBox="0 0 24 24"
+        <div className="flex gap-3 items-end">
+          <Input
+            label="Search"
+            type="text"
+            placeholder="Search Characteristics"
+            value={searchTerm}
+            style={{ fontSize: "15px" }}
+            onChange={handleSearch}
+            containerProps={{ className: "!w-[300px]" }}
+          />
+          <Button
+            size="md"
+            className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
+            onClick={() => setCharacteristic(false)}
           >
-            <path
-              fill="currentColor"
-              d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
-            ></path>
-          </svg>
-          Add Characteristic
-        </Button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={24}
+              height={24}
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
+              ></path>
+            </svg>
+            Add Characteristic
+          </Button>{" "}
+        </div>
       </div>
 
-      <div className="mt-10 rounded-2xl shadow-3xl bg-white">
+      <div className="rounded-lg shadow border bg-white border-dark-200 mb-5">
         <Formik initialValues={formik.initialValues}>
-          <form onSubmit={formik.handleSubmit} className=" rounded p-7 mb-4">
+          <form onSubmit={formik.handleSubmit} className="rounded p-7">
             <div className="flex flex-col gap-5">
-              <div className="grid items-start grid-cols-2 gap-5">
-                <div>
+              <div className="flex items-start gap-5">
+                <div className="w-full">
                   <Input
                     label="Name"
                     type="text"
+                    style={{ fontSize: "15px" }}
                     name="name"
                     value={formik.values?.name || ""}
                     onChange={formik.handleChange}
                     error={formik.touched.name && formik.errors.name}
                   />
                 </div>
-                <div>
+                <div className="w-full">
                   <Select
                     label="Type"
                     name="chars_type"
@@ -230,40 +274,30 @@ const CharacteristicsForm = ({ characteristics, charTypes }) => {
                     ))}
                   </Select>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-5">
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
-                  loading={formik.isSubmitting}
-                >
-                  {characteristic ? "Update" : "Add"}
-                </Button>
-
-                {characteristic && (
+                <div className="flex items-center gap-5">
                   <Button
-                    className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded font-emirates"
-                    color="red"
-                    size="lg"
-                    onClick={() => setCharacteristic(false)}
+                    type="submit"
+                    className="flex w-[150px] h-[39px] items-center gap-2 px-4 py-1 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
                   >
-                    Cancel
+                    {characteristic ? "Update" : "Add"} Characteristic
                   </Button>
-                )}
-              </div>
+                </div>
+              </div>{" "}
             </div>
           </form>
         </Formik>
       </div>
 
-      <DataTable
-        data={characteristics}
-        columns={columns}
-        highlightOnHover
-        pagination
-      />
+      <div className="rounded-lg shadow border bg-white border-dark-200 py-5">
+        <DataTable
+          striped
+          columns={columns}
+          data={filteredCharacteristics}
+          pagination
+          customStyles={customStyles}
+        />
+      </div>
     </>
   );
 };

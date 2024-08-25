@@ -741,7 +741,10 @@ const Variation = ({
 
                     <div>
                       <Editor
-                        apiKey="kcvt74ak3m6obm71iminsf87md1n56lm5b6nrtndf3ptm75z"
+                        apiKey={
+                          process.env.NEXT_PUBLIC_TINY_MCE_KEY ||
+                          "kcvt74ak3m6obm71iminsf87md1n56lm5b6nrtndf3ptm75z"
+                        }
                         init={{
                           height: 400,
                           menubar: true,

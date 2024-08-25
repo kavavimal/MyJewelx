@@ -2,6 +2,8 @@ import React from "react";
 import GemstoneForm from "./components/GemstoneForm";
 import prisma from "@/lib/prisma";
 
+export const revalidate = 0;
+
 const getGemstones = () => {
   return prisma.gemstone.findMany();
 };

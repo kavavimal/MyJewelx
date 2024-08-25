@@ -24,14 +24,23 @@ const FilterProduct = ({ filterdDatas }) => {
   const categories = filterdDatas.categories;
 
   const [isShowMore, setIsShowMore] = useState(false);
-  const [openAccordions, setOpenAccordions] = useState([1]);
-
-  const handleAccordionToggle = (value) => {
-    setOpenAccordions((prevOpenAccordions) =>
-      prevOpenAccordions.includes(value)
-        ? prevOpenAccordions.filter((id) => id !== value)
-        : [...prevOpenAccordions, value]
-    );
+  const [openAccordions, setOpenAccordions] = useState([0, 2]);
+  const [nestedAccordions, setNestedAccordions] = useState({});
+  const handleAccordionToggle = (id, isNested = false) => {
+    if (isNested) {
+      // For nested accordions
+      setNestedAccordions((prevNested) => ({
+        ...prevNested,
+        [id]: !prevNested[id],
+      }));
+    } else {
+      // For main accordions
+      setOpenAccordions((prevOpen) =>
+        prevOpen.includes(id)
+          ? prevOpen.filter((item) => item !== id)
+          : [...prevOpen, id]
+      );
+    }
   };
 
   const handleCategoryChange = (event) => {
@@ -159,12 +168,12 @@ const FilterProduct = ({ filterdDatas }) => {
         </Button>
       </div>
       <Accordion
-        open={openAccordions.includes(1)}
-        icon={<Icon id={1} open={openAccordions.includes(1)} />}
+        open={openAccordions.includes(0)}
+        icon={<Icon id={0} open={openAccordions.includes(0)} />}
       >
         <AccordionHeader
           className="text-sm py-3 font-medium font-emirates"
-          onClick={() => handleAccordionToggle(1)}
+          onClick={() => handleAccordionToggle(0)}
         >
           Filter By Categories
         </AccordionHeader>
@@ -172,9 +181,95 @@ const FilterProduct = ({ filterdDatas }) => {
           <div className="min-w-0 pt-2 p-0 px-0 flex flex-col gap-3">
             {categories
               .filter((category) => category.parent_id === null)
-              ?.slice(0, isShowMore ? categories?.length : 5)
+              .slice(0, isShowMore ? categories.length : 5)
               .map((category, index) => {
-                return (
+                const hasSubcategories = categories.some(
+                  (subcategory) =>
+                    subcategory.parent_id === category.category_id
+                );
+
+                return hasSubcategories ? (
+                  <Accordion
+                    key={index}
+                    open={nestedAccordions[category.category_id]}
+                  >
+                    <AccordionHeader
+                      className="text-sm py-3 font-medium font-emirates flex items-center !justify-start"
+                      onClick={() =>
+                        handleAccordionToggle(category.category_id, true)
+                      }
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                        className={`h-4 w-4 mr-2 transition-transform ${
+                          nestedAccordions[category.category_id]
+                            ? "rotate-180"
+                            : ""
+                        }`}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                        />
+                      </svg>
+                      <Checkbox
+                        value={category.category_id}
+                        id={category.name}
+                        checked={
+                          selectedFilters?.categories &&
+                          selectedFilters?.categories?.some(
+                            (selectedCategory) =>
+                              selectedCategory === category.category_id
+                          )
+                        }
+                        className="w-4 h-4"
+                        onChange={handleCategoryChange}
+                        ripple={false}
+                        label={category.name}
+                        labelProps={{ className: "pl-2" }}
+                      />
+                    </AccordionHeader>
+                    <AccordionBody>
+                      <div className="min-w-0 p-0 px-0 flex flex-col gap-3">
+                        {categories
+                          .filter(
+                            (subcategory) =>
+                              subcategory.parent_id === category.category_id
+                          )
+                          .map((subcategory, i) => (
+                            <label
+                              key={i}
+                              htmlFor={subcategory.name}
+                              className="flex w-full pt-3 cursor-pointer items-center ms-7"
+                            >
+                              <Checkbox
+                                value={subcategory.category_id}
+                                onChange={handleSubCategoryChange}
+                                checked={
+                                  selectedFilters?.subCategories &&
+                                  selectedFilters?.subCategories?.some(
+                                    (selectedSubcategory) =>
+                                      selectedSubcategory ===
+                                      subcategory.category_id
+                                  )
+                                }
+                                className="w-4 h-4"
+                                labelProps={{ className: "pl-2" }}
+                                id={subcategory.name}
+                                ripple={false}
+                                label={subcategory.name}
+                              />
+                            </label>
+                          ))}
+                      </div>
+                    </AccordionBody>
+                  </Accordion>
+                ) : (
                   <div className="p-0" key={index}>
                     <label
                       htmlFor={category.name}
@@ -190,86 +285,57 @@ const FilterProduct = ({ filterdDatas }) => {
                               selectedCategory === category.category_id
                           )
                         }
+                        className="w-4 h-4"
+                        labelProps={{ className: "pl-2" }}
                         onChange={handleCategoryChange}
                         ripple={false}
                         label={category.name}
                       />
                     </label>
-
-                    <div>
-                      <div className="min-w-0 p-0 px-0 flex flex-col">
-                        {categories
-                          .filter(
-                            (subcategory) =>
-                              subcategory.parent_id === category.category_id
-                          )
-                          .map((subcategory, i) => {
-                            return (
-                              <label
-                                key={i}
-                                htmlFor={subcategory.name}
-                                className="flex w-full pt-3 cursor-pointer items-center ms-7"
-                              >
-                                <Checkbox
-                                  value={subcategory.category_id}
-                                  onChange={handleSubCategoryChange}
-                                  checked={
-                                    selectedFilters?.subCategories &&
-                                    selectedFilters?.subCategories?.some(
-                                      (selectedSubcategory) =>
-                                        selectedSubcategory ===
-                                        subcategory.category_id
-                                    )
-                                  }
-                                  id={subcategory.name}
-                                  ripple={false}
-                                  label={subcategory.name}
-                                />
-                              </label>
-                            );
-                          })}
-                      </div>
-                    </div>
                   </div>
                 );
               })}
-          </div>
 
-          {categories && categories?.length > 5 && (
-            <button
-              variant="text"
-              className="flex justify-start mt-4"
-              onClick={() => setIsShowMore(!isShowMore)}
-              ripple={false}
-            >
-              {isShowMore ? (
-                "Show Less"
-              ) : (
-                <span className="flex items-center gap-5 text-gray-700">
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                  >
-                    <circle cx="7" cy="7" r="6.5" stroke="#676767" />
-                    <path
-                      d="M10 7.49902H7.5V9.99902C7.5 10.1316 7.44732 10.2588 7.35355 10.3526C7.25979 10.4463 7.13261 10.499 7 10.499C6.86739 10.499 6.74022 10.4463 6.64645 10.3526C6.55268 10.2588 6.5 10.1316 6.5 9.99902V7.49902H4C3.86739 7.49902 3.74021 7.44634 3.64645 7.35258C3.55268 7.25881 3.5 7.13163 3.5 6.99902C3.5 6.86642 3.55268 6.73924 3.64645 6.64547C3.74021 6.5517 3.86739 6.49902 4 6.49902H6.5V3.99902C6.5 3.86642 6.55268 3.73924 6.64645 3.64547C6.74022 3.5517 6.86739 3.49902 7 3.49902C7.13261 3.49902 7.25979 3.5517 7.35355 3.64547C7.44732 3.73924 7.5 3.86642 7.5 3.99902V6.49902H10C10.1326 6.49902 10.2598 6.5517 10.3536 6.64547C10.4473 6.73924 10.5 6.86642 10.5 6.99902C10.5 7.13163 10.4473 7.25881 10.3536 7.35258C10.2598 7.44634 10.1326 7.49902 10 7.49902Z"
-                      fill="#676767"
-                    />
-                  </svg>
-                  Show More
-                </span>
-              )}
-            </button>
-          )}
+            {categories && categories.length > 5 && (
+              <button
+                variant="text"
+                className="flex justify-start mt-4"
+                onClick={() => setIsShowMore(!isShowMore)}
+                ripple={false}
+              >
+                {isShowMore ? (
+                  "Show Less"
+                ) : (
+                  <>
+                    {" "}
+                    <span className="flex items-center gap-2 text-gray-700">
+                      Show More{" "}
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 14 14"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-5 h-5"
+                      >
+                        <circle cx="7" cy="7" r="6.5" stroke="#676767" />
+                        <path
+                          d="M10 7.49902H7.5V9.99902C7.5 10.1316 7.44732 10.2588 7.35355 10.3526C7.25979 10.4463 7.13261 10.499 7 10.499C6.86739 10.499 6.74022 10.4463 6.64645 10.3526C6.55268 10.2588 6.5 10.1316 6.5 9.99902V7.49902H4C3.86739 7.49902 3.74021 7.44634 3.64645 7.35258C3.55268 7.25881 3.5 7.13163 3.5 6.99902C3.5 6.86642 3.55268 6.73924 3.64645 6.64547C3.74021 6.5517 3.86739 6.49902 4 6.49902H6.5V3.99902C6.5 3.86642 6.55268 3.73924 6.64645 3.64547C6.74022 3.5517 6.86739 3.49902 7 3.49902C7.13261 3.49902 7.25979 3.5517 7.35355 3.64547C7.44732 3.73924 7.5 3.86642 7.5 3.99902V6.49902H10C10.1326 6.49902 10.2598 6.5517 10.3536 6.64547C10.4473 6.73924 10.5 6.86642 10.5 6.99902C10.5 7.13163 10.4473 7.25881 10.3536 7.35258C10.2598 7.44634 10.1326 7.49902 10 7.49902Z"
+                          fill="#676767"
+                        />
+                      </svg>
+                    </span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         </AccordionBody>
       </Accordion>
+
       <Accordion
         open={openAccordions.includes(2)}
-        icon={<Icon id={1} open={openAccordions.includes(2)} />}
+        icon={<Icon id={2} open={openAccordions.includes(2)} />}
       >
         <AccordionHeader
           className="text-sm py-3 font-medium font-emirates"
@@ -299,6 +365,8 @@ const FilterProduct = ({ filterdDatas }) => {
                                 selectedVendor === vendor?.vendor?.store_name
                             )
                           }
+                          className="w-4 h-4"
+                          labelProps={{ className: "pl-2" }}
                           onChange={handleVendorChange}
                           id={vendor?.vendor?.store_name}
                           ripple={false}
@@ -342,6 +410,8 @@ const FilterProduct = ({ filterdDatas }) => {
                             (selectedMetal) => selectedMetal === metal?.id
                           )
                         }
+                        className="w-4 h-4"
+                        labelProps={{ className: "pl-2" }}
                         id={metal?.name}
                         ripple={false}
                         label={metal?.name}
@@ -385,6 +455,8 @@ const FilterProduct = ({ filterdDatas }) => {
                               selectedPattern === pattern?.pattern_id
                           )
                         }
+                        className="w-4 h-4"
+                        labelProps={{ className: "pl-2" }}
                         id={pattern?.name}
                         ripple={false}
                         label={pattern?.name}
@@ -433,6 +505,8 @@ const FilterProduct = ({ filterdDatas }) => {
                                 selectedCharacteristic === brand?.chars_id
                             )
                           }
+                          className="w-4 h-4"
+                          labelProps={{ className: "pl-2" }}
                           id={brand?.name}
                           ripple={false}
                           label={brand?.name}
@@ -482,6 +556,8 @@ const FilterProduct = ({ filterdDatas }) => {
                                 selectedTrend === trend?.chars_id
                             )
                           }
+                          className="w-4 h-4"
+                          labelProps={{ className: "pl-2" }}
                           id={trend?.name}
                           ripple={false}
                           label={trend?.name}
@@ -525,6 +601,8 @@ const FilterProduct = ({ filterdDatas }) => {
                               selectedCollection === collection?.collection_id
                           )
                         }
+                        className="w-4 h-4"
+                        labelProps={{ className: "pl-2" }}
                         id={collection?.name}
                         label={collection?.name}
                       />
@@ -572,6 +650,8 @@ const FilterProduct = ({ filterdDatas }) => {
                                 selectedCharacteristic === style?.chars_id
                             )
                           }
+                          className="w-4 h-4"
+                          labelProps={{ className: "pl-2" }}
                           id={style?.name}
                           ripple={false}
                           label={style?.name}
@@ -620,6 +700,8 @@ const FilterProduct = ({ filterdDatas }) => {
                                 selectedCharacteristic === theme?.chars_id
                             )
                           }
+                          className="w-4 h-4"
+                          labelProps={{ className: "pl-2" }}
                           id={theme?.name}
                           ripple={false}
                           label={theme?.name}

@@ -8,7 +8,7 @@ export async function POST(request) {
     const name = req.get("permission_name");
 
     const exists = await prisma.permission.findFirst({
-      where: { permission_name: permission_name },
+      where: { permission_name: name },
     });
 
     if (exists) {

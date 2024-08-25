@@ -1,5 +1,5 @@
 "use client";
-import { Elements } from '@stripe/react-stripe-js';
+import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import StripeCard from "./StripeCard";
 
@@ -25,12 +25,12 @@ const SubscribeComponent = ({
   });
   const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
   const stripePromise = loadStripe(publishableKey);
-  
+
   return (
     <div>
       <Elements stripe={stripePromise}>
         <StripeCard handlePlaceOrder={handlePlaceOrder} items={items} />
-        </Elements>
+      </Elements>
     </div>
   );
 };

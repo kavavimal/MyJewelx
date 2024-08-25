@@ -5,6 +5,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { AcountType } from "@prisma/client";
 
+export const revalidate = 0;
+
 const getVendors = () =>
   prisma.user.count({
     where: {
@@ -35,18 +37,49 @@ const getCountsData = async (id) => {
   return userData._count;
 };
 
+const totalOrderAmount = async (user) => {
+  let total = 0;
+  if (user.account_type === AcountType.VENDOR) {
+    const userOrdersData = await prisma.user.findFirst({
+      where: { id: user.id },
+      include: {
+        sellerOrders: {
+          include: {
+            order: {
+              include: {
+                user: true,
+                orderItems: true,
+                seller: { include: { user: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    userOrdersData.sellerOrders.map((item) => {
+      total += item.order?.orderTotal;
+      return item.order;
+    });
+
+    return total;
+  }
+};
+
 const page = async () => {
   const session = await getServerSession(authOptions);
-  const role = session?.user?.role;
+  const role = session.user?.role;
 
   if (role === AcountType.VENDOR) {
     const counts = await getCountsData(session.user.id);
+    const orders = await totalOrderAmount(session.user);
     return (
       <Dashboard
         products={counts.products}
         sellerOrders={counts.sellerOrders}
         allUsers={false}
         allOrders={false}
+        totalOrderAmount={orders}
       />
     );
   }

@@ -9,18 +9,28 @@ import DataTable from "react-data-table-component";
 import { useRouter } from "next/navigation";
 import DeleteCountry from "./DeleteCountry";
 import Link from "next/link";
+import moment from "moment";
 
 const CountryForm = ({ countries }) => {
   const router = useRouter();
   const [country, setCountry] = useState(false);
+  const [filterCountries, setFilterCountries] = useState(countries);
+
   const columns = [
     {
       name: "Name",
       selector: (row) => row?.name,
+      sortable: true,
     },
     {
       name: "Region",
       selector: (row) => row?.region,
+      sortable: true,
+    },
+    {
+      name: "Date",
+      selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortable: true,
     },
     {
       name: "Action",
@@ -65,6 +75,7 @@ const CountryForm = ({ countries }) => {
       ),
     },
   ];
+
   const formik = useFormik({
     initialValues: {
       name: country ? country.name : "",
@@ -168,72 +179,114 @@ const CountryForm = ({ countries }) => {
       }
     },
   });
+
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    const filtered = countries.filter((country) => {
+      const { name, region } = country;
+      return (
+        (name && name.toLowerCase().includes(value)) ||
+        (region && region.toLowerCase().includes(value))
+      );
+    });
+    setFilterCountries(filtered);
+  };
+
+  const customStyles = {
+    cells: {
+      style: {
+        fontSize: "15px",
+      },
+    },
+  };
+
   return (
     <>
-      <div className="flex items-center justify-between mb-10 intro-y">
+      <div className="flex items-center justify-between mb-5 intro-y">
         <h2 className="text-2xl font-semibold">Countries</h2>
-        <Button
-          onClick={() => setCountry(false)}
-          size="md"
-          className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={24}
-            height={24}
-            viewBox="0 0 24 24"
+        <div className="flex gap-3 items-end">
+          <Input
+            placeholder="Search Countries"
+            label="Search"
+            type="text"
+            style={{ fontSize: "15px" }}
+            onChange={handleSearch}
+            containerProps={{ className: "!w-[300px]" }}
+          />
+          <Button
+            onClick={() => setCountry(false)}
+            size="md"
+            className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
           >
-            <path
-              fill="currentColor"
-              d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
-            ></path>
-          </svg>
-          Add Country
-        </Button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={24}
+              height={24}
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
+              ></path>
+            </svg>
+            Add Country
+          </Button>{" "}
+        </div>
       </div>
 
-      <div className="mt-5 rounded-2xl shadow-3xl bg-white">
+      <div className="rounded-lg shadow border bg-white border-dark-200 mb-5">
+        {" "}
         <Formik initialValues={formik.initialValues}>
-          <form onSubmit={formik.handleSubmit} className=" rounded p-7 mb-4">
+          <form onSubmit={formik.handleSubmit} className=" rounded p-7">
             <div className="flex flex-col gap-5">
               <div className="flex gap-5">
-                <div className="mb-2 w-1/2">
+                <div className="w-full">
                   <Input
                     label="Name"
                     type="text"
+                    style={{ fontSize: "15px" }}
                     name="name"
                     value={formik.values?.name || ""}
                     onChange={formik.handleChange}
                     error={formik.touched.name && formik.errors.name}
                   />
                 </div>
-                <div className="mb-2 w-1/2">
+                <div className="w-full">
                   <Input
                     label="Region"
                     type="text"
+                    style={{ fontSize: "15px" }}
                     value={formik.values?.region || ""}
                     name="region"
                     onChange={formik.handleChange}
                     error={formik.touched.region && formik.errors.region}
                   />
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between">
-                <Button
-                  type="submit"
-                  className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
-                  loading={formik.isSubmitting}
-                >
-                  {country ? "Update" : "Add"}
-                </Button>
+                <div className="flex items-center justify-between">
+                  <Button
+                    type="submit"
+                    className="flex items-center gap-2 px-4 py-3 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
+                    loading={formik.isSubmitting}
+                  >
+                    {country ? "Update" : "Add"}
+                  </Button>
+                </div>
               </div>
             </div>
           </form>
         </Formik>
       </div>
-
-      <DataTable data={countries} columns={columns} highlightOnHover />
+      <div className="rounded-lg shadow border bg-white border-dark-200 py-5">
+        <DataTable
+          striped
+          data={filterCountries}
+          columns={columns}
+          highlightOnHover
+          pagination
+          customStyles={customStyles}
+        />
+      </div>
     </>
   );
 };

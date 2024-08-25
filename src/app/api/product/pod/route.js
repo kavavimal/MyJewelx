@@ -6,6 +6,7 @@ import { writeFile } from "fs/promises";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { AcountType, PODStatus } from "@prisma/client";
+import { JODMail } from "@/lib/sendMails";
 
 const productPODSchema = z.object({
   name: z.string().min(1, "Product name required").max(50),
@@ -16,9 +17,10 @@ const productPODSchema = z.object({
 
 const checkUserSession = async () => {
   const session = await getServerSession(authOptions);
-  if (session?.user?.role !== AcountType.CUSTOMER) 
-    return false;
-  return session.user;
+
+  if ([AcountType.VENDOR, AcountType.CUSTOMER].includes(session?.user?.role))
+    return session.user;
+  return false;
 };
 
 export async function POST(request) {
@@ -46,8 +48,8 @@ export async function POST(request) {
     const metal_type = req.get("metal");
     const karat = req.get("karat") ? req.get("karat") : null;
     const contact = req.get("contact");
-    
-    const productData ={
+
+    const productData = {
       name: product_name,
       Status,
       description,
@@ -58,20 +60,20 @@ export async function POST(request) {
       metal_type,
     };
     if (min_weight !== null) {
-      productData.min_weight = min_weight
+      productData.min_weight = min_weight;
     }
     if (max_weight !== null) {
-      productData.max_weight = max_weight
+      productData.max_weight = max_weight;
     }
     if (min_price !== null) {
-      productData.min_price = parseFloat(min_price)
+      productData.min_price = parseFloat(min_price);
     }
     if (max_price !== null) {
-      productData.max_price = parseFloat(max_price)
-    }    
+      productData.max_price = parseFloat(max_price);
+    }
     if (karat !== null) {
-      productData.karat = karat
-    }    
+      productData.karat = karat;
+    }
     const parseProductData = productPODSchema.parse(productData);
 
     const files = await req.getAll("files[]");
@@ -111,23 +113,28 @@ export async function POST(request) {
         },
       };
     }
-    
+
     const result = await prisma.productOnDemand.create({
-      data: {...productData,
+      data: {
+        ...productData,
         user: {
           connect: {
-            id: user.id
-          }
-        }
+            id: user.id,
+          },
+        },
       },
       include: {
         Images: true,
         user: true,
-      }
+      },
     });
     // TODO: send email to customer and admin about request is saved
-
-    return NextResponse.json({ message: "Product On Demand Request added successfully", status: 201, result });
+    await JODMail(user);
+    return NextResponse.json({
+      message: "Product On Demand Request added successfully",
+      status: 201,
+      result,
+    });
   } catch (error) {
     if (error.name === "ZodError") {
       return NextResponse.json(

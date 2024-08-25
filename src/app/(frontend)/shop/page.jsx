@@ -4,6 +4,8 @@ import FilterProduct from "./compos/FilterProduct";
 import ProductLoop from "./compos/ProductLoop";
 import ShopTopComponent from "./compos/ShopTopComponent";
 import prisma from "@/lib/prisma";
+import "../../../styles/globals.css";
+export const revalidate = 0;
 
 const getFilterableDatas = async () => {
   const vendors = await prisma.user.findMany({
@@ -37,6 +39,15 @@ const getFilterableDatas = async () => {
   };
 };
 
+const getMaximumPrice = async () => {
+  const result = await prisma.productVariation.aggregate({
+    _max: {
+      selling_price: true,
+    },
+  });
+
+  return result?._max?.selling_price || 0;
+};
 export default async function Shop({ searchParams }) {
   let searchFilter = {};
   if (searchParams?.q) {
@@ -47,18 +58,15 @@ export default async function Shop({ searchParams }) {
   }
   const products = await searchProducts(searchFilter);
   const filterdDatas = await getFilterableDatas();
+  const max = await getMaximumPrice();
 
   return (
     <>
-      <ShopTopComponent />
+      <ShopTopComponent max={max} />
       <div className="flex items-start gap-[11px]">
         <div
-          className="w-[224px]"
-          // style={{
-          //   position: "sticky",
-          //   top: 120,
-          //   left: 0,
-          // }}
+          className="w-[304px] max-h-[84vh] sticky overflow-auto pr-[16px]"
+          style={{ position: "sticky", top: "120px" }}
         >
           <FilterProduct filterdDatas={filterdDatas} />
         </div>

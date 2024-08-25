@@ -10,6 +10,8 @@ import Topcategories from "./components/TopCategories";
 import Editions from "./components/Editions";
 import Trending from "./components/Trending";
 
+export const revalidate = 0;
+
 const getCategories = () => prisma.category.findMany({});
 const getVendors = () =>
   prisma.user.findMany({
@@ -21,6 +23,13 @@ const getVendors = () =>
       image: true,
     },
   });
+
+// const getPopularProducts = () =>
+//   prisma.product.findMany({
+//     where: {
+//       labels: "Popular",
+//     },
+//   });
 const homeSlider = () => prisma.homeSlider.findMany({});
 const getPromoList = () =>
   prisma.promotional.findMany({
@@ -45,7 +54,7 @@ export default async function Home() {
     status: ["PUBLISHED"],
     featured: true,
   });
-
+  // const popularProducts = await getPopularProducts({ status: ["PUBLISHED"] });
   return (
     <>
       <Hero
@@ -56,11 +65,11 @@ export default async function Home() {
       />
       <PopularProducts products={products} />
       <Ads ads={ads} />
-      <NewProdFeatureProd products={featureProducts} />
+      <NewProdFeatureProd products={products} />
       <Topcategories categories={categories} />
       <TopVendors vendors={vendors} />
       <Editions />
-      <Trending />
+      <Trending products={products} />
       <Testimonial />
     </>
   );

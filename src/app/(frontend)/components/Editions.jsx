@@ -117,8 +117,14 @@ const Editions = () => {
                     delay: 5000,
                     disableOnInteraction: false,
                   }}
-                  slidesPerView={4}
-                  spaceBetween={20}
+                  slidesPerView={1}
+                  // spaceBetween={20}
+                  breakpoints={{
+                    540: {
+                      slidesPerView: 4,
+                      spaceBetween: 20,
+                    },
+                  }}
                 >
                   {filterProducts?.map((product, index) => {
                     return (

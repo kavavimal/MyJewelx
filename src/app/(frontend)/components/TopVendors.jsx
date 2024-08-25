@@ -38,22 +38,24 @@ const TopVendors = ({ vendors }) => {
                     {vendors.map((vendor, index) => {
                       return (
                         <SwiperSlide key={index} className="text-center">
-                          <div className="">
+                          <div className="group">
                             <Link
                               href={`/${vendor.firstName} ${vendor.lastName}`}
                             >
-                              <Image
-                                src={
-                                  vendor.image?.path ??
-                                  "/assets/images/vendor1.jpg"
-                                }
-                                alt="Vendor Images"
-                                width={100}
-                                height={100}
-                                className="mx-auto rounded-full h-[100px] w-[100px]"
-                              ></Image>
+                              <div className="relative mx-auto h-[100px] w-[100px] rounded-full overflow-hidden transition-transform transform group-hover:rotate-12">
+                                <Image
+                                  src={
+                                    vendor.image?.path ??
+                                    "/assets/images/vendor1.jpg"
+                                  }
+                                  alt="Vendor Images"
+                                  width={100}
+                                  height={100}
+                                  className="h-full w-full object-cover"
+                                />
+                              </div>
 
-                              <p className="py-5 text-base font-semibold	">
+                              <p className="py-5 text-base font-semibold transition-colors group-hover:text-primary-500">
                                 {vendor.firstName + " " + vendor.lastName}
                               </p>
                             </Link>

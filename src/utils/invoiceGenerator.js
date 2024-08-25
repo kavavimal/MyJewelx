@@ -170,25 +170,27 @@ export async function generateInvoice(order, seller) {
                 ${order.user.email}`;
     const invoiceData = `Invoice #: ${order.id}<br>
                 Date: ${new Date(order.createdAt).toLocaleDateString()}<br>`;
-    const items = order.orderItems.filter((item) => item.sellerId === seller.user.id);
-    
+    const items = order.orderItems.filter(
+      (item) => item.sellerId === seller.user.id
+    );
+
     const html = getInvoiceHTML({
       invoiceData,
       vendor,
       customer,
       paymentMethod: order.paymentMethod,
       items: items.map((item) => {
+        const variation = JSON.parse(item.variationData) ?? false;
         return `<tr class="item">
           <td>
-            ${item.name}
+            ${item.name} ${variation ? `(${variation?.variation_name})` : ""}
           </td>
-  
           <td>
             ${item.price}
           </td>
         </tr>`;
       }),
-      orderTotal: items.reduce((sum,item) => sum + parseFloat(item.price),0),
+      orderTotal: items.reduce((sum, item) => sum + parseFloat(item.price), 0),
     });
 
     // simulate a chrome browser with puppeteer and navigate to a new page

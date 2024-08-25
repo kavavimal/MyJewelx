@@ -8,6 +8,8 @@ import prisma from "@/lib/prisma";
 import Ads from "./Ads";
 import CartSummary from "@/components/frontend/cart/CartSummary";
 
+export const revalidate = 0;
+
 const getAds = () =>
   prisma.promotional.findMany({
     where: {

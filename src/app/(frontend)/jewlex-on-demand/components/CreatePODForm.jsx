@@ -9,6 +9,7 @@ import {
   productCategory,
   productMetals,
   SUPPORTED_FORMATS_IMAGES,
+  theme,
 } from "@/utils/constants";
 import { showToast } from "@/utils/helper";
 import {
@@ -16,7 +17,7 @@ import {
   IconButton,
   Input,
   Textarea,
-  Typography
+  Typography,
 } from "@material-tailwind/react";
 import { Formik } from "formik";
 import Image from "next/image";
@@ -78,7 +79,7 @@ const CreatePODForm = () => {
           ? createResponse?.data?.message
           : "Request Saved Successfully",
       });
-      router.push("/product-on-demand");
+      router.push("/jewlex-on-demand");
     } else {
       showToast({
         message: createResponse?.data?.message
@@ -124,6 +125,7 @@ const CreatePODForm = () => {
                   return { value: item, label: item };
                 })}
                 styles={customStyles}
+                theme={theme}
                 value={
                   props.values.name
                     ? { value: props.values.name, label: props.values.name }

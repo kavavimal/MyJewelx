@@ -9,18 +9,30 @@ import DataTable from "react-data-table-component";
 import { useRouter } from "next/navigation";
 import DeleteAttribute from "./DeleteAttribute";
 import Link from "next/link";
-
+import moment from "moment";
 const AttributeForm = ({ product_attribute }) => {
   const router = useRouter();
   const [attribute, setAttribute] = useState(false);
+  const [search, setSearch] = useState("");
+  console.log(product_attribute);
+  const [filteredAttributes, setFilteredAttributes] =
+    useState(product_attribute);
+
   const columns = [
     {
       name: "Name",
       selector: (row) => row?.name,
+      sortable: true,
     },
     {
       name: "Description",
       selector: (row) => row?.description,
+      sortable: true,
+    },
+    {
+      name: "Date",
+      selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortable: true,
     },
     {
       name: "Action",
@@ -205,46 +217,77 @@ const AttributeForm = ({ product_attribute }) => {
       }
     },
   });
+
+  const handleSearch = (event) => {
+    const searchTerm = event.target.value.toLowerCase();
+    setSearch(searchTerm);
+
+    const filtered = product_attribute.filter(
+      (item) =>
+        item.name.toLowerCase().includes(searchTerm) ||
+        item.description.toLowerCase().includes(searchTerm)
+    );
+    setFilteredAttributes(filtered);
+  };
+  const customStyles = {
+    cells: {
+      style: {
+        fontSize: "15px",
+      },
+    },
+  };
   return (
     <>
-      <div className="flex items-center justify-between mb-10 intro-y">
+      <div className="flex items-center justify-between mb-5 intro-y">
         <h2 className="text-2xl font-semibold">Product Attributes</h2>
-        <Button
-          size="md"
-          className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
-          onClick={() => setAttribute(false)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={24}
-            height={24}
-            viewBox="0 0 24 24"
+        <div className="flex gap-3 items-end">
+          <Input
+            type="text"
+            label="Search"
+            placeholder="Search Attributes"
+            value={search}
+            style={{ fontSize: "15px" }}
+            onChange={handleSearch}
+            containerProps={{ className: "!w-[300px]" }}
+          />
+          <Button
+            size="md"
+            className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
+            onClick={() => setAttribute(false)}
           >
-            <path
-              fill="currentColor"
-              d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
-            ></path>
-          </svg>
-          Add Attribute
-        </Button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={24}
+              height={24}
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
+              ></path>
+            </svg>
+            Add Attribute
+          </Button>{" "}
+        </div>
       </div>
 
-      <div className="mt-10 rounded-2xl shadow-3xl bg-white">
+      <div className="rounded-lg shadow border bg-white border-dark-200 mb-5">
         <Formik initialValues={formik.initialValues}>
-          <form onSubmit={formik.handleSubmit} className=" rounded p-7 mb-4">
+          <form onSubmit={formik.handleSubmit} className="rounded p-7">
             <div className="flex flex-col gap-5">
-              <div className="grid items-start grid-cols-2 gap-5">
-                <div>
+              <div className="flex gap-5">
+                <div className="w-full">
                   <Input
                     label="Name"
                     type="text"
+                    style={{ fontSize: "15px" }}
                     name="name"
                     value={formik.values?.name || ""}
                     onChange={formik.handleChange}
                     error={formik.touched.name && formik.errors.name}
                   />
                 </div>
-                <div>
+                <div className="w-full">
                   <Input
                     label="Description"
                     type="text"
@@ -256,7 +299,7 @@ const AttributeForm = ({ product_attribute }) => {
                     }
                   />
                 </div>
-                <div>
+                <div className="flex gap-3 items-center mr-2">
                   <Checkbox
                     label="Required"
                     name="isRequired"
@@ -272,24 +315,31 @@ const AttributeForm = ({ product_attribute }) => {
                     checked={formik.values?.isMultiple || false}
                   />
                 </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
-                  loading={formik.isSubmitting}
-                >
-                  {attribute ? "Update" : "Add"}
-                </Button>
+                <div className="flex items-center justify-between">
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
+                    loading={formik.isSubmitting}
+                  >
+                    {attribute ? "Update" : "Add"}
+                  </Button>
+                </div>{" "}
               </div>
             </div>
           </form>
         </Formik>
       </div>
-
-      <DataTable data={product_attribute} columns={columns} highlightOnHover />
+      <div className="rounded-lg shadow border bg-white border-dark-200 py-5">
+        <DataTable
+          striped
+          columns={columns}
+          data={filteredAttributes}
+          highlightOnHover
+          pagination
+          customStyles={customStyles}
+        />
+      </div>
     </>
   );
 };

@@ -6,7 +6,7 @@ import { Button, Option, Select } from "@material-tailwind/react";
 import { PODStatus } from "@prisma/client";
 import { useState } from "react";
 
-export default function UpdateStatus({ id, status, isAdmin=false }) {
+export default function UpdateStatus({ id, status, isAdmin = false }) {
   const [loading, setLoading] = useState(false);
   const [updateRequestStatus, setUpdateRequestStatus] = useState(status);
   const handleChange = (newVal) => {
@@ -21,44 +21,51 @@ export default function UpdateStatus({ id, status, isAdmin=false }) {
           message: update.message,
           variant: update.status === "error" ? "error" : "success",
         });
-        if (update.status === 'error'){
-            setUpdateRequestStatus(status);
+        if (update.status === "error") {
+          setUpdateRequestStatus(status);
         }
       }
       setLoading(false);
     }
   };
-  const StatusList = isAdmin ? [
-    PODStatus.DRAFT,
-    PODStatus.REQUESTED,
-    PODStatus.PUBLISHED,
-    PODStatus.ACCEPTEDBYSELLER,
-    PODStatus.SOLD,
-    PODStatus.ARCHIVED,
-    PODStatus.CANCELED
-  ]: [
-    PODStatus.DRAFT,
-    PODStatus.REQUESTED,
-    PODStatus.ARCHIVED,
-    PODStatus.CANCELED
-  ]
+  const StatusList = isAdmin
+    ? [
+        PODStatus.DRAFT,
+        PODStatus.REQUESTED,
+        PODStatus.PUBLISHED,
+        PODStatus.ACCEPTEDBYSELLER,
+        // PODStatus.SOLD,
+        // PODStatus.ARCHIVED,
+        PODStatus.CANCELED,
+      ]
+    : [
+        PODStatus.DRAFT,
+        PODStatus.REQUESTED,
+        // PODStatus.ARCHIVED,
+        PODStatus.CANCELED,
+      ];
   return (
-    <div className="flex justify-between items-center">
-      <Select
-        label="Request Status"
-        name="updateRequestStatus"
-        value={updateRequestStatus}
-        onChange={handleChange}
-      >
-        {StatusList.map((item) => (
-          <Option key={item} value={item}>
-            {item}
-          </Option>
-        ))}
-      </Select>
-      <Button onClick={saveStatus}>
-        {loading && <LoadingDots color="text-black" />}Update
-      </Button>
+    <div className="flex justify-between gap-3 items-center">
+      <div>
+        <Select
+          label="Request Status"
+          name="updateRequestStatus"
+          value={updateRequestStatus}
+          onChange={handleChange}
+        >
+          {StatusList.map((item) => (
+            <Option key={item} value={item}>
+              {console.log(item)}
+              {item === PODStatus.ACCEPTEDBYSELLER ? "ACCEPTED" : item}
+            </Option>
+          ))}
+        </Select>
+      </div>
+      <div>
+        <Button loading={loading} onClick={saveStatus} className="h-[40px]">
+          Update
+        </Button>
+      </div>
     </div>
   );
 }

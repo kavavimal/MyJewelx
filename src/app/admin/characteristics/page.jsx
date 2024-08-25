@@ -3,6 +3,8 @@ import CharacteristicsForm from "./components/CharacteristicsForm";
 import prisma from "@/lib/prisma";
 import { CharsType } from "@prisma/client";
 
+export const revalidate = 0;
+
 const getCharacteristics = () => {
   return prisma.characteristic.findMany();
 };

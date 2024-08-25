@@ -18,13 +18,18 @@ const Ads = ({ ads }) => {
                     height={100}
                     width={100}
                     className="h-[100%] w-[100%]"
-                    alt={adslist.ads_desc}
+                    alt={adslist.ads_desc ?? "ads"}
                   />
                   <div className="absolute left-10 top-14">
                     <h3 className="font-playfairdisplay font-semibold text-2xl">
                       {adslist.ads_desc}
                     </h3>
-                    <Link href={adslist.ads_link}>Shop now</Link>
+                    <Link
+                      href={adslist.ads_link}
+                      className="text-xs py-2 px-3.5 inline-block border border-black rounded font-bold mt-[15px]"
+                    >
+                      Shop now
+                    </Link>
                   </div>
                 </div>
               );

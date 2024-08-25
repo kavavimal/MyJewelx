@@ -11,28 +11,23 @@ import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { useSession } from "next-auth/react";
 
 const Header = () => {
+  const { data: session, status } = useSession();
   return (
-    <header>
-      <div className="flex justify-between items-center pt-5 pb-8">
-        <div className="flex gap-3 items-center">
-          <IconButton variant="text" className=" rounded-full">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width={25}
-              height={25}
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="#637381"
-                d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5S14 7.01 14 9.5S11.99 14 9.5 14"
-              ></path>
-            </svg>
-          </IconButton>
+    <header className="shadow my-5 p-5 bg-[#ffffff] rounded-lg border border-[#cfd8dc]">
+      <div className="flex justify-between items-center rounded-lg">
+        <div className="flex items-center">
+          <span className="text-xl font-semibold text-blueGray-500 trekking-wide select-none">
+            Welcome back 👋
+          </span>
         </div>
         <div className="flex gap-2 items-center">
           <Menu placement="bottom-start">
+            <h3 className="text-sm font-semibold uppercase font-emirates">
+              {session?.user?.firstName + " " + session?.user?.lastName}
+            </h3>
             <MenuHandler>
               <Image
                 width={100}
@@ -43,8 +38,8 @@ const Header = () => {
               />
             </MenuHandler>
             <MenuList placement="bottom-start">
-              <MenuItem>
-                <Link className="flex items-center gap-2" href="/admin/profile">
+              <Link href="/admin/profile" className="outline-none">
+                <MenuItem className="flex items-center gap-2 outline-none">
                   <svg
                     width="16"
                     height="16"
@@ -62,46 +57,8 @@ const Header = () => {
                   <Typography variant="small" className="font-medium">
                     My Profile
                   </Typography>
-                </Link>
-              </MenuItem>
-              <MenuItem className="flex items-center gap-2">
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M2 0C1.46957 0 0.960859 0.210714 0.585786 0.585786C0.210714 0.960859 0 1.46957 0 2V12C0 12.5304 0.210714 13.0391 0.585786 13.4142C0.960859 13.7893 1.46957 14 2 14H12C12.5304 14 13.0391 13.7893 13.4142 13.4142C13.7893 13.0391 14 12.5304 14 12V2C14 1.46957 13.7893 0.960859 13.4142 0.585786C13.0391 0.210714 12.5304 0 12 0H2ZM2 2H12V9H10L9 11H5L4 9H2V2Z"
-                    fill="#90A4AE"
-                  ></path>
-                </svg>
-                <Typography variant="small" className="font-medium">
-                  Inbox
-                </Typography>
-              </MenuItem>
-              <MenuItem className="flex items-center gap-2">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M16 8C16 10.1217 15.1571 12.1566 13.6569 13.6569C12.1566 15.1571 10.1217 16 8 16C5.87827 16 3.84344 15.1571 2.34315 13.6569C0.842855 12.1566 0 10.1217 0 8C0 5.87827 0.842855 3.84344 2.34315 2.34315C3.84344 0.842855 5.87827 0 8 0C10.1217 0 12.1566 0.842855 13.6569 2.34315C15.1571 3.84344 16 5.87827 16 8ZM14 8C14 8.993 13.759 9.929 13.332 10.754L11.808 9.229C12.0362 8.52269 12.0632 7.76679 11.886 7.046L13.448 5.484C13.802 6.249 14 7.1 14 8ZM8.835 11.913L10.415 13.493C9.654 13.8281 8.83149 14.0007 8 14C7.13118 14.0011 6.27257 13.8127 5.484 13.448L7.046 11.886C7.63267 12.0298 8.24426 12.039 8.835 11.913ZM4.158 9.117C3.96121 8.4394 3.94707 7.72182 4.117 7.037L4.037 7.117L2.507 5.584C2.1718 6.34531 1.99913 7.16817 2 8C2 8.954 2.223 9.856 2.619 10.657L4.159 9.117H4.158ZM5.246 2.667C6.09722 2.22702 7.04179 1.99825 8 2C8.954 2 9.856 2.223 10.657 2.619L9.117 4.159C8.34926 3.93538 7.53214 3.94687 6.771 4.192L5.246 2.668V2.667ZM10 8C10 8.53043 9.78929 9.03914 9.41421 9.41421C9.03914 9.78929 8.53043 10 8 10C7.46957 10 6.96086 9.78929 6.58579 9.41421C6.21071 9.03914 6 8.53043 6 8C6 7.46957 6.21071 6.96086 6.58579 6.58579C6.96086 6.21071 7.46957 6 8 6C8.53043 6 9.03914 6.21071 9.41421 6.58579C9.78929 6.96086 10 7.46957 10 8Z"
-                    fill="#90A4AE"
-                  ></path>
-                </svg>
-                <Typography variant="small" className="font-medium">
-                  Help
-                </Typography>
-              </MenuItem>
+                </MenuItem>
+              </Link>
               <hr className="my-2 border-blue-gray-50" />
               <MenuItem
                 className="flex items-center gap-2"

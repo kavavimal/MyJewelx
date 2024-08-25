@@ -7,18 +7,29 @@ import React, { useState } from "react";
 import DataTable from "react-data-table-component";
 import { useRouter } from "next/navigation";
 import DeleteGemstone from "./DeleteGemstone";
+import moment from "moment";
 
 const GemstoneForm = ({ gemstones }) => {
   const router = useRouter();
   const [gemstone, setGemstone] = useState(false);
+  const [search, setSearch] = useState("");
+  const [filteredGemstones, setFilteredGemstones] = useState(gemstones);
+
   const columns = [
     {
       name: "Name",
       selector: (row) => row?.name,
+      sortable: true,
     },
     {
       name: "Description",
       selector: (row) => row?.description,
+      sortable: true,
+    },
+    {
+      name: "Date",
+      selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortable: true,
     },
     {
       name: "Action",
@@ -46,6 +57,7 @@ const GemstoneForm = ({ gemstones }) => {
       ),
     },
   ];
+
   const formik = useFormik({
     initialValues: {
       name: gemstone ? gemstone.name : "",
@@ -106,7 +118,7 @@ const GemstoneForm = ({ gemstones }) => {
           const response = await post("/api/gemstone", values);
           router.refresh();
           formik.resetForm();
-          enqueueSnackbar("Gender Created", {
+          enqueueSnackbar("Gemstone Created", {
             variant: "success",
             preventDuplicate: true,
             anchorOrigin: {
@@ -146,32 +158,57 @@ const GemstoneForm = ({ gemstones }) => {
       }
     },
   });
+
+  // Handle search input change
+  const handleSearch = (event) => {
+    const searchTerm = event.target.value.toLowerCase();
+    setSearch(searchTerm);
+
+    const filtered = gemstones.filter(
+      (item) =>
+        item.name.toLowerCase().includes(searchTerm) ||
+        item.description.toLowerCase().includes(searchTerm)
+    );
+    setFilteredGemstones(filtered);
+  };
+
   return (
     <>
-      <div className="flex items-center justify-between mb-10 intro-y">
+      <div className="flex items-center justify-between mb-5 intro-y">
         <h2 className="text-2xl font-semibold">Gemstones</h2>
-        <Button
-          size="md"
-          className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
-          onClick={() => setGemstone(false)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={24}
-            height={24}
-            viewBox="0 0 24 24"
+        <div className="flex gap-3 items-end">
+          <Input
+            type="text"
+            label="Search"
+            placeholder="Search Gemstones..."
+            value={search}
+            onChange={handleSearch}
+            containerProps={{ className: "!w-[300px]" }}
+          />
+          <Button
+            size="md"
+            className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
+            onClick={() => setGemstone(false)}
           >
-            <path
-              fill="currentColor"
-              d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
-            ></path>
-          </svg>
-          Add Gemstone
-        </Button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={24}
+              height={24}
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
+              ></path>
+            </svg>
+            Add Gemstone
+          </Button>{" "}
+        </div>
       </div>
+
       <div className="mt-5 rounded-2xl shadow-3xl bg-white">
         <Formik initialValues={formik.initialValues}>
-          <form onSubmit={formik.handleSubmit} className=" rounded p-7 mb-4">
+          <form onSubmit={formik.handleSubmit} className="rounded p-7 mb-4">
             <div className="flex flex-col gap-5">
               <div className="grid items-start grid-cols-2 gap-5">
                 <div>
@@ -212,7 +249,13 @@ const GemstoneForm = ({ gemstones }) => {
           </form>
         </Formik>
       </div>
-      <DataTable data={gemstones} columns={columns} highlightOnHover />
+
+      <DataTable
+        data={filteredGemstones}
+        columns={columns}
+        pagination
+        highlightOnHover
+      />
     </>
   );
 };

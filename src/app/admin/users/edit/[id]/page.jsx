@@ -2,9 +2,12 @@ import React from "react";
 import { getRoles } from "../../add/page";
 import UserForm from "../../components/UserForm";
 
+export const revalidate = 0;
+
 async function getUser(id) {
   try {
     const user = await prisma.user.findFirst({
+      include: { image: true },
       where: { id: id },
     });
     return user;

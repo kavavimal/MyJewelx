@@ -9,21 +9,21 @@ import { theme } from "@/utils/constants";
 import { AnimatePresence, motion } from "framer-motion";
 import { Autoplay } from "swiper/modules";
 
-const Trending = () => {
-  const [products, setProducts] = useState([]);
+const Trending = ({ products }) => {
+  // const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState([]);
   const [filterProducts, setFilterProducts] = useState(products);
-  const getProducts = async () => {
-    try {
-      const repsonse = await get("/api/product");
-      setFilterProducts(repsonse?.data?.products);
-      setProducts(repsonse?.data?.products);
-    } catch (error) {
-      setProducts([]);
-      console.log(error);
-    }
-  };
+  // const getProducts = async () => {
+  //   try {
+  //     const repsonse = await get("/api/product");
+  //     setFilterProducts(repsonse?.data?.products);
+  //     setProducts(repsonse?.data?.products);
+  //   } catch (error) {
+  //     setProducts([]);
+  //     console.log(error);
+  //   }
+  // };
 
   const getCategories = async () => {
     try {
@@ -44,19 +44,24 @@ const Trending = () => {
       : [];
 
   useEffect(() => {
+    const filteredbyLabel = products.filter(
+      (product) => product.labels && product.labels.includes("Trending")
+    );
+    console.log(filteredbyLabel);
+
     if (selectedCategory.length === 0) {
-      setFilterProducts(products);
+      setFilterProducts(filteredbyLabel);
     } else {
       setFilterProducts(
-        products.filter((product) => {
+        filteredbyLabel.filter((product) => {
           return selectedCategory.includes(product.categoryId);
         })
       );
     }
-  }, [selectedCategory]);
+  }, [products, selectedCategory]);
 
   useEffect(() => {
-    getProducts();
+    // getProducts();
     getCategories();
   }, []);
   return (
@@ -134,7 +139,7 @@ const Trending = () => {
                   slidesPerView={4}
                   spaceBetween={20}
                 >
-                  {products?.map((product, index) => {
+                  {filterProducts?.map((product, index) => {
                     return (
                       <SwiperSlide key={index}>
                         <motion.div

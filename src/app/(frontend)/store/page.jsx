@@ -4,6 +4,9 @@ import prisma from "@/lib/prisma";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import StorelistSlide from "./component/StorelistSlide";
 import { VENDOR_ID } from "@/utils/constants";
+import { checkUserSession } from "../layout";
+
+export const revalidate = 0;
 
 const getVendors = () =>
   prisma.user.findMany({
@@ -12,7 +15,24 @@ const getVendors = () =>
     },
     include: {
       vendor: true,
+      products: {
+        include: {
+          reviews: true,
+        },
+      },
       image: true,
+      _count: {
+        select: {
+          products: true,
+        },
+      },
+      likesReceived: true,
+      _count: {
+        select: {
+          likesReceived: true,
+          products: true,
+        },
+      },
     },
   });
 const getPromoList = () =>
@@ -23,7 +43,8 @@ const getPromoList = () =>
   });
 
 export default async function Storelist() {
-  const vendors = await getVendors();
+  const user = await checkUserSession();
+  const vendors = await getVendors(user?.id);
   const promolist = await getPromoList();
   return (
     <>

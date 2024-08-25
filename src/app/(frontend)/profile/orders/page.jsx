@@ -5,6 +5,9 @@ import Container from "@/components/frontend/Container";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import OrderTable from "./components/Orders";
+
+export const revalidate = 0;
+
 export default async function OrderPage() {
   const { user } = await getServerSession(authOptions);
   if (!user) {

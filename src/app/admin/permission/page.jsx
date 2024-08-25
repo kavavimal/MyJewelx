@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import Permissions from "./components/Permissions";
 
-export const revalidate = 2;
+export const revalidate = 0;
 async function getPermissions() {
   const fetchPermissions = await prisma.permission.findMany();
   return fetchPermissions;

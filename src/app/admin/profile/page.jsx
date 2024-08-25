@@ -10,15 +10,18 @@ import { checkUserSession } from "@/app/(frontend)/layout";
 import { AcountType } from "@prisma/client";
 import React from "react";
 import VendorForm from "../vendors/components/VendorForm";
+import Adminform from "./components/Adminform";
+export const revalidate = 0;
 
 const page = async () => {
   const user = await checkUserSession();
+  console.log(user);
   const accountNumbers = await getAccountNumbers();
   const licenseNumbers = await getLicenseNumbers();
   const storeURLs = await getStoreURLs();
   const emails = await getEmails();
   if (user.role?.role_name === AcountType.ADMIN) {
-    return <h1>Admin Profile</h1>;
+    return <Adminform user={user} />;
   } else if (user.role?.role_name === AcountType.VENDOR) {
     return (
       <section>

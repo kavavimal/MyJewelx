@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/route";
 import OrdersList from "./components/OrderList";
 
+export const revalidate = 0;
+
 const getOrders = async (user) => {
   try {
     if (user.account_type === AcountType.VENDOR) {
@@ -46,9 +48,6 @@ const OrdersPage = async () => {
   const orders = await getOrders(session.user);
   return (
     <>
-      <div className="flex justify-between items-center btn btn-primary mb-10">
-        <h2 className="text-2xl font-semibold ">Orders</h2>
-      </div>
       <OrdersList orders={orders} />
     </>
   );

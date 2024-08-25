@@ -105,7 +105,7 @@ export async function POST(request) {
       params = {
         payment_method_types:
           paymentMethodType === "link" ? ["link", "card"] : [paymentMethodType],
-        amount: taxCalculation.amount_total,
+        amount: Math.ceil(taxCalculation.amount_total),
         currency: currency,
         description: "pay by stripe with tax",
         metadata: { tax_calculation: taxCalculation.id },
@@ -114,7 +114,7 @@ export async function POST(request) {
       params = {
         payment_method_types:
           paymentMethodType === "link" ? ["link", "card"] : [paymentMethodType],
-        amount: orderAmount,
+        amount: Math.ceil(orderAmount),
         currency: currency,
         description: "pay by stripe",
       };
@@ -137,7 +137,7 @@ export async function POST(request) {
        */
       params.payment_method_options = {
         konbini: {
-          product_description: "Tシャツ",
+          product_description: "myjewlex",
           expires_after_days: 3,
         },
       };
@@ -179,7 +179,6 @@ export async function POST(request) {
     //
     // [0] https://stripe.com/docs/api/payment_intents/create
     const paymentIntent = await stripe.paymentIntents.create(params);
-
     // Send publishable key and PaymentIntent details to client
     return NextResponse.json(
       {
@@ -194,7 +193,12 @@ export async function POST(request) {
       { status: 200 }
     );
   } catch (error) {
-    console.log(error);
-    return new NextResponse("Internal Server", { status: 500 });
+    console.log('cache error',error);
+    return new NextResponse.json({
+      message: error.message || "Internal Server",
+      error 
+    }, {
+      status: 400
+    });
   }
 }

@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    // "exclude": ["node_modules", "__tests__", "public", "src/assets", "src/lib", "src/store", "src/utils"],
+    // "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }

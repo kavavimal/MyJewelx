@@ -2,6 +2,8 @@ import React from "react";
 import Categories from "./components/Categories";
 import prisma from "@/lib/prisma";
 
+export const revalidate = 0;
+
 const getCategories = () => {
   return prisma.category.findMany({});
 };

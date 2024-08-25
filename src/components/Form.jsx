@@ -96,50 +96,51 @@ export default function Form({ type, emails }) {
         if (!isOtpSent) {
           await requestOtp();
           return;
-        } else {
-          fetch("/api/auth/register", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              firstName: values.firstName,
-              lastName: values.lastName,
-              email: values.email,
-              password: values.password,
-              confirmPassword: values.confirmPassword,
-            }),
-          })
-            .then(async (res) => {
-              setLoading(false);
-              if (res.status === 201) {
-                enqueueSnackbar("Registration Successfull", {
-                  variant: "success",
-                  preventDuplicate: true,
-                  anchorOrigin: {
-                    vertical: "top",
-                    horizontal: "right",
-                  },
-                  autoHideDuration: 3000,
-                  style: {
-                    background: "white",
-                    color: "black",
-                    borderRadius: ".5rem",
-                    boxShadow:
-                      "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-                    padding: "0 4px",
-                  },
-                });
-                router.push("/login");
-              } else {
-                const { error } = await res.json();
-                console.error("Registration Failed");
-              }
-            })
-            .catch((error) => {
-              setLoading(false);
-            });
         }
+        // else {
+        //   fetch("/api/auth/register", {
+        //     method: "POST",
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //     },
+        //     body: JSON.stringify({
+        //       firstName: values.firstName,
+        //       lastName: values.lastName,
+        //       email: values.email,
+        //       password: values.password,
+        //       confirmPassword: values.confirmPassword,
+        //     }),
+        //   })
+        //     .then(async (res) => {
+        //       setLoading(false);
+        //       if (res.status === 201) {
+        //         enqueueSnackbar("Registration Successfull", {
+        //           variant: "success",
+        //           preventDuplicate: true,
+        //           anchorOrigin: {
+        //             vertical: "top",
+        //             horizontal: "right",
+        //           },
+        //           autoHideDuration: 3000,
+        //           style: {
+        //             background: "white",
+        //             color: "black",
+        //             borderRadius: ".5rem",
+        //             boxShadow:
+        //               "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+        //             padding: "0 4px",
+        //           },
+        //         });
+        //         router.push("/login");
+        //       } else {
+        //         const { error } = await res.json();
+        //         console.error("Registration Failed");
+        //       }
+        //     })
+        //     .catch((error) => {
+        //       setLoading(false);
+        //     });
+        // }
       }
     },
   });
@@ -244,10 +245,57 @@ export default function Form({ type, emails }) {
       }).then(async (res) => {
         setLoading(false);
         if (res.status === 201) {
+          let values = formik.values;
           setEmailVerified(true);
           setIsOtpSent(true);
           setFormData({});
           showToast({ message: "OTP Verified", variant: "success" });
+          showToast({
+            message: "Registration is processing",
+            type: "info",
+          });
+          await fetch("/api/auth/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              firstName: values.firstName,
+              lastName: values.lastName,
+              email: values.email,
+              password: values.password,
+              confirmPassword: values.confirmPassword,
+            }),
+          })
+            .then(async (res) => {
+              setLoading(false);
+              if (res.status === 201) {
+                enqueueSnackbar("Registration Successfull", {
+                  variant: "success",
+                  preventDuplicate: true,
+                  anchorOrigin: {
+                    vertical: "top",
+                    horizontal: "right",
+                  },
+                  autoHideDuration: 3000,
+                  style: {
+                    background: "white",
+                    color: "black",
+                    borderRadius: ".5rem",
+                    boxShadow:
+                      "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                    padding: "0 4px",
+                  },
+                });
+                router.push("/login");
+              } else {
+                const { error } = await res.json();
+                console.error("Registration Failed");
+              }
+            })
+            .catch((error) => {
+              setLoading(false);
+            });
         } else {
           const { error } = await res.json();
           showToast({
@@ -525,7 +573,7 @@ export default function Form({ type, emails }) {
               </div>
             )}
 
-            {type === "register" && emailVerified && (
+            {/* {type === "register" && emailVerified && (
               <div>
                 <Button
                   type="submit"
@@ -535,7 +583,7 @@ export default function Form({ type, emails }) {
                   Register
                 </Button>
               </div>
-            )}
+            )} */}
 
             {type === "login" && (
               <div>
@@ -638,19 +686,19 @@ export default function Form({ type, emails }) {
                 </Button>
               </div>
 
-                            <div className="mt-2">
-                                <Typography className="font-emirates text-sm text-gray-700">
-                                    By proceeding next, you are agree with the
-                                    my jewlex Term of use and{' '}
-                                    <Link href="/privacy-policy" className="text-primary-200">
-                                        Privacy Policy
-                                    </Link>
-                                </Typography>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </Formik>
-        </>
-    );
+              <div className="mt-2">
+                <Typography className="font-emirates text-sm text-gray-700">
+                  By proceeding next, you are agree with the my jewlex Term of
+                  use and{" "}
+                  <Link href="/privacy-policy" className="text-primary-200">
+                    Privacy Policy
+                  </Link>
+                </Typography>
+              </div>
+            </div>
+          </div>
+        </form>
+      </Formik>
+    </>
+  );
 }

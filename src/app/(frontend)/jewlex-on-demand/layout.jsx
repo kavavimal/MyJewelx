@@ -4,13 +4,15 @@ import LoadingDots from "@/components/loading-dots";
 import { Suspense } from "react";
 import ShopBannerCraousel from "../shop/compos/ShopBannerCraousel";
 import AdsBanner from "@/components/frontend/AdsBanner";
-export const revalidate = 0;
+
 import { AcountType, PODStatus } from "@prisma/client";
 import Link from "next/link";
 import SearchPODForm from "./components/SearchPODForm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
+
+export const revalidate = 0;
 const getPromoList = async () =>
   await prisma.promotional.findMany({
     where: {

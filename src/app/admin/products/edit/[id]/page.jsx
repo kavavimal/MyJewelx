@@ -5,6 +5,8 @@ import { attributeIDs } from "@/utils/constants";
 import { CharsType, ProductStatus } from "@prisma/client";
 import { getProducts } from "@/actions/product";
 
+export const revalidate = 0;
+
 export const getCategories = async (id = null) => {
   return await prisma.category.findMany({});
 };
@@ -58,6 +60,11 @@ const getProduct = (id) => {
   return prisma.product.findFirst({
     where: { product_id: Number(id) },
     include: {
+      user: {
+        include: {
+          vendor: true,
+        },
+      },
       ProductAttributeValue: true,
       attributes: true,
       variations: {
@@ -139,7 +146,7 @@ const page = async ({ params: { id } }) => {
   const styles = await getStyles();
   const themes = await getThemes();
   const trends = await getTrends();
-  const allproducts = await getProducts({status: [ProductStatus.PUBLISHED]});
+  const allproducts = await getProducts({ status: [ProductStatus.PUBLISHED] });
 
   return (
     <ProductForm

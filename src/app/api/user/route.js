@@ -104,3 +104,20 @@ export async function POST(request) {
     );
   }
 }
+
+export async function GET() {
+  try {
+    const result = await prisma.user.findMany({
+      include: {
+        role: true,
+      },
+    });
+    return NextResponse.json({ success: true, users: result });
+  } catch (error) {
+    console.error("Error in GET:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error", e: error },
+      { status: 500 }
+    );
+  }
+}

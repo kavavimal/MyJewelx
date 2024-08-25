@@ -1,6 +1,9 @@
 import CreatePODForm from "../components/CreatePODForm";
 import AdsBanner from "@/components/frontend/AdsBanner";
 import Ads from "../../components/Ads";
+
+export const revalidate = 0;
+
 async function CreatePODPage() {
   const getAds = () =>
     prisma.promotional.findMany({

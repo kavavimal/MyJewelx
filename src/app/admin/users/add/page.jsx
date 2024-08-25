@@ -1,17 +1,19 @@
-import prisma from '@/lib/prisma';
-import Link from 'next/link';
-import UserForm from '../components/UserForm';
+import prisma from "@/lib/prisma";
+import Link from "next/link";
+import UserForm from "../components/UserForm";
+
+export const revalidate = 0;
 
 export async function getRoles() {
-    const roles = await prisma.role.findMany();
-    return roles;
+  const roles = await prisma.role.findMany();
+  return roles;
 }
 
 export default async function AddUser() {
-    const roles = await getRoles();
-    return (
-        <div>
-            <UserForm roles={roles} />
-        </div>
-    );
+  const roles = await getRoles();
+  return (
+    <div>
+      <UserForm roles={roles} />
+    </div>
+  );
 }

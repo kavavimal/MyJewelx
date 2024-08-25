@@ -4,7 +4,8 @@ import { NextResponse } from "next/server";
 import * as z from "zod";
 import { AcountType } from "@prisma/client";
 import { mailOptions, transporter } from "@/config/nodemailer";
-import logo from "../../../../../public/logo.svg";
+// import logo from "../../../../../public/logo.svg";
+
 //Define schema for input validation
 const userSchema = z.object({
   firstName: z.string().min(1, "FirstName is required").max(100),
@@ -88,12 +89,12 @@ export async function POST(req) {
                   }
                 </style>
             </head>
-            <body>
-                <div style="padding: 30px; font-family: 'Emirates', sans-serif;">
+            <body style="background-color: #ff0000;">
+                <div style="padding: 30px; font-family: 'Emirates', sans-serif; margin: 0 auto;">
                     <div style="background-color: #fff; border-radius: 20px; box-shadow: 0 0 20px 0px rgba(0, 0, 0, 0.1);">
                       <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px; background-color: #fffbf2 ; border-top-left-radius: 20px; border-top-right-radius: 20px;">
-                        <img src=${logo} alt="Jewlex Logo" style="width: 100px;">
-                        <img src=${logo} alt="Jewlex Logo" style="width: 100px;">
+                        <img src="https://myjewlex.com/my-jewlex-logo.png" height="auto" alt="Jewlex Logo" style="width: 200px;">
+                        <img src="https://myjewlex.com/sub-logo.png" width="300px" alt="Jewlex Logo" style="width: 100px;">
                         <h1 style="font-size: 22px; margin-bottom: 10px; font-style: italic">Discover The Beauty</h1>
                       </div>
                       <div style="font-size: 18px; margin-bottom: 20px; padding: 0 40px ;">
@@ -123,14 +124,20 @@ export async function POST(req) {
                         
                       </div>
                       <div class="footer">
-                        <div style="text-align: left; margin-top: 20px; background-color: #fffbf2; display: flex; align-items: center; justify-content: space-between; padding: 10px 40px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
-                        <div>
-                        <p style="font-weight:bold; font-size: 14px; margin-bottom: 10px;">Do you need help?</p>
-                        <p style="font-size: 14px;">Feel free to reach out to us anytime: <a href="mailto:support@myJewlex.com" style="color: #ffcc00;">support@myJewlex.com</a></p></div>
-                        <div style="text-align: center;">
-                        <a href="https://www.facebook.com/" style="color: #3b5998; margin-right: 10px;"></a>
-                        <a href="https://www.linkedin.com/" style="color: #007bb5; margin-right: 10px;"></a>
-                        <a href="https://www.instagram.com/" style="color: #e1306c;"></a>
+                        <div style="text-align: left; margin-top: 20px; background-color: #fffbf2; padding: 10px 40px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
+                          <table style="width: 100%;">
+                            <tr>
+                              <td style="vertical-align: top;">
+                                <p style="font-weight:bold; font-size: 14px; margin-bottom: 10px;">Do you need help?</p>
+                                <p style="font-size: 14px;">Feel free to reach out to us anytime: <a href="mailto:support@myJewlex.com" style="color: #ffcc00;">support@myJewlex.com</a></p>
+                              </td>
+                              <td style="align-self:right; horizontal-align: right;">
+                                <a href="https://www.facebook.com/" style="color: #3b5998; margin-right: 10px;"><img src="https://myjewlex.com/facebook.png" alt="facebook" style="height: 20px; width: 20px;" ></a>
+                                <a href="https://www.linkedin.com/" style="color: #007bb5; margin-right: 10px;"><img src="https://myjewlex.com/linkedin.png" alt="linkedin" style="height: 20px; width: 20px;" ></a>
+                                <a href="https://www.instagram.com/" style="color: #e1306c;"><img src="https://myjewlex.com/instagram.png" alt="instagram" style="height: 20px; width: 20px;" ></a>
+                              </td>
+                            </tr>
+                          </table>
                         </div>
                       </div>
                     </div>
@@ -152,6 +159,33 @@ export async function POST(req) {
         to: email,
         ...generateWelcomeEmailContent(firstName, lastName, companyEmail),
         subject: "My-jewlex Registration",
+        // attachments: [
+        //   {
+        //     filename: "logo.png",
+        //     path: "/k/github/my-jwelex/public/logo.png",
+        //     cid: "unique@nodemailer.com", //same cid value as in the html img src
+        //   },
+        //   {
+        //     filename: "email-header-logo.png",
+        //     path: "/k/github/my-jwelex/public/assets/images/email-header-logo.png",
+        //     cid: "uniquehead@nodemailer.com", //same cid value as in the html img src
+        //   },
+        //   {
+        //     filename: "facebook.svg",
+        //     path: "/k/github/my-jwelex/public/assets/images/facebook.svg",
+        //     cid: "uniquefb@nodemailer.com", //same cid value as in the html img src
+        //   },
+        //   {
+        //     filename: "linkedin.svg",
+        //     path: "/k/github/my-jwelex/public/assets/images/linkedin.svg",
+        //     cid: "uniqueln@nodemailer.com", //same cid value as in the html img src
+        //   },
+        //   {
+        //     filename: "instagram.svg",
+        //     path: "/k/github/my-jwelex/public/assets/images/instagram.svg",
+        //     cid: "uniqueig@nodemailer.com", //same cid value as in the html img src
+        //   },
+        // ],
       });
 
       return NextResponse.json(

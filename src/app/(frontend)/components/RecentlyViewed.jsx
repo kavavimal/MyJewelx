@@ -47,7 +47,7 @@ const RecentlyViewed = () => {
                 <div className="flex flex-col ms-2.5 text-center justify-center items-start gap-0.5">
                   <Link
                     href={`/product/${product?.product_id}`}
-                    className="text-sm font-normal leading-[23.87px] hover:underline"
+                    className="text-sm font-normal leading-[23.87px] hover:text-primary-200"
                   >
                     {product?.product_name &&
                       truncate(product?.product_name, 30)}

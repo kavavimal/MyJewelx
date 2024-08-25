@@ -6,7 +6,7 @@ import ProductImages from "./ProductImages";
 import Paragraph from "@/components/Paragraph";
 import Share from "./Share";
 import ProductMeta from "./ProductMeta";
-import { printPrice, truncate } from "@/utils/helper";
+import { printFormatPrice, printPrice, truncate } from "@/utils/helper";
 import ProductAttributeSelections from "./ProductAttributeSelections";
 import AddToWishlist from "@/components/frontend/cart/AddToWishlist";
 import ProductLikes from "@/components/frontend/ProductLikes";
@@ -37,8 +37,62 @@ const Detail = ({
   let gemstone_total = other_charges
     .filter((a) => a.charge_type === "gemstone")
     .reduce((total, charges) => total + Number(charges.value), 0);
-
+  const discount = other_charges.find((a) => a.charge_type === "discount");
+  const isDiscount = Boolean(variation?.isDiscount);
   const vat = other_charges.find((a) => a.charge_type === "vat/tax");
+
+  const makingCharge = JSON.parse(variation.making_charges);
+  const metalPrice = makingCharge?.metalPrice || 0;
+  const makingChargeValue = makingCharge?.value || 0;
+  const net_weight = Number(variation?.net_weight);
+
+  const getMetalCharge = () => {
+    switch (makingCharge?.charge_type) {
+      case "Per Gram On Net Weight":
+        return (
+          parseFloat(makingChargeValue || 0) * parseFloat(net_weight || 0) || 0
+        );
+      case "Per Piece / Flat":
+        return parseFloat(makingChargeValue) || 0;
+      case "Per(%) On Metal Rate On Karat":
+        return metalPrice * (parseFloat(makingChargeValue) || 0) || 0;
+      default:
+        return 0;
+    }
+  };
+
+  const getDiscount = () => {
+    if (isDiscount) {
+      switch (discount?.name) {
+        case "Per Gram On Net Weight":
+          return (
+            parseFloat(net_weight || 0) * parseFloat(discount?.value || 0) || 0
+          );
+
+        case "Per Piece / Flat":
+          return parseFloat(discount?.value) || 0;
+
+        case "Per(%) On Metal Rate On Karat":
+          return metalPrice * (parseFloat(discount?.value) || 0) || 0;
+
+        default:
+          return 0;
+      }
+    }
+    return 0;
+  };
+
+  let subtotal =
+    metalPrice * net_weight +
+    getMetalCharge() +
+    gemstone_total +
+    other_charges_total -
+    getDiscount();
+  let vatTax = 0;
+
+  if (Boolean(vat)) {
+    vatTax = parseFloat((subtotal * vat.value) / 100) || 0;
+  }
 
   return (
     <>
@@ -154,32 +208,6 @@ const Detail = ({
                 </div>
 
                 <div className="pb-3 border-b border-b-blueGray-300 pt-2.5">
-                  {/* <p className="leading-relaxed pb-3">
-                    Making Charges :{" "}
-                    {printPrice(
-                      variation.making_charges
-                        ? variation.making_charges?.value
-                        : 0
-                    )}
-                  </p>
-                  <p className="leading-relaxed pb-3">
-                    Gemstone Charges : {printPrice(gemstone_total)}
-                  </p>
-                  <p className="leading-relaxed pb-3">
-                    Other Charges : {printPrice(other_charges_total)}
-                  </p>
-                  <p className="leading-relaxed pb-3">
-                    Value Added Tax : {vat ? vat?.value : 0}
-                    <span>&#37;</span>
-                  </p>
-                  <p className="leading-relaxed">
-                    Total Amount :{" "}
-                    {printPrice(
-                      variation?.selling_price
-                        ? variation?.selling_price
-                        : variation?.regular_price
-                    )}
-                  </p> */}
                   <table className="w-1/2">
                     <thead>
                       <tr>
@@ -194,23 +222,18 @@ const Detail = ({
                     <tbody>
                       <tr>
                         <td className="text-left text-secondary-100 font-light text-base py-1">
+                          Metal Amount <span>:</span>
+                        </td>
+                        <td className="text-right text-secondary-100 font-light text-base py-1">
+                          {printFormatPrice(metalPrice * net_weight)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="text-left text-secondary-100 font-light text-base py-1">
                           Metal Charges <span>:</span>
                         </td>
                         <td className="text-right text-secondary-100 font-light text-base py-1">
-                          5,000.00
-                        </td>
-                      </tr>
-
-                      <tr>
-                        <td className="text-left text-secondary-100 font-light text-base py-1">
-                          Making Charges <span>:</span>
-                        </td>
-                        <td className="text-right text-secondary-100 font-light text-base py-1">
-                          {printPrice(
-                            variation.making_charges
-                              ? variation.making_charges?.value
-                              : 0
-                          )}
+                          {printFormatPrice(getMetalCharge())}
                         </td>
                       </tr>
 
@@ -219,7 +242,7 @@ const Detail = ({
                           Other Charges <span>:</span>
                         </td>
                         <td className="text-right text-secondary-100 font-light text-base py-1">
-                          {printPrice(gemstone_total)}
+                          {printFormatPrice(gemstone_total)}
                         </td>
                       </tr>
 
@@ -228,7 +251,7 @@ const Detail = ({
                           Add Charges <span>:</span>
                         </td>
                         <td className="text-right text-secondary-100 font-light text-base py-1">
-                          {printPrice(other_charges_total)}
+                          {printFormatPrice(other_charges_total)}
                         </td>
                       </tr>
                       <tr>
@@ -236,7 +259,7 @@ const Detail = ({
                           Discount <span>:</span>
                         </td>
                         <td className="text-right text-secondary-100 font-light text-base py-1">
-                          -60.00
+                          -{isDiscount ? printFormatPrice(getDiscount()) : 0}
                         </td>
                       </tr>
 
@@ -245,7 +268,7 @@ const Detail = ({
                           Shipping Charges <span>:</span>
                         </td>
                         <td className="text-right text-secondary-100 font-light text-base py-1">
-                          - 50.90
+                          0
                         </td>
                       </tr>
                       <tr>
@@ -253,15 +276,15 @@ const Detail = ({
                           Sub Total <span>:</span>
                         </td>
                         <td className="text-right text-secondary-100 font-light text-base py-1">
-                          5,470.00
+                          {printFormatPrice(subtotal)}
                         </td>
                       </tr>
                       <tr>
                         <td className="text-left text-secondary-100 font-light text-base py-1">
-                          VAT 5% <span>:</span>
+                          VAT {vat ? "(5%)" : "(0)"} <span>:</span>
                         </td>
                         <td className="text-right text-secondary-100 font-light text-base py-1">
-                          {vat ? vat?.value : 0}
+                          {printFormatPrice(vatTax)}
                         </td>
                       </tr>
                     </tbody>
@@ -271,7 +294,7 @@ const Detail = ({
                           Total <span>:</span>
                         </td>
                         <td className="text-right text-black font-medium text-base py-1">
-                          {printPrice(
+                          {printFormatPrice(
                             variation?.selling_price
                               ? variation?.selling_price
                               : variation?.regular_price
@@ -290,58 +313,12 @@ const Detail = ({
                   <AddToCart variation={variation} />
                   <AddToWishlist product_id={product.product_id} />
                 </div>
-                <Share />
+                <Share product={product} />
               </div>
             </div>
           </div>
         </div>
       </section>
-      {/* <div className="m-2">
-        <h1>This is Detail page</h1>
-        <div className="flex space-between">
-          <div className="w-full">
-            <div className="">
-              <Image
-                src={mainImage}
-                alt="image for design"
-                width="600"
-                height="600"
-              />
-            </div>
-            <div>
-              {variation.image.map((image, index) => {
-                return (
-                  <>
-                    <Image
-                      key={index}
-                      src={image.path}
-                      onClick={() => setMainImage(image.path)}
-                      alt="Gallery Image"
-                      width="200"
-                      height="200"
-                    />{" "}
-                  </>
-                );
-              })}
-            </div>
-          </div>
-          <div className="w-full border rounded p-2">
-            <h2>{variation.variation_name}</h2>
-            <StarRatings
-              starRatings={variation.starRatings ? variation.starRatings : 3.50}
-            />
-            <p>
-              {" "}
-              &#36;{variation.selling_price}{" "}
-              <span className="line-through	">
-                {" "}
-                &#36;{variation.regular_price}
-              </span>
-            </p>
-            <p>{variation.description}</p>
-          </div>
-        </div>
-      </div> */}
     </>
   );
 };

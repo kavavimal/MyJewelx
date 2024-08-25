@@ -4,6 +4,7 @@ import { checkUserSession } from "@/app/(frontend)/layout";
 import { revalidatePath } from "next/cache";
 
 import prisma from "@/lib/prisma";
+import { VENDOR_ID } from "@/utils/constants";
 
 export const getProducts = (data = false) => {
   let where = {};
@@ -513,7 +514,7 @@ export const searchProducts = async (data) => {
 export const getVendors = async () => {
   return await prisma.user.findMany({
     where: {
-      role_id: 2,
+      role_id: VENDOR_ID,
     },
     include: {
       vendor: true,
@@ -556,3 +557,27 @@ async function getGrams(str) {
     return null;
   }
 }
+
+export const asignProduct = async (data) => {
+  try {
+    const response = await prisma.product.update({
+      where: {
+        product_id: Number(data.id),
+      },
+      data: {
+        user_id: data.user_id,
+      },
+      include: {
+        user: {
+          include: {
+            vendor: true,
+          },
+        },
+      },
+    });
+    revalidatePath("/admin/products");
+    return { success: true, response, message: "Product Assigned" };
+  } catch (error) {
+    return { message: "Something went wrong", success: false, error };
+  }
+};

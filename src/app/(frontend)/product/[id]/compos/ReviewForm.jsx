@@ -6,7 +6,7 @@ import { useState } from "react";
 import * as Yup from "yup";
 
 const ReviewForm = ({ product_id, user_id }) => {
-  const [rating, setRating] = useState(0); // State to manage rating
+  const [rating, setRating] = useState(0);
   const [loading, setLoading] = useState(false);
   const formik = useFormik({
     initialValues: {

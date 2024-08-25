@@ -14,7 +14,10 @@ export function printFormatPrice(price = "") {
   if (price === "") {
     return "";
   } else {
-    const formatter = new Intl.NumberFormat("en-IN");
+    const formatter = new Intl.NumberFormat("en-IN", {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
+    });
     return formatter.format(Number(price).toFixed(2));
   }
 }

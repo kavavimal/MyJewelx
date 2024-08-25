@@ -24,11 +24,11 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
           viewport={{ once: true }}
-          className="bg-primary-250 pt-[21px] pb-[50px]"
+          className="bg-primary-250 sm:pt-[21px] pb-[26px] sm:pb-[50px]"
         >
           <div className="max-w-screen-xl mx-auto">
-            <div className="flex items-start justify-between gap-5">
-              <div className="w-[220px]">
+            <div className="flex flex-col sm:flex-row items-start justify-between sm:gap-5">
+              <div className="hidden sm:block sm:w-[220px] ">
                 <div className="border border-primary-200 rounded-sm relative">
                   <div className="flex items-center gap-2 py-[6.8px] border-b px-4">
                     <svg
@@ -133,7 +133,7 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
                                           return (
                                             <Link
                                               href={`/shop/?category=${subcategory.name}`}
-                                              className="text-base"
+                                              className="text-base hover:text-black"
                                               key={i}
                                             >
                                               {subcategory.name}
@@ -150,19 +150,34 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
                                       <div className="border border-primary-200 absolute bottom-[0.08px] min-w-16 rounded-full"></div>
                                     </div>
                                     <div className="flex flex-col gap-2">
-                                      <Link href="/" className="text-base">
+                                      <Link
+                                        href="/"
+                                        className="text-base hover:text-black"
+                                      >
                                         Featured Products
                                       </Link>
-                                      <Link href="/" className="text-base">
+                                      <Link
+                                        href="/"
+                                        className="text-base hover:text-black"
+                                      >
                                         Popular Products
                                       </Link>
-                                      <Link href="/" className="text-base">
+                                      <Link
+                                        href="/"
+                                        className="text-base hover:text-black"
+                                      >
                                         New Products
                                       </Link>
-                                      <Link href="/" className="text-base">
+                                      <Link
+                                        href="/"
+                                        className="text-base hover:text-black"
+                                      >
                                         Best Selling Product
                                       </Link>
-                                      <Link href="/" className="text-base">
+                                      <Link
+                                        href="/"
+                                        className="text-base hover:text-black"
+                                      >
                                         Eyeglass chain
                                       </Link>
                                     </div>
@@ -186,7 +201,7 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
                                                 " " +
                                                 list.lastName
                                               }`}
-                                              className="bg-clip-border overflow-hidden rounded-sm"
+                                              className="bg-clip-border overflow-hidden rounded-sm hover:shadow-lg hover:shadow-gray-500"
                                             >
                                               <Image
                                                 src={
@@ -233,7 +248,7 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
                   </button>
                 </div>
               </div>
-              <div className="w-[800px]">
+              <div className="max-w-full w-full sm:w-[800px]">
                 <Carousel
                   autoplay
                   loop
@@ -350,7 +365,7 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
                     );
                   }}
                   navigation={({ setActiveIndex, activeIndex, length }) => (
-                    <div className="absolute bottom-4 left-2/4 z-50 flex -translate-x-2/4 gap-2">
+                    <div className="absolute bottom-[10px] sm:bottom-4 left-2/4 z-50 flex -translate-x-2/4 gap-2">
                       {new Array(length).fill("").map((_, i) => (
                         <span
                           key={i}
@@ -384,35 +399,38 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
                 >
                   {homeSlide.map((slide, index) => {
                     return (
-                      <div className="relative h-[393px]" key={index}>
+                      <div
+                        className="relative h-[465px] sm:h-[393px]"
+                        key={index}
+                      >
                         <img
                           src={slide.image_url}
                           alt="slider hero 2"
-                          className="h-full w-full object-cover"
+                          className="h-[465px] sm:h-full w-full object-cover"
                         />
-                        <div className="absolute inset-0 grid items-center">
-                          <div className="w-2/3 pl-24">
+                        <div className="absolute inset-0 flex flex-col justify-end sm:justify-normal bottom-[33px] sm:top-0 sm:m-0 sm:grid sm:items-center">
+                          <div className="sm:w-2/3 sm:pl-24">
                             <Typography
                               variant="h1"
                               color="black"
-                              className="mb-4 text-3xl  font-playfairdisplay"
+                              className="text-[24px] text-center sm:text-left mb-[15px] leading-[28.8px]  sm:mb-4 sm:text-3xl font-playfairdisplay"
                             >
                               {slide.title}
                             </Typography>
                             <Typography
                               variant="lead"
-                              className="mb-6 opacity-80 text-secondary-200 font-emirates"
+                              className="text-[14px] text-center sm:text-left leading-[23.83px] mb-[15px] sm:text-[16px] sm:leading-[22.4px] sm:mb-[29px] sm:opacity-80 text-secondary-200 font-emirates"
                             >
                               {slide.description}
                             </Typography>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 items-center justify-center sm:justify-start sm:items-start">
                               <Link
                                 size="lg"
                                 color="white"
-                                className="normal-case bg-primary-200 font-emirates font-bold"
+                                className="normal-case rounded-[4px] border border-transparent bg-transparent font-emirates font-bold"
                                 href={slide.link_url}
                               >
-                                <Button className="rounded-md hover:shadow-none">
+                                <Button className="rounded-md border shadow-none hover:shadow-none border-primary-200 bg-primary-200 hover:bg-transparent hover:text-primary-200 hover:border-primary-200 ">
                                   Shop now
                                 </Button>
                               </Link>
@@ -424,25 +442,25 @@ const Hero = ({ categories, homeSlide, promolist, vendors }) => {
                   })}
                 </Carousel>
               </div>
-              <div className="w-[220px]">
-                <div className="flex flex-col gap-5">
+              <div className="w-full sm:w-[220px]">
+                <div className="flex sm:flex-col p-2.5 sm:p-0 gap-2.5 sm:gap-5">
                   {promolist.slice(0, 2).map((promo, index) => {
                     return (
-                      <div className="relative rounded-sm" key={index}>
+                      <div className="relative rounded-sm  sm:p-0" key={index}>
                         <Image
                           src={promo.ads_img_url}
                           width={100}
                           height={100}
-                          className="w-full h-[185px] object-cover"
-                          alt="slider Promo"
+                          className="max-w-full w-[300px] h-[130px] sm:max-w-[199px] sm:w-full sm:h-[185px] object-cover"
+                          alt={`slider Promo ${index}`}
                         />
-                        <div className="absolute top-6 left-6">
-                          <p className="text-base font-playfairdisplay font-semibold w-4/5 ">
+                        <div className="absolute sm:top-6 top-[84px] left-6">
+                          <p className="text-base font-playfairdisplay font-semibold w-4/5 hidden sm:block ">
                             {promo.ads_title}
                           </p>
                           <Link
                             href={promo.ads_link}
-                            className="text-xs py-1 px-2 inline-block border border-black rounded font-bold mt-2.5"
+                            className="text-[15px] font-medium font-playfairdisplay sm:font-emirates sm:text-xs sm:py-1 sm:px-2 inline-block underline sm:no-underline sm:border sm:border-black rounded sm:font-bold mt-0 sm:mt-2.5 hover:bg-black hover:text-white "
                           >
                             Shop now
                           </Link>

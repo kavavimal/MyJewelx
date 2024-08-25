@@ -11,6 +11,9 @@ import moment from "moment";
 import RelatedProduct from "./compos/RelatedProduct";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import CustomerReviews from "./compos/CustomerReviews";
+
+export const revalidate = 0;
+
 async function get_productBy_id(id) {
   if (id) {
     const product = await prisma.product.findFirst({
@@ -225,7 +228,7 @@ export default async function ProductDetails({ params: { id } }) {
                     </div>
                     <div className="flex items-center justify-between text-secondary-100">
                       <div>
-                        on {moment(review.createdAt.toString()).fromNow()}
+                        on {moment(review?.createdAt?.toString())?.fromNow()}
                       </div>
                     </div>
                   </div>

@@ -26,10 +26,39 @@ import {
 import { attributeIDs, theme } from "@/utils/constants";
 import ProductAttributeItem from "./ProductAttributeItem";
 import { Router } from "next/router";
-import { CharsType } from "@prisma/client";
+import { AcountType, CharsType } from "@prisma/client";
 import Link from "next/link";
 import ProductVariationsStepWrap from "./ProductVariationsStepWrap";
 import { getProduct } from "@/actions/product";
+import AsignProduct from "./AsignProduct";
+import { useUserStore } from "@/contexts/userStore";
+
+const lables = [
+  {
+    value: "Popular",
+    label: "Popular",
+  },
+  {
+    value: "Featured",
+    label: "Featured",
+  },
+  {
+    value: "Trending",
+    label: "Trending",
+  },
+  {
+    value: "Limited-Editions",
+    label: "Limited Editions",
+  },
+  {
+    value: "Gift-Idea",
+    label: "Gift Idea",
+  },
+  {
+    value: "Holiday-Special",
+    label: "Holiday Special",
+  },
+];
 
 const ProductForm = ({
   product,
@@ -84,6 +113,9 @@ const ProductForm = ({
   const [productStyle, setProductStyle] = useState([]);
   const [productTheme, setProductTheme] = useState([]);
   const [productTrend, setProductTrend] = useState([]);
+  const [productLables, setProductLables] = useState([]);
+
+  const { user } = useUserStore((state) => state);
 
   const getPricing = async () => {
     const data = await get("/api/pricing_history/latest");
@@ -319,10 +351,6 @@ const ProductForm = ({
     (a) => a.label !== "Material"
   );
 
-  // if (materialAttribute) {
-  //   productAttributesOptions = [materialAttribute, ...otherAttributes];
-  // }
-
   const gendersOptions = genders?.map((gender) => ({
     value: gender?.gender_id,
     label: gender?.name,
@@ -412,20 +440,6 @@ const ProductForm = ({
             const response = await update(
               `/api/product/${product.product_id}`,
               {
-                // ...values,
-                // attributes: values.attributes.join(","),
-                // tags: values.tags.join(","),
-                // collections: values.collections.join(","),
-                // genders: values.genders.join(","),
-                // patterns: values.patterns.join(","),
-                // characteristics: [
-                //   productBrand,
-                //   productStyle,
-                //   productTheme,
-                //   productTrend,
-                // ]
-                //   .flat()
-                //   .join(","),
                 product_name: values.product_name,
                 status: values.status,
                 attributes: values.attributes.join(","),
@@ -435,9 +449,6 @@ const ProductForm = ({
               }
             );
 
-            // if (response.status === 201) {
-            //   setAttributes(values.attributes);
-            // }
             const productRes = await getProduct(product.product_id);
             setCurrentProduct(productRes?.productData);
             window.localStorage.setItem("product_id", product.product_id);
@@ -545,6 +556,7 @@ const ProductForm = ({
                 ]
                   .flat()
                   .join(","),
+                lables: productLables.join(","),
               }
             );
             router.push(`/admin/products`);
@@ -558,20 +570,6 @@ const ProductForm = ({
           try {
             setLoading(true);
             const response = await post("/api/product", {
-              // ...values,
-              // attributes: values.attributes.join(","),
-              // tags: values.tags.join(","),
-              // collections: values.collections.join(","),
-              // genders: values.genders.join(","),
-              // patterns: values.patterns.join(","),
-              // characteristics: [
-              //   productBrand,
-              //   productStyle,
-              //   productTheme,
-              //   productTrend,
-              // ]
-              //   .flat()
-              //   .join(","),
               product_name: values.product_name,
               status: values.status,
               attributes: values.attributes.join(","),
@@ -693,6 +691,7 @@ const ProductForm = ({
       let brands = "";
       let trends = [];
       let variation = [];
+      let labels = [];
       variation = product.variations;
       setVariations(variation);
 
@@ -725,20 +724,16 @@ const ProductForm = ({
         setProductTheme(themes);
         setProductTrend(trends);
       }
+
+      if (product.labels) {
+        labels = product?.labels.split(",");
+        setProductLables(labels);
+      }
     }
   }, [productData, product]);
 
   useEffect(() => {
     if (product) {
-      // setSelectedProductAttributes(() => {
-      //   const attributeIds = product.attributes.map(
-      //     (attr) => attr.attribute_id
-      //   );
-
-      //   return productAttributesOptions.filter((option) =>
-      //     attributeIds.includes(option.id)
-      //   );
-      // });
       setAttributes(formik.values.attributes);
     }
   }, [formik.values.attributes]);
@@ -786,6 +781,9 @@ const ProductForm = ({
         >
           Back
         </Button>
+      </div>
+      <div>
+        <AsignProduct id={product?.product_id} product={product} />
       </div>
       <div className="flex flex-col gap-5">
         <div className="mb-20">
@@ -1492,6 +1490,28 @@ const ProductForm = ({
                       }
                     />
                   </div>
+                  {user?.role?.role_name === AcountType.ADMIN && (
+                    <div>
+                      <Typography>Label Your List</Typography>
+                      <ReactSelect
+                        isMulti
+                        options={lables}
+                        value={lables.filter((label) =>
+                          productLables.includes(label.value)
+                        )}
+                        onChange={(options) => {
+                          setProductLables(
+                            options?.map((option) => option?.value)
+                          );
+                        }}
+                        styles={style}
+                        theme={theme}
+                        menuPortalTarget={
+                          typeof window !== "undefined" && document.body
+                        }
+                      />
+                    </div>
+                  )}
                 </div>
               </Form>
             </Formik>

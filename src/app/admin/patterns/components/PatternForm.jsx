@@ -6,7 +6,7 @@ import { Formik, useFormik } from "formik";
 import { enqueueSnackbar } from "notistack";
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-
+import moment from "moment";
 const DataTable = dynamic(() => import("react-data-table-component"), {
   ssr: false,
 });
@@ -16,14 +16,35 @@ import DeletePattern from "./DeletePattern";
 const PatternForm = ({ patterns }) => {
   const router = useRouter();
   const [pattern, setPattern] = useState(false);
+  const [search, setSearch] = useState("");
+  const [filteredPatterns, setFilteredPatterns] = useState(patterns);
+
+  const handleSearch = (event) => {
+    const searchTerm = event.target.value.toLowerCase();
+    setSearch(searchTerm);
+    const filtered = patterns.filter(
+      (item) =>
+        item.name.toLowerCase().includes(searchTerm) ||
+        item.description.toLowerCase().includes(searchTerm)
+    );
+    setFilteredPatterns(filtered);
+  };
+
   const columns = [
     {
       name: "Name",
       selector: (row) => row?.name,
+      sortable: true,
     },
     {
       name: "Description",
       selector: (row) => row?.description,
+      sortable: true,
+    },
+    {
+      name: "Date",
+      selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortable: true,
     },
     {
       name: "Action",
@@ -51,6 +72,7 @@ const PatternForm = ({ patterns }) => {
       ),
     },
   ];
+
   const formik = useFormik({
     initialValues: {
       name: pattern ? pattern.name : "",
@@ -153,82 +175,105 @@ const PatternForm = ({ patterns }) => {
       }
     },
   });
+
+  const customStyles = {
+    cells: {
+      style: {
+        fontSize: "15px",
+      },
+    },
+  };
+
   return (
     <>
-      <div className="flex items-center justify-between mb-10 intro-y">
+      <div className="flex items-center justify-between mb-5 intro-y">
         <h2 className="text-2xl font-semibold">
           {pattern ? "Edit" : "Add"} Pattern
         </h2>
-        <Button
-          size="md"
-          className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
-          onClick={() => setPattern(false)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={24}
-            height={24}
-            viewBox="0 0 24 24"
+        <div className="flex gap-3 items-end">
+          <Input
+            type="text"
+            label="Search"
+            placeholder="Search Patterns"
+            className="Search Patterns"
+            value={search}
+            style={{ fontSize: "15px" }}
+            onChange={handleSearch}
+            containerProps={{ className: "!w-[300px]" }}
+          />
+          <Button
+            size="md"
+            className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
+            onClick={() => setPattern(false)}
           >
-            <path
-              fill="currentColor"
-              d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
-            ></path>
-          </svg>
-          Add Pattern
-        </Button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={24}
+              height={24}
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
+              ></path>
+            </svg>
+            Add Pattern
+          </Button>{" "}
+        </div>
       </div>
-
-      <div className="mt-10 rounded-2xl shadow-3xl bg-white">
+      <div className="rounded-lg shadow border bg-white border-dark-200 mb-5">
         <Formik initialValues={formik.initialValues}>
-          <form onSubmit={formik.handleSubmit} className=" rounded p-7 mb-4">
+          <form onSubmit={formik.handleSubmit} className="rounded p-7">
             <div className="flex flex-col gap-5">
-              <div className="grid items-start grid-cols-2 gap-5">
-                <div>
+              <div className="flex gap-5">
+                <div className="w-full">
                   <Input
                     label="Name"
                     type="text"
                     name="name"
+                    style={{ fontSize: "15px" }}
                     value={formik.values?.name || ""}
                     onChange={formik.handleChange}
                     error={formik.touched.name && formik.errors.name}
                   />
                 </div>
-                <div>
+                <div className="w-full">
                   <Input
                     label="Description"
                     type="text"
                     value={formik.values?.description || ""}
                     name="description"
+                    style={{ fontSize: "15px" }}
                     onChange={formik.handleChange}
                     error={
                       formik.touched.description && formik.errors.description
                     }
                   />
                 </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="flex items-center gap-2 px-4 py-2 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
-                  loading={formik.isSubmitting}
-                >
-                  {pattern ? "Update" : "Add"}
-                </Button>
+                <div className="flex items-center justify-between">
+                  <Button
+                    type="submit"
+                    className="flex items-center gap-2 px-4 py-3 hover:shadow-none hover:opacity-90 shadow-none rounded bg-primary-200 text-black font-emirates"
+                    loading={formik.isSubmitting}
+                  >
+                    {pattern ? "Update" : "Add"}
+                  </Button>
+                </div>{" "}
               </div>
             </div>
           </form>
         </Formik>
       </div>
-
-      <DataTable
-        data={patterns}
-        columns={columns}
-        pagination
-        highlightOnHover
-      />
+      <div className="rounded-lg shadow border bg-white border-dark-200 py-5">
+        <DataTable
+          striped
+          data={filteredPatterns}
+          columns={columns}
+          pagination
+          highlightOnHover
+          customStyles={customStyles}
+        />
+      </div>
     </>
   );
 };

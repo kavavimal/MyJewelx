@@ -2,6 +2,8 @@ import React from "react";
 import Tags from "./components/Tags";
 import prisma from "@/lib/prisma";
 
+export const revalidate = 0;
+
 const getTags = () => {
   return prisma.tag.findMany();
 };

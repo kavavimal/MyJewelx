@@ -47,6 +47,8 @@ export async function POST(request) {
       ? Number(req.get("subCategory"))
       : null;
 
+    const lables = req.get("lables") ?? "";
+
     const productData = productSchema.parse({
       product_name,
       status,
@@ -78,6 +80,7 @@ export async function POST(request) {
             connect: { category_id: productData.subCategory },
           },
         }),
+        labels: lables,
       },
     });
 

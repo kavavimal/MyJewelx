@@ -2,7 +2,7 @@ import React from "react";
 import prisma from "@/lib/prisma";
 import Roles from "./components/Roles";
 
-export const revalidate = 2;
+export const revalidate = 0;
 async function getRoles() {
   const fetchRoles = await prisma.role.findMany();
   return fetchRoles;

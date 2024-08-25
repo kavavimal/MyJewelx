@@ -12,6 +12,8 @@ import Ads from "./Ads";
 import { AddressType } from "@prisma/client";
 import Image from "next/image";
 
+export const revalidate = 0;
+
 const getAds = () =>
   prisma.promotional.findMany({
     where: {

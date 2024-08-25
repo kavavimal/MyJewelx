@@ -138,7 +138,7 @@ export default function CheckoutSummary({ cart, user, showCoupon = false }) {
           </div>
         )}
         {paymentMethod === "cod" && (
-          <ButtonComponent onClick={handlePlaceOrder}>
+          <ButtonComponent onClick={() => handlePlaceOrder(JSON.stringify({paymentMethod: 'cod'}))}>
             {/* {loading && <LoadingDots />} */}
             Place Order
           </ButtonComponent>

@@ -104,6 +104,7 @@ export async function PUT(request, { params }) {
         },
       });
     } else if (slug === "additional_tags_attributes") {
+      const labels = req.get("lables") ?? "";
       const country_id = req.get("country_id")
         ? Number(req.get("country_id"))
         : null;
@@ -151,7 +152,9 @@ export async function PUT(request, { params }) {
         ? req.get("purchase_note")
         : "";
       const relatedProducts =
-        req.get("relatedProducts") !== "" ? req.get("relatedProducts").split(",") : [];
+        req.get("relatedProducts") !== ""
+          ? req.get("relatedProducts").split(",")
+          : [];
       const stepTwoData = stepTwoSchema.parse({
         isOnlineBuyable,
         country_id,
@@ -261,6 +264,7 @@ export async function PUT(request, { params }) {
             }),
           },
         }),
+        labels: labels,
       };
 
       if (!isOnlineBuyable) {

@@ -1,11 +1,8 @@
+"use client";
 import React, { useCallback, useEffect, useState, useRef } from "react";
 
-export default function PriceFilter({ filterByPrice }) {
-  const [minRangePrice, setMinRangePrice] = useState(1);
-  const [maxRangePrice, setMaxRangePrice] = useState(200000);
-
+export default function PriceFilter({ filterByPrice, max }) {
   const min = 0;
-  const max = 2000000;
 
   const [minVal, setMinVal] = useState(min);
   const [maxVal, setMaxVal] = useState(max);
@@ -38,37 +35,12 @@ export default function PriceFilter({ filterByPrice }) {
     }
   }, [maxVal, getPercent]);
 
-  // useEffect(() => {
-  //   filterByPrice(minVal, maxVal);
-  // }, [minVal, maxVal]);
+  useEffect(() => {
+    filterByPrice(minVal, maxVal);
+  }, [minVal, maxVal]);
 
   return (
-    // <div className="flex w-64 m-auto items-center h-32 justify-center">
-    //   Min:{" "}
-    //   <input
-    //     type="number"
-    //     name="minrangeprice"
-    //     value={minRangePrice}
-    //     max={maxRangePrice - 1}
-    //     onChange={(e) => setMinRangePrice(e.target.value)}
-    //   />
-    //   Max:{" "}
-    //   <input
-    //     type="number"
-    //     name="maxrangeprice"
-    //     min={minRangePrice + 1}
-    //     value={maxRangePrice}
-    //     onChange={(e) => setMaxRangePrice(e.target.value)}
-    //   />
-    //   <button
-    //     type="button"
-    //     onClick={() => filterByPrice(minRangePrice, maxRangePrice)}
-    //   >
-    //     Filter
-    //   </button>
-    // </div>
-
-    <div className="ms-60">
+    <div className="ms-80">
       <input
         type="range"
         min={min}

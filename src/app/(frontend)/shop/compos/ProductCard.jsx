@@ -13,7 +13,7 @@ const ProductCard = ({ product }) => {
   const variation = product?.variations[0];
   const averateRating = getProductAverageRatings(product.reviews);
   return (
-    <Card className="overflow-hidden font-normal text-left">
+    <Card className="overflow-hidden h-[224px] sm:h-auto  font-normal text-left">
       <CardHeader
         floated={false}
         shadow={false}
@@ -23,7 +23,7 @@ const ProductCard = ({ product }) => {
         <div className="w-auto overflow-hidden">
           <Link
             href={`/product/${product?.product_id}`}
-            className="font-normal text-left block"
+            className="font-normal text-left block "
           >
             <Image
               src={
@@ -36,7 +36,7 @@ const ProductCard = ({ product }) => {
               alt="image for design"
               width={350}
               height={350}
-              className="w-full h-[252px] hover:scale-105 transition-all duration-300"
+              className="w-full h-[169px] sm:h-[252px] hover:scale-105 transition-all duration-300"
             />
           </Link>
         </div>
@@ -46,7 +46,7 @@ const ProductCard = ({ product }) => {
           <p className="text-black text-sm">
             <Link
               href={`/product/${product?.product_id}`}
-              className="font-normal text-left"
+              className="font-normal text-left hover:text-primary-200"
             >
               {truncate(product?.product_name, 25)}
             </Link>
@@ -59,13 +59,15 @@ const ProductCard = ({ product }) => {
               {variation.net_weight} gram
             </span>
           </div>
-          <Engagement
-            averateRating={averateRating}
-            product_id={product.product_id}
-            variation={variation}
-          />
+          <div className="hidden sm:block ">
+            <Engagement
+              averateRating={averateRating}
+              product_id={product.product_id}
+              variation={variation}
+            />
+          </div>
           {product?.user && (
-            <p className="text-black text-sm leading-[23.83px]">
+            <p className="text-black text-sm leading-[23.83px] hidden sm:block">
               Seller:{" "}
               {product?.user?.vendor?.store_name ??
                 product?.user?.firstName + " " + product?.user?.lastName}

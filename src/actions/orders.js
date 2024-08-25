@@ -2,6 +2,7 @@
 import { checkUserSession } from "@/app/(frontend)/layout";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
+import { OrderStatusMail } from "@/lib/sendMails";
 import { getServerSession } from "next-auth";
 
 export const getOrders = async () => {
@@ -35,8 +36,12 @@ export const updateOrderStatus = async (orderid, newStatus) => {
       },
       include: {
         seller: true,
+        user: true,
       },
     });
+
+    const billingAddress = JSON.parse(findorderData.billingAddress);
+
     if (!findorderData) {
       return {
         message: "Order not found or you not have access to this order",
@@ -60,6 +65,14 @@ export const updateOrderStatus = async (orderid, newStatus) => {
         status: newStatus,
       },
     });
+
+    await OrderStatusMail(
+      { email: billingAddress.email },
+      {
+        new: orderData?.status,
+        prev: findorderData.status,
+      }
+    );
     return { message: "Order Status Updated Succesfully", orderData };
   } catch (e) {
     return {

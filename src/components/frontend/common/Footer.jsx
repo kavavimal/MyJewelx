@@ -32,10 +32,10 @@ export default function Footer() {
                     <input
                       type="text"
                       name="search"
-                      className="h-10 rounded-s border-[#E6E6E6] border-s-[1.5px] border-y-[1.5px] focus:outline-none px-3 placeholder:text-secondary-100 text-secondary-100"
+                      className="h-[42px] rounded-s border-[#E6E6E6] border-s-[1.5px] border-y-[1.5px] focus:outline-none px-3 placeholder:text-secondary-100 text-secondary-100"
                       placeholder="Your Email Address"
                     />
-                    <Button className="hover:shadow-none shadow-none outline-none rounded-s-none rounded-e focus:outline-none active:outline-none">
+                    <Button className="hover:shadow-none border hover:text-primary-200 hover:border-primary-200 hover:bg-transparent shadow-none outline-none rounded-s-none rounded-e focus:outline-none active:outline-none">
                       Subscribe
                     </Button>
                   </form>
@@ -47,17 +47,26 @@ export default function Footer() {
                 </h3>
                 <ul>
                   <li>
-                    <Link href="/" className="text-sm text-secondary-50">
+                    <Link
+                      href="/"
+                      className="text-sm text-secondary-50 hover:text-black"
+                    >
                       About us
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-sm text-secondary-50">
+                    <Link
+                      href="/"
+                      className="text-sm text-secondary-50 hover:text-black"
+                    >
                       Contact us
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-sm text-secondary-50">
+                    <Link
+                      href="/"
+                      className="text-sm text-secondary-50 hover:text-black"
+                    >
                       How it works
                     </Link>
                   </li>
@@ -69,22 +78,34 @@ export default function Footer() {
                 </h3>
                 <ul>
                   <li>
-                    <Link href="/" className="text-sm text-secondary-50">
+                    <Link
+                      href="/"
+                      className="text-sm text-secondary-50 hover:text-black"
+                    >
                       Shipping info
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-sm text-secondary-50">
+                    <Link
+                      href="/"
+                      className="text-sm text-secondary-50 hover:text-black"
+                    >
                       Returns
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-sm text-secondary-50">
+                    <Link
+                      href="/"
+                      className="text-sm text-secondary-50 hover:text-black"
+                    >
                       How to order
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-sm text-secondary-50">
+                    <Link
+                      href="/"
+                      className="text-sm text-secondary-50 hover:text-black"
+                    >
                       How to track
                     </Link>
                   </li>
@@ -96,22 +117,34 @@ export default function Footer() {
                 </h3>
                 <ul>
                   <li>
-                    <Link href="/" className="text-sm text-secondary-50">
+                    <Link
+                      href="/"
+                      className="text-sm text-secondary-50 hover:text-black"
+                    >
                       Customer Service
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-sm text-secondary-50">
+                    <Link
+                      href="/"
+                      className="text-sm text-secondary-50 hover:text-black"
+                    >
                       Terms and Condition
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-sm text-secondary-50">
+                    <Link
+                      href="/"
+                      className="text-sm text-secondary-50 hover:text-black"
+                    >
                       Transaction
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-sm text-secondary-50">
+                    <Link
+                      href="/"
+                      className="text-sm text-secondary-50 hover:text-black"
+                    >
                       Take our feedback survey
                     </Link>
                   </li>
@@ -128,6 +161,7 @@ export default function Footer() {
                           width="1em"
                           height="1em"
                           viewBox="0 0 256 256"
+                          className="hover:rotate-90"
                         >
                           <path
                             fill="#1877f2"
@@ -302,19 +336,28 @@ export default function Footer() {
               <div>
                 <div className="flex gap-3 items-center">
                   <div>
-                    <Link href="/" className="text-xs text-[#808080;]">
+                    <Link
+                      href="/"
+                      className="text-xs text-[#808080] hover:text-black"
+                    >
                       Privacy Policy
                     </Link>
                   </div>
                   <div className="border-t sm:border-t-0 sm:border-s h-3 border-secondary-50 border"></div>
                   <div>
-                    <Link href="/" className="text-xs text-[#808080;]">
+                    <Link
+                      href="/"
+                      className="text-xs text-[#808080] hover:text-black"
+                    >
                       Cookie Policy
                     </Link>
                   </div>
                   <div className="border-t sm:border-t-0 sm:border-s h-3 border-secondary-50 border"></div>
                   <div>
-                    <Link href="/" className="text-xs text-[#808080;]">
+                    <Link
+                      href="/"
+                      className="text-xs text-[#808080] hover:text-black"
+                    >
                       Terms and Conditions
                     </Link>
                   </div>

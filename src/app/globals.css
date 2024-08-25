@@ -167,3 +167,7 @@ body .swiper-pagination-bullet-active {
 body .swiper-pagination-bullet {
   @apply bg-primary-200 cursor-pointer;
 }
+
+body .user-donut-chart .apexcharts-legend {
+  @apply border-t border-dashed border-gray-300;
+}

@@ -8,6 +8,8 @@ import { checkUserSession } from "../../layout";
 import Ads from "./components/Ads";
 import Wishlist from "./components/WhishList";
 
+export const revalidate = 0;
+
 const getAds = () =>
   prisma.promotional.findMany({
     where: {

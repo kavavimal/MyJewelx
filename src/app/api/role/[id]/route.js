@@ -15,11 +15,6 @@ export async function PUT(request, { params }) {
         { error: `Can't find the role with role_id ${role_id}` },
         { status: 400 }
       );
-    } else if (exists.users.length > 0) {
-      return NextResponse.json(
-        { error: `Can't update Role that is associated with User` },
-        { status: 400 }
-      );
     }
 
     const req = await request.formData();
@@ -28,17 +23,29 @@ export async function PUT(request, { params }) {
       updateData.role_name = req.get("name");
     }
 
-    const existsWithName = await prisma.role.findFirst({
-      where: { role_name: role_name },
-    });
-
-    if (existsWithName) {
-      return NextResponse.json(
-        {
-          error: `This role with role_name ${updateData.role_name} already exists`,
-        },
-        { status: 400 }
-      );
+    // if role name is changed restrict if role is assigned to any user(s) or check if same role is already exists
+    if (exists.role_name !== updateData.role_name) {
+      // if existing role has user and dont allow to change role name
+      if (exists.users.length > 0) {
+        return NextResponse.json(
+          { error: `Can't update Role that is associated with User` },
+          { status: 400 }
+        );
+      } else {
+        // check is new submitted role name is already saved 
+        const existsWithName = await prisma.role.findFirst({
+          where: { role_name: updateData.role_name },
+        });
+    
+        if (existsWithName) {
+          return NextResponse.json(
+            {
+              error: `This role with role_name ${updateData.role_name} already exists`,
+            },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     if (
