@@ -1,5 +1,5 @@
 "use client";
-import LoadingDots from "@/components/loading-dots";
+import LoadingDots from "@/app/components/LoadingDots";
 import { permissionValidationSchema } from "@/schemas/ValidationSchema";
 import { post, update } from "@/utils/api";
 import { Button, Input } from "@material-tailwind/react";
@@ -25,72 +25,6 @@ export default function AddPermission({ edit = false }) {
       });
     }
   }, [edit]);
-
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   try {
-  //     setLoading(true);
-  //     await validationSchema
-  //       .validate(formData, { abortEarly: false })
-  //       .then(async (values) => {
-  //         const dataValues = new FormData();
-
-  //         Object.entries(values).forEach(([key, value]) => {
-  //           dataValues.set(key, value);
-  //         });
-
-  //         if (edit !== false) {
-  //           // update permission
-  //           const response = await fetch(
-  //             `/api/permission/${edit.permission_id}`,
-  //             {
-  //               method: "PUT",
-  //               body: dataValues,
-  //             }
-  //           );
-
-  //           if (!response.ok) {
-  //             // Handle non-successful response (e.g., server error)
-  //             const errorData = await response.json();
-  //             setError(errorData.error || "An error occurred");
-  //           } else {
-  //             // Reset form and navigate on success
-  //             setFormData({ permission_name: "", description: "" });
-  //             setError(null);
-  //             router.refresh();
-  //           }
-  //         } else {
-  //           // add new permission
-  //           const response = await fetch("/api/permission", {
-  //             method: "POST",
-  //             body: dataValues,
-  //           });
-
-  //           if (!response.ok) {
-  //             // Handle non-successful response (e.g., server error)
-  //             const errorData = await response.json();
-  //             setError(errorData.error || "An error occurred");
-  //           } else {
-  //             // Reset form and navigate on success
-  //             setFormData({ permission_name: "", description: "" });
-  //             setError(null);
-  //             router.refresh();
-  //           }
-  //         }
-  //       })
-  //       .catch((err) => {
-  //         err.errors.forEach((error) => {
-  //           setError(error);
-  //         });
-  //       });
-
-  //     setLoading(false);
-  //   } catch (error) {
-  //     console.error(error);
-  //     setError("An unexpected error occurred");
-  //     setLoading(false);
-  //   }
-  // };
 
   const formik = useFormik({
     initialValues: {
@@ -188,12 +122,7 @@ export default function AddPermission({ edit = false }) {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <Button
-                  // className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
-                  type="submit"
-                >
-                  {edit ? "Update" : "Add"}
-                </Button>
+                <Button type="submit">{edit ? "Update" : "Add"}</Button>
               </div>{" "}
             </div>
           </div>

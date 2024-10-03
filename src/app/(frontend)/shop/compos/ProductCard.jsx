@@ -10,33 +10,32 @@ import Link from "next/link";
 import Engagement from "./Engagement";
 
 const ProductCard = ({ product }) => {
-  const variation = product?.variations[0];
+  const variation = product ? product.variations[0] : null;
   const averateRating = getProductAverageRatings(product.reviews);
+  // console.log(product);
   return (
-    <Card className="overflow-hidden h-[224px] sm:h-auto  font-normal text-left">
+    <Card className="overflow-hidden h-[224px] md:h-auto  font-normal text-left">
       <CardHeader
         floated={false}
         shadow={false}
         color="transparent"
         className="m-0 rounded-none"
       >
-        <div className="w-auto overflow-hidden">
+        <div className="w-auto overflow-hidden bg-[#fffdf8] md:h-[252px] flex flex-col items-center justify-center">
           <Link
             href={`/product/${product?.product_id}`}
             className="font-normal text-left block "
           >
             <Image
               src={
-                product?.variations &&
-                product?.variations.length > 0 &&
-                product?.variations[0]?.image[0]?.path
+                variation?.image[0]?.path
                   ? product?.variations[0]?.image[0]?.path
                   : "/assets/images/image.png"
               }
               alt="image for design"
               width={350}
               height={350}
-              className="w-full h-[169px] sm:h-[252px] hover:scale-105 transition-all duration-300"
+              className="w-[260px] h-[169px] md:h-[250px] hover:scale-105 transition-all duration-300"
             />
           </Link>
         </div>
@@ -53,25 +52,35 @@ const ProductCard = ({ product }) => {
           </p>
           <div className="flex items-center justify-between">
             <span className="font-light text-xs leading-[18px]">
-              {getProductPriceString(product, variation)}
+              {getProductPriceString(product, variation ? variation : 0)}
             </span>
             <span className="font-light text-xs">
-              {variation.net_weight} gram
+              {variation?.net_weight} gram
             </span>
           </div>
-          <div className="hidden sm:block ">
+          <div className="hidden md:block ">
             <Engagement
               averateRating={averateRating}
               product_id={product.product_id}
               variation={variation}
+              product_name={product.product_name}
+              likes={product?.likes ? product.likes.length : ""}
+              reviews={product?.reviews ? product.reviews.length : ""}
             />
           </div>
           {product?.user && (
-            <p className="text-black text-sm leading-[23.83px] hidden sm:block">
+            <Link
+              href={`/${
+                product?.user?.vendor?.store_name ??
+                product?.user?.firstName + " " + product?.user?.lastName
+              }`}
+              className="text-black text-sm leading-[23.83px] hidden md:block hover:text-primary-200"
+            >
+              {" "}
               Seller:{" "}
               {product?.user?.vendor?.store_name ??
                 product?.user?.firstName + " " + product?.user?.lastName}
-            </p>
+            </Link>
           )}
         </div>
       </CardBody>

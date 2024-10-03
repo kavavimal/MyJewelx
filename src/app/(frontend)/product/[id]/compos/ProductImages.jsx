@@ -2,119 +2,21 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import Slider from "react-slick";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "slick-carousel/slick/slick.css";
 import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
-import { FreeMode, Navigation, Thumbs } from "swiper/modules";
+import { FreeMode, Thumbs } from "swiper/modules";
 
 export default function ProductImages({ variation }) {
-  const [nav1, setNav1] = useState(null);
-  const [nav2, setNav2] = useState(null);
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
-  let sliderRef1 = useRef(null);
-  let sliderRef2 = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0); // Track the active index
 
-  useEffect(() => {
-    setNav1(sliderRef1);
-    setNav2(sliderRef2);
-  }, []);
-  const [mainImage, setMainImage] = useState(variation?.image[0].path);
-
-  const settings = {
-    customPaging: function (i) {
-      return (
-        <a>
-          <img src={mainImage} />
-        </a>
-      );
-    },
-    dots: true,
-    dotsClass: "slick-dots slick-thumb",
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-  };
-  function NextArrow(props) {
-    const { className, style, onClick } = props;
-    return (
-      <div
-        className={`${className} absolute right-5 top-1/2 h-5 w-5 bg-red`}
-        style={{ ...style, display: "block", background: "red" }}
-        onClick={onClick}
-      />
-    );
-  }
-  function PrevArrow(props) {
-    const { className, style, onClick } = props;
-    return (
-      <div
-        className={className}
-        style={{ ...style, display: "block", background: "green" }}
-        onClick={onClick}
-      />
-    );
-  }
   return (
-    <div className="w-[630px]">
-      <div className="slider-container flex flex-col gap-5">
-        {/* <Slider
-          //   nextArrow={<NextArrow />}
-          //   prevArrow={<PrevArrow />}
-          arrows={false}
-          asNavFor={nav2}
-          ref={(slider) => (sliderRef1 = slider)}
-        >
-          {variation?.image &&
-            variation?.image.length > 0 &&
-            variation?.image?.map((image, index) => {
-              return (
-                <div className="px-2 h-[500px] w-[500px]" key={index}>
-                  <Image
-                    className="border-2 h-full w-full object-cover"
-                    key={index}
-                    src={image.path}
-                    onClick={() => setMainImage(image.path)}
-                    alt="Gallery Image"
-                    width={500}
-                    height={500}
-                    objectFit="cover"
-                  />
-                </div>
-              );
-            })}
-        </Slider>
-        <Slider
-          asNavFor={nav1}
-          ref={(slider) => (sliderRef2 = slider)}
-          arrows={false}
-          slidesToShow={4}
-          swipeToSlide={true}
-          focusOnSelect={true}
-        >
-          {variation?.image &&
-            variation?.image.length > 0 &&
-            variation?.image?.map((image, index) => {
-              return (
-                <div className="px-2 h-[142px] w-[142px]" key={index}>
-                  <Image
-                    className="border-2 h-full w-full object-cover"
-                    key={index}
-                    src={image.path}
-                    onClick={() => setMainImage(image.path)}
-                    alt="Gallery Image"
-                    width={142}
-                    height={142}
-                    objectFit="cover"
-                  />
-                </div>
-              );
-            })}
-        </Slider> */}
+    <div className="w-full sm:w-full md:w-1/2 xl:w-[630px]">
+      <div className="slider-container flex flex-col gap-2.5 sm:gap-5">
         {variation?.image && variation?.image.length > 0 && (
           <>
             <div>
@@ -123,17 +25,21 @@ export default function ProductImages({ variation }) {
                 spaceBetween={10}
                 thumbs={{ swiper: thumbsSwiper }}
                 modules={[FreeMode, Thumbs]}
+                onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)} // Update active index
               >
                 {variation?.image?.map((image, index) => {
                   return (
-                    <SwiperSlide key={index}>
+                    <SwiperSlide
+                      key={index}
+                      className="sm:!h-[607px] !h-[380px] border w-full  border-blueGray-300 bg-[#FFFDF8] !flex !items-center !flex-col !justify-center"
+                    >
                       <Image
-                        className="border h-[607px] w-full object-cover border-blueGray-300"
+                        className="h-[70%] w-[70%] sm:h-[450px] sm:w-[450px] object-cover"
                         key={index}
                         src={image.path}
                         alt="Gallery Image"
-                        width={500}
-                        height={500}
+                        width={250}
+                        height={250}
                       />
                     </SwiperSlide>
                   );
@@ -149,6 +55,20 @@ export default function ProductImages({ variation }) {
                 freeMode={true}
                 watchSlidesProgress={true}
                 modules={[FreeMode, Thumbs]}
+                breakpoints={{
+                  720: {
+                    slidesPerView: 3,
+                    spaceBetween: 15,
+                  },
+                  1020: {
+                    slidesPerView: 4,
+                    spaceBetween: 15,
+                  },
+                  1280: {
+                    slidesPerView: 4,
+                    spaceBetween: 20,
+                  },
+                }}
               >
                 {variation?.image &&
                   variation?.image.length > 0 &&
@@ -156,7 +76,11 @@ export default function ProductImages({ variation }) {
                     return (
                       <SwiperSlide key={index}>
                         <Image
-                          className="border h-[142px] w-full object-cover border-blueGray-300"
+                          className={`border h-[92px] sm:h-[142px] w-full object-cover transition-all border-blueGray-300  ${
+                            activeIndex === index
+                              ? "border-primary-200 opacity-100"
+                              : "border-blueGray-300 opacity-70"
+                          }`}
                           key={index}
                           src={image.path}
                           alt="Gallery Image"

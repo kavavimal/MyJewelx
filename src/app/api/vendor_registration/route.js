@@ -117,6 +117,33 @@ export async function POST(request) {
       };
     }
 
+    //banner file
+    const bannerfile = req.get("bannerfile");
+
+    if (
+      typeof bannerfile === "object" &&
+      bannerfile !== "" &&
+      bannerfile !== undefined &&
+      bannerfile !== null
+    ) {
+      const timestamp = Date.now();
+      const bytes = await bannerfile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const path = join(
+        process.cwd(),
+        "/public/assets/uploads",
+        timestamp + "_" + bannerfile.name
+      );
+      await writeFile(path, buffer);
+      let BannerImage = "/assets/uploads/" + timestamp + "_" + bannerfile.name;
+      userCreateQuery.banner_image = {
+        create: {
+          path: BannerImage,
+          image_type: "user",
+        },
+      };
+    }
+
     const userResponse = await prisma.user.create({
       data: userCreateQuery,
     });

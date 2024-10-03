@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { join } from "path";
 import { writeFile, unlink } from "fs/promises";
-import { checkUserSession } from "@/app/(frontend)/layout";
+import { checkUserSession } from "@/app/actions/users";
 
 const reviewSchema = z.object({
   productId: z.number(),
@@ -24,7 +24,6 @@ export async function POST(request) {
     const text = req.get("review");
     const recommandation = req.get("recommandation");
     const files = req.getAll("files[]");
-    console.log("files upload", files);
     // const parsedAttributeAndValues = reviewSchema.parse({
     //   productId: productId,
     //   userId: userId,

@@ -1,6 +1,6 @@
 "use client";
 
-import ButtonComponent from "@/components/frontend/ButtonComponent";
+import { Button } from "@material-tailwind/react";
 import { useState } from "react";
 
 export default function BillingAddress({
@@ -12,7 +12,7 @@ export default function BillingAddress({
   const saveAddress = () => {
     // validate address
     let flag = true;
-    
+
     setEditAddress(false);
     updateBillingAddress(address);
   };
@@ -205,9 +205,7 @@ export default function BillingAddress({
           </div>
 
           <div className="sm:col-span-2">
-            <ButtonComponent onClick={() => saveAddress()}>
-              Save Address
-            </ButtonComponent>
+            <Button onClick={() => saveAddress()}>Save Address</Button>
           </div>
         </div>
       )}

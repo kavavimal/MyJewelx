@@ -5,8 +5,8 @@ import {
   getAccountNumbers,
   getLicenseNumbers,
   getStoreURLs,
-} from "@/actions/vendor";
-import { getEmails } from "@/actions/users";
+} from "@/app/actions/vendor";
+import { getEmails } from "@/app/actions/users";
 import StoreSetup from "@/app/(auth)/vendor/details/components/StoreSetup";
 import PaymentSetup from "@/app/(auth)/vendor/details/components/PaymentSetup";
 
@@ -20,6 +20,7 @@ const getVendorById = (id) => {
     include: {
       vendor: true,
       image: true,
+      banner_image: true,
     },
   });
 };

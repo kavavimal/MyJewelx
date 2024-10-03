@@ -1,41 +1,13 @@
-import { Inter } from "next/font/google";
 import { Suspense } from "react";
-// import Footer from "@/components/Footer";
-// import Header from "@/components/Header";
-import LoadingDots from "@/components/loading-dots";
-import prisma from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import FrontendHeader from "@/components/frontend/common/Header";
-import Footer from "@/components/frontend/common/Footer";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import { getCategories } from "../actions/category";
+import Footer from "./components/Footer";
+import FrontendHeader from "./components/FrontendHeader";
+import "../globals.css";
+import { getProducts } from "../actions/product";
 
-const inter = Inter({ subsets: ["latin"] });
-
-export const checkUserSession = async () => {
-  const session = await getServerSession(authOptions);
-  if (session?.user?.email) {
-    const user = await prisma.user.findUnique({
-      where: {
-        email: session?.user?.email,
-      },
-      include: {
-        role: {
-          select: {
-            role_name: true,
-          },
-        },
-        vendor: true,
-        image: true,
-      },
-    });
-    return user;
-  }
-  return false;
-};
-const getCategories = () => prisma.category.findMany({});
-
-export default async function RootLayout({ children }) {
+export default async function FrontendLayout({ children }) {
   const categories = await getCategories();
+  const products = await getProducts();
   return (
     <Suspense
       fallback={
@@ -51,7 +23,7 @@ export default async function RootLayout({ children }) {
         </div>
       }
     >
-      <FrontendHeader categories={categories} />
+      <FrontendHeader categories={categories} products={products} />
       {children}
       <Footer />
     </Suspense>

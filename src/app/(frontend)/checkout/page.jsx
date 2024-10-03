@@ -1,16 +1,14 @@
 import { redirect } from "next/navigation";
 import Checkout from "./Checkout";
-import { getCart } from "@/actions/cart";
-import Container from "@/components/frontend/Container";
-import Breadcrumbs from "@/components/Breadcrumbs";
-import CartSummary from "@/components/frontend/cart/CartSummary";
-import { fetchCurrentUser } from "@/actions/users";
-import CartItem from "../cart/CartItem";
-import CheckoutSummary from "./CheckoutSummary";
+import CartItem from "../cart/components/CartItem";
+import CheckoutSummaryData from "./CheckoutSummaryData";
 import prisma from "@/lib/prisma";
 import Ads from "./Ads";
 import { AddressType } from "@prisma/client";
 import Image from "next/image";
+import Breadcrumbs from "@/app/components/Breadcrumbs";
+import { fetchCurrentUser } from "@/app/actions/users";
+import { getCart } from "@/app/actions/cart";
 
 export const revalidate = 0;
 
@@ -35,7 +33,7 @@ export default async function CheckoutPage() {
     return redirect("/cart");
   }
   return (
-    <Container>
+    <div className="container">
       <div className="border-b border-b-primary-200 py-[20px] mb-[30px]">
         <Breadcrumbs
           items={[
@@ -45,7 +43,7 @@ export default async function CheckoutPage() {
         />
       </div>
       <section className="bg-white pb-4 antialiased">
-        <div className="mx-auto max-w-screen-xl px-4 2xl:px-0">
+        <div className="mx-auto max-w-screen-xl px-0 sm:px-4 2xl:px-0">
           <div className="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start xl:gap-6">
             <div className="mx-auto w-full flex-none lg:max-w-2xl xl:max-w-4xl">
               <h2 className="text-lg font-semibold text-gray-900 sm:text-2xl mb-[14px]">
@@ -107,7 +105,7 @@ export default async function CheckoutPage() {
               </div>
             </div>
 
-            <CheckoutSummary
+            <CheckoutSummaryData
               cart={cart.cartData}
               user={user}
               showCoupon
@@ -117,6 +115,6 @@ export default async function CheckoutPage() {
         </div>
       </section>
       <Ads ads={ads} />
-    </Container>
+    </div>
   );
 }

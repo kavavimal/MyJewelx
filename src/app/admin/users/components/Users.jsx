@@ -12,7 +12,6 @@ import moment from "moment";
 import Image from "next/image";
 const Users = ({ users }) => {
   const [filterUsers, setFilterUsers] = useState(users);
-  console.log(filterUsers);
   const columns = [
     {
       name: "Image",

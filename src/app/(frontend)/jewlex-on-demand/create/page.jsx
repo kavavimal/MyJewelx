@@ -1,6 +1,7 @@
-import CreatePODForm from "../components/CreatePODForm";
-import AdsBanner from "@/components/frontend/AdsBanner";
+import prisma from "@/lib/prisma";
 import Ads from "../../components/Ads";
+import AdsBanner from "../../components/AdsBanner";
+import CreatePODForm from "../components/CreatePODForm";
 
 export const revalidate = 0;
 
@@ -18,7 +19,7 @@ async function CreatePODPage() {
       <div className="bg-primary-250 pt-[70px] pb-[69px] mt-5 ">
         <div className="container">
           <div className="flex gap-[50px] items-start justify-between">
-            <div className="grid border-2 bg-white  border-black px-5 py-[30px] rounded-md border-t-orange-700 border-l-0 border-r-0 border-b-0 shadow-[0_0_10px_1px_rgba(0,0,0,0.2)] w-[910px] max-w-[100%]">
+            <div className="grid border-4 bg-white  border-black px-5 py-[30px] rounded-md border-t-primary-200 border-l-0 border-r-0 border-b-0 shadow-[0_0_15px_1px_rgba(0,0,0,0.1)] w-[910px] max-w-[100%]">
               <h2 className="text-[20px] font-playfairdisplay pb-[30px]">
                 Jewlex On Deman Request
               </h2>

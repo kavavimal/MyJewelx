@@ -1,12 +1,12 @@
-import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import GoogleProvider from "next-auth/providers/google";
-import FacebookProvider from "next-auth/providers/facebook";
-import InstagramProvider from "next-auth/providers/instagram"
 import prisma from "@/lib/prisma";
-import { compare } from "bcrypt";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { AcountType } from "@prisma/client";
+import { compare } from "bcrypt";
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import FacebookProvider from "next-auth/providers/facebook";
+import GoogleProvider from "next-auth/providers/google";
+import InstagramProvider from "next-auth/providers/instagram";
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -21,11 +21,10 @@ export const authOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       profile(profile) {
-
         return {
           id: profile.sub,
           firstName: profile.given_name,
-          lastName: profile.family_name ? profile.family_name : ' ',
+          lastName: profile.family_name ? profile.family_name : " ",
           email: profile.email,
 
           // image: profile.picture,
@@ -73,18 +72,18 @@ export const authOptions = {
           id: profile.id,
           username: profile.name,
           email: profile.email,
-       // image: profile.picture.data.url,
+          // image: profile.picture.data.url,
           role: {
             connectOrCreate: {
               where: {
-                role_name: AcountType.CUSTOMER
+                role_name: AcountType.CUSTOMER,
               },
               create: {
-                role_name: AcountType.CUSTOMER
-              }
+                role_name: AcountType.CUSTOMER,
+              },
             },
           },
-        }
+        };
       },
     }),
     CredentialsProvider({
@@ -178,3 +177,4 @@ export const authOptions = {
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
+

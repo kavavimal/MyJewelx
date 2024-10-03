@@ -67,6 +67,7 @@ export async function POST(request) {
       isPriceFixed: req.get("isPriceFixed") === "true" ? true : false,
       other_charges: req.get("other_charges"),
       making_charges: req.get("making_charges"),
+      shipping_charge: Number(req.get("shipping_charge")) ?? "",
     };
 
     const parsedVariation = productVariationSchema.parse(variationData);
@@ -151,6 +152,7 @@ export async function POST(request) {
       isPriceFixed: parsedVariation.isPriceFixed,
       other_charges: parsedVariation.other_charges,
       making_charges: parsedVariation.making_charges,
+      shipping_charge: variationData.shipping_charge,
     };
 
     const files = await req.getAll("files[]");

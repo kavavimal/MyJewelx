@@ -6,7 +6,21 @@ import React from "react";
 
 const CheckoutItem = ({ item, variation, index }) => {
   const variationDataSplit = variation.variation_name?.split(",");
-  // console.log(item);
+  const variationinfo = JSON.parse(item.variationData);
+  const other_charges = variationinfo?.other_charges
+    ? JSON.parse(variationinfo.other_charges)
+    : [];
+  const vatTax = other_charges.find((a) => a.charge_type === "vat/tax");
+  const discount = other_charges.find((a) => a.charge_type === "discount");
+  const vat = vatTax ? vatTax?.tax * item.quantity : 0;
+  const shipping_charge = Number(variationinfo?.shipping_charge || 0);
+
+  let discountValue = 0;
+  if (discount) {
+    discountValue = discount?.discount * item.quantity;
+  }
+
+  const subtotal = Number(item.price) + discountValue - vat - shipping_charge;
 
   return (
     <div
@@ -29,7 +43,8 @@ const CheckoutItem = ({ item, variation, index }) => {
         <div className="flex justify-between items-center">
           <h4 className="size-sm">{item.name}</h4>
           <p className="text-base text-blueGray-500">
-            AED {printFormatPrice(item.price)}
+            {/* AED {printFormatPrice(item.price)} */}
+            AED {printFormatPrice(subtotal)}
           </p>
         </div>
         <div className="py-0.5">
@@ -47,7 +62,11 @@ const CheckoutItem = ({ item, variation, index }) => {
           })}
         </div>
         <p className="size-sm text-secondary-100  text-sm">
-          Seller: Malabar's Gold and Diamonds
+          Seller:{" "}
+          {`${
+            variation?.product?.user?.vendor?.store_name ??
+            `${variation?.product?.user?.firstName} ${variation?.product?.user?.lastName}`
+          }`}
         </p>
         <div className="flex justify-between items-center">
           <p className="size-sm text-secondary-100  text-sm">
@@ -59,6 +78,20 @@ const CheckoutItem = ({ item, variation, index }) => {
           >
             View Product
           </Link>
+        </div>
+        <div>
+          <span className="size-sm text-secondary-100 pr-[6px] border-r border-blueGray-300 text-sm ">
+            <span>VAT : </span>
+            AED {printFormatPrice(vat)}
+          </span>
+          <span className="size-sm text-secondary-100 px-[6px]  border-r border-blueGray-300 text-sm ">
+            <span>Shipping Charge : </span>
+            AED {printFormatPrice(shipping_charge)}
+          </span>
+          <span className="size-sm text-secondary-100 px-[6px] text-sm ">
+            <span>Discount : </span>
+            AED {printFormatPrice(discountValue)}
+          </span>
         </div>
       </div>
     </div>

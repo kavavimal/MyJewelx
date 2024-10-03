@@ -30,6 +30,11 @@ const CountryForm = ({ countries }) => {
     {
       name: "Date",
       selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortFunction: (rowA, rowB) => {
+        const dateA = new Date(rowA.createdAt);
+        const dateB = new Date(rowB.createdAt);
+        return dateB - dateA;
+      },
       sortable: true,
     },
     {

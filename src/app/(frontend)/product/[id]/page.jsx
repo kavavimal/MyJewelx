@@ -1,16 +1,13 @@
 import prisma from "@/lib/prisma";
 import Detail from "./compos/Detail";
 import { ATTRIBUTE_ORDER } from "@/utils/constants";
-import ReviewForm from "./compos/ReviewForm";
-import { checkUserSession } from "../../layout";
 import { ReviewStatus } from "@prisma/client";
 import Image from "next/image";
-import StarRatings from "@/components/frontend/StarRatings";
-import Container from "@/components/frontend/Container";
 import moment from "moment";
 import RelatedProduct from "./compos/RelatedProduct";
-import Breadcrumbs from "@/components/Breadcrumbs";
 import CustomerReviews from "./compos/CustomerReviews";
+import StarRatings from "@/app/components/StarRatings";
+import { checkUserSession } from "@/app/actions/users";
 
 export const revalidate = 0;
 
@@ -34,8 +31,9 @@ async function get_productBy_id(id) {
             },
           },
         },
-        user: true,
-
+        user: {
+          include: { vendor: true, image: true },
+        },
         country: true,
         likes: true,
         genders: {
@@ -189,20 +187,19 @@ export default async function ProductDetails({ params: { id } }) {
         filteredAttributes={productData?.filteredAttributes}
         avgRating={productData?.avgRating}
       />
-      <section className="pt-[50px] pb-[43px]">
-        <Container>
-          <CustomerReviews reviews={productData?.reviews} />
-        </Container>
-      </section>
-      <Container>
+      <section className="pt-5 sm:pt-[50px] pb-5 sm:pb-[43px]">
         {user.id && (
-          <div className="pb-[15px] border-b border-blueGray-300">
-            <div className="w-[620px]">
-              <ReviewForm user_id={user.id} product_id={id} />
-            </div>
+          <div className="container">
+            <CustomerReviews
+              reviews={productData?.reviews}
+              user_id={user.id}
+              product_id={id}
+            />
           </div>
         )}
-        <div className="pb-[46px] pt-[50px]">
+      </section>
+      <div className="container">
+        <div className="pb-5 sm:pb-[46px] sm:pt-[50px]">
           {productData?.reviews &&
             productData?.reviews?.map((review, index) => {
               return (
@@ -264,7 +261,7 @@ export default async function ProductDetails({ params: { id } }) {
               );
             })}
         </div>
-      </Container>
+      </div>
 
       <RelatedProduct product={productData} />
     </>

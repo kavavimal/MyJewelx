@@ -1,10 +1,7 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import FilterProduct from "./FilterProduct";
 import ProductCard from "./ProductCard";
-import { searchProducts } from "@/actions/product";
-import LoadingDots from "@/components/loading-dots";
 import {
   Carousel,
   Typography,
@@ -13,9 +10,11 @@ import {
   Option,
 } from "@material-tailwind/react";
 import Link from "next/link";
-import Breadcrumbs from "@/components/Breadcrumbs";
 import PriceFilter from "./PriceFilter";
 import { useSearchParams } from "next/navigation";
+import LoadingDots from "@/app/components/LoadingDots";
+import { searchProducts } from "@/app/actions/product";
+import Breadcrumbs from "@/app/components/Breadcrumbs";
 
 const ShopComponent = ({ products, categories, promolist }) => {
   const [loading, setLoading] = useState(false);
@@ -59,7 +58,7 @@ const ShopComponent = ({ products, categories, promolist }) => {
     }
   }, [query, category]);
   return (
-    <section className="container pb-20 pt-5">
+    <section className="container pb-5 lg:pb-20 pt-5">
       <div className="mb-5">
         <Carousel className="rounded">
           {promolist?.length > 0 &&
@@ -110,8 +109,9 @@ const ShopComponent = ({ products, categories, promolist }) => {
       <div className="flex items-center text-sm before:flex-1 before:border-t after:pr-64 before:border-primary-200 after:border-t after:border-primary-200 dark:text-white dark:before:border-neutral-600 dark:after:border-neutral-600">
         <img src="/assets/images/divider.svg" alt="" />
       </div>
+
       <div className="flex justify-end items-center py-5">
-        <div className="w-full">
+        <div className="w-full hidden lg:block ">
           <PriceFilter filterByPrice={filterByPrice} />
         </div>
         <div className="flex">
@@ -134,7 +134,7 @@ const ShopComponent = ({ products, categories, promolist }) => {
         </div>
 
         {filteredProducts.length > 0 ? (
-          <div className="flex-1 grid grid-cols-3 gap-5">
+          <div className="flex-1 grid grid-cols-2 lg:grid-cols-3 gap-5">
             {loading ? (
               <div className="w-full min-h-80 flex items-center justify-center col-span-4">
                 <LoadingDots size={10} />
@@ -152,5 +152,4 @@ const ShopComponent = ({ products, categories, promolist }) => {
     </section>
   );
 };
-
 export default ShopComponent;

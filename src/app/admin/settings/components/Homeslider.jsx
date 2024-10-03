@@ -21,8 +21,6 @@ const Homeslider = ({ homeslider, searchQuery, onSearchChange }) => {
   const [filteredData, setFilteredData] = useState(homeslider);
   const router = useRouter();
 
-  console.log(filteredData);
-
   const columns = [
     {
       name: "Image",
@@ -55,6 +53,11 @@ const Homeslider = ({ homeslider, searchQuery, onSearchChange }) => {
     {
       name: "Date",
       selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortFunction: (rowA, rowB) => {
+        const dateA = new Date(rowA.createdAt);
+        const dateB = new Date(rowB.createdAt);
+        return dateB - dateA;
+      },
       sortable: true,
     },
     {

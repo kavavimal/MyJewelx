@@ -38,6 +38,7 @@ export default withMT({
         blueGray: {
           50: "#919eab1f",
           100: "#919eab14",
+          150: "#E6E6E6",
           200: "#637381",
           300: "#CBCBCB",
           400: "#EFEFEF",

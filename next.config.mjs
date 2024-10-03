@@ -1,14 +1,27 @@
 /** @type {import('next').NextConfig} */
 import dotenv from "dotenv";
 dotenv.config();
-
 const nextConfig = {
+  // async headers() {
+  //   return [
+  //     {
+  //       source: "/assets/(.*)",
+  //       headers: [
+  //         {
+  //           key: "Cache-Control",
+  //           value: "public, max-age=0, must-revalidate",
+  //         },
+  //       ],
+  //     },
+  //   ];
+  // },
+  staticPageGenerationTimeout: 1200,
   experimental: {
     // This is experimental but can
     // be enabled to allow parallel threads
     // with nextjs automatic static generation
     workerThreads: false,
-    cpus: 4,
+    // cpus: 4,
   },
   images: {
     remotePatterns: [

@@ -1,7 +1,7 @@
 import React from "react";
 import RegistrationForm from "./components/RegistrationForm";
-import { getStoreURLs } from "@/actions/vendor";
-import { getEmails } from "@/actions/users";
+import { getStoreURLs } from "@/app/actions/vendor";
+import { getEmails } from "@/app/actions/users";
 
 const page = async () => {
   const storeURLs = await getStoreURLs();

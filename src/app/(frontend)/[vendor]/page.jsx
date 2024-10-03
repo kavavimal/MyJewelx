@@ -1,5 +1,4 @@
 import React from "react";
-import Image from "next/image";
 import StorePage from "./components/StorePage";
 import prisma from "@/lib/prisma";
 
@@ -27,6 +26,7 @@ const getVendor = async (firstName = "", lastName = "", storeName = "") => {
       ],
     },
     include: {
+      reviews: true,
       image: true,
       likes: true,
       vendor: true,
@@ -41,10 +41,27 @@ const getVendor = async (firstName = "", lastName = "", storeName = "") => {
           reviews: true,
         },
       },
+      _count: {
+        select: {
+          reviews: true,
+        },
+      },
+      _count: {
+        select: {
+          products: true,
+        },
+      },
+      likesReceived: true,
+      _count: {
+        select: {
+          likesReceived: true,
+          products: true,
+          reviews: true,
+        },
+      },
     },
   });
 };
-
 const getStoreReview = async (id) => {
   return prisma.review.findMany({
     where: {
@@ -64,7 +81,6 @@ export default async function StoreVendorPage({ params }) {
   const firstName = vendorName.split(" ")[0];
   const lastName = vendorName.split(" ")[1];
   const vendor = await getVendor(firstName, lastName, vendorName);
-  // console.log(vendor);
   const reviews = await getStoreReview(vendor?.id);
 
   return (

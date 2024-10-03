@@ -1,4 +1,4 @@
-import { checkUserSession } from "@/app/(frontend)/layout";
+import { checkUserSession } from "@/app/actions/users";
 import { mailOptions, transporter } from "@/config/nodemailer";
 import { generateInvoice } from "@/utils/invoiceGenerator";
 import { OrderStatus, UserStatus } from "@prisma/client";
@@ -212,132 +212,120 @@ const getEmailFooter = () => {
         <p class="footer">Best regards,<br>My-jewlex Team</p>`;
 };
 
-function generateOrderEmail(order, recipientType) {
+function generateOrderEmail(order, recipientType, sellerUserId = null) {
   const recipient = recipientType === "vendor" ? "Vendor" : "Customer";
   const shippingAddress = JSON.parse(order.shippingAddress);
-  return (
-    `
+
+  // Filter order items by seller's user_id, if provided (for vendors only)
+  const filteredOrderItems = sellerUserId
+    ? order.orderItems.filter((item) => item.sellerId === sellerUserId)
+    : order.orderItems;
+
+  const totalAmount = filteredOrderItems.reduce(
+    (acc, item) => acc + item.quantity * item.price,
+    0
+  );
+
+  return `
     <!DOCTYPE html>
     <html>
       <head>
         <title>Order Confirmation</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-          }
-          .email-container {
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #eee;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
-          }
-          .email-header {
-            background: #f8f8f8;
-            padding: 10px 20px;
-            border-bottom: 1px solid #ddd;
-          }
-          .email-header h1 {
-            margin: 0;
-            font-size: 24px;
-          }
-          .email-body {
-            padding: 20px;
-          }
-          .email-body table {
-            width: 100%;
-            border-collapse: collapse;
-          }
-          .email-body table, .email-body th, .email-body td {
-            border: 1px solid #ddd;
-            padding: 8px;
-          }
-          .email-body th {
-            background: #f4f4f4;
-          }
-          .email-footer {
-            background: #f8f8f8;
-            padding: 10px 20px;
-            border-top: 1px solid #ddd;
-            text-align: center;
-          }
-        </style>
+        <style></style>
       </head>
       <body>
-        <div class="email-container">
-          <div class="email-header">
-            <h1>Order Confirmation</h1>
-          </div>
-          <div class="email-body">
-            <p>Dear ${recipient},</p>
-            <p>${
-              recipientType === "vendor"
-                ? "You receive Order."
-                : "Thank you for your order."
-            } Below are the details of order:</p>
-            <h2>Order ID: ${order.id}</h2>
-            <p><strong>Date:</strong> ${new Date(
-              order.createdAt
-            ).toLocaleDateString()}</p>
-            <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
-            <h3>Customer Information</h3>
-            <p>
-              <strong>Name:</strong> ${order.user.firstName} ${
-      order.user.lastName
-    }<br>
-              <strong>Email:</strong> ${order.user.email}<br>
-              <strong>Phone:</strong> ${order.user.phone_number}<br>
-              <strong>Shipping Address:</strong> ${shippingAddress.firstName} ${
-      shippingAddress.lastName
-    }<br/>
-              ${shippingAddress.street} ${
-      shippingAddress.address_2 !== "" ? shippingAddress.address_2 : ""
-    }<br />
-              ${shippingAddress.city} ${shippingAddress.state}, ${
-      shippingAddress.country
-    } ${shippingAddress.zipCode}<br />
-              Phone: ${shippingAddress.phone}, Email: ${shippingAddress.email}
-            </p>
-            <h3>Order Details</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Price (AED)</th>
-                  <th>Total (AED)</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${order.orderItems
-                  .map((item) => {
-                    const variation = JSON.parse(item.variationData) ?? false;
-                    return `<tr>
-                        <td>${item.name} (${
-                      variation ? variation?.variation_name : ""
-                    })</td>
-                        <td>${item.quantity}</td>
-                        <td>${item.price}</td>
-                        <td>${(item.quantity * item.price).toFixed(2)}</td>
-                      </tr>
-                      `;
-                  })
-                  .join("")}
-              </tbody>
-            </table>
-            <h3>Total Amount: ${order.orderTotal} AED</h3>
-          </div>
-          <div class="email-footer">
-            ` +
-    getEmailFooter() +
-    `
+        <div style="padding: 30px; font-family: 'Emirates', sans-serif; margin: 0 auto;">
+          <div style="background-color: #fff; border-radius: 20px; box-shadow: 0 0 20px 0px rgba(0, 0, 0, 0.1);">
+            ${mailHeader()}
+            <div style="font-size: 18px; margin-bottom: 20px; padding: 0 40px;">
+              <div class="email-header">
+                <h1 style="font-size: 24px; color: #333;">Order Confirmation</h1>
+              </div>
+              <div class="email-body">
+                <p style="font-size: 16px; line-height: 1.5; color: #555;">Dear ${recipient},</p>
+                <p style="font-size: 16px; line-height: 1.5; color: #555;">${
+                  recipientType === "vendor"
+                    ? "You received an order."
+                    : "Thank you for your order."
+                } Below are the details of your order:</p>
+                <h2 style="font-size: 20px; color: #333;">Order ID: ${
+                  order.id
+                }</h2>
+                <p style="font-size: 16px; line-height: 1.5; color: #555;"><strong>Date:</strong> ${new Date(
+                  order.createdAt
+                ).toLocaleDateString()}</p>
+                <p style="font-size: 16px; line-height: 1.5; color: #555;"><strong>Payment Method:</strong> ${
+                  order.paymentMethod
+                }</p>
+
+                <h3 style="font-size: 18px; color: #333;">Customer Information</h3>
+                <p style="font-size: 16px; line-height: 1.5; color: #555;">
+                  <strong>Name:</strong> ${order.user.firstName} ${
+    order.user.lastName
+  }<br>
+                  <strong>Email:</strong> ${order.user.email}<br>
+                  <strong>Phone:</strong> ${order.user.phone_number}<br>
+                  <strong>Shipping Address:</strong> ${
+                    shippingAddress.firstName
+                  } ${shippingAddress.lastName}<br/>
+                  ${shippingAddress.street} ${
+    shippingAddress.address_2 ? shippingAddress.address_2 : ""
+  }<br />
+                  ${shippingAddress.city} ${shippingAddress.state}, ${
+    shippingAddress.country
+  } ${shippingAddress.zipCode}<br />
+                  Phone: ${shippingAddress.phone}, Email: ${
+    shippingAddress.email
+  }
+                </p>
+
+                <h3 style="font-size: 18px; color: #333;">Order Details</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr>
+                      <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Product</th>
+                      <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Quantity</th>
+                      <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Price (AED)</th>
+                      <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Total (AED)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${filteredOrderItems
+                      .map((item) => {
+                        const variation =
+                          JSON.parse(item.variationData) ?? false;
+                        return `
+                          <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${
+                              item.name
+                            } (${
+                          variation ? variation.variation_name : ""
+                        })</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${
+                              item.quantity
+                            }</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${
+                              item.price
+                            }</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${(
+                              item.quantity * item.price
+                            ).toFixed(2)}</td>
+                          </tr>`;
+                      })
+                      .join("")}
+                  </tbody>
+                </table>
+                <h3 style="font-size: 18px; color: #333;">Total Amount: 
+                  ${totalAmount.toFixed(2)}
+                 AED</h3>
+              </div>
+            </div>
+            ${mailFooter()}
           </div>
         </div>
       </body>
     </html>
-  `
-  );
+  `;
 }
 
 export const sendOrderEmail = async (user, order, meta = false) => {
@@ -353,7 +341,7 @@ export const sendOrderEmail = async (user, order, meta = false) => {
       const vendorEmailOptions = {
         ...mailOptions,
         to: sellers[i].user.email,
-        html: generateOrderEmail(order, "vendor"),
+        html: generateOrderEmail(order, "vendor", sellers[i].user_id),
         subject: subject,
       };
       if (!pdf?.error) {
@@ -453,7 +441,11 @@ export const JODStatusMail = async (user, data) => {
   }
 };
 
-const generatOrderStatusEmail = (user, data) => {
+const generatOrderStatusEmail = (user, data, item, companyName = null) => {
+  const totalAmount = item.orderItem.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
   return `
   <!DOCTYPE html>
     <html>
@@ -463,18 +455,65 @@ const generatOrderStatusEmail = (user, data) => {
         </style>
       </head>
       <body>
-        <div class="container">
-          <p>Dear ${user?.firstName} ${user?.lastName}, Your order status changed from ${data?.prev} to ${data?.new}</p>
+          <div style="padding: 30px; font-family: 'Emirates', sans-serif;  margin: 0 auto;>
+              <div style="background-color: #fff; border-radius: 20px; box-shadow: 0 0 20px 0px rgba(0, 0, 0, 0.1);">
+                ${mailHeader()}
+
+
+                 <div style="font-size: 18px; margin-bottom: 20px; padding: 0 40px ;">
+                <h2 style="margin: 45px 0; text-align: center; font-size: 20px ; font-family: 'Emirates', sans-serif;" >Order Status Updated!</h2>
+          
+                   <p style="font-size: 17px; margin-bottom: 20px; font-weight: bold">Dear ${
+                     user?.firstName
+                   } ${user?.lastName},</p>
+                 <p style="font-size:17px;">
+                  ${
+                    data?.new === "PROCESSING"
+                      ? "Your order is being prepared by the store. We’ll notify you as soon as it’s ready for shipment."
+                      : data?.new === "SHIPPED"
+                      ? `Good news! Your order has been <span style="font-weight: bold"> SHIPPED </span> and is on its way to you.`
+                      : data?.new === "PACKED"
+                      ? `Your order has been carefully <span style="font-weight: bold"> PACKED </span> and is ready for shipping.`
+                      : data?.new === "DELIVERED"
+                      ? "Your order has been successfully delivered. We hope you enjoy your purchase!"
+                      : data?.new === "OUTFORDELIVERY"
+                      ? `Your order is on its way!  It’s currently <span style="font-weight: bold">OUT FOR DELIVERY</span>. `
+                      : data?.new === "SELLERCANCELLED"
+                      ? `Unfortunately, your order has been <span style="font-weight: bold">canceled by the seller.</span>`
+                      : data?.new === "USERCANCELLED"
+                      ? `Your order has been <span style="font-weight: bold">canceled as per your request.</span>`
+                      : `Your order is: <span style="font-weight: bold">${data?.new}</span>`
+                  }
+                </p>
+
+                  <div>
+                    <p style="font-size: 17px; font-weight: bold">Order Details :</p>
+                    <p style="font-size: 17px;">- Order Number: [Order #${
+                      data?.order_id
+                    }]</p>
+                    <p style="font-size: 17px;">- Total Amount: ${
+                      totalAmount ? totalAmount.toFixed(2) : "0.00"
+                    }</p>
+                  </div> 
+
+                  <p style="font-size: 17px; line-height:25px; margin-bottom: 20px">Thank you for your patience!</p>
+
+                        <p style="font-size: 17px; margin-bottom: 20px; line-height:25px; letter-spacing: 0.5px ; word-spacing: 1px ;">Best regards,<br>${
+                          companyName ? companyName : "My-jewlex"
+                        } Team
+                        </p>
+                </div></div>
+                ${mailFooter()}
         </div>
       </body>
     </html>
   `;
 };
 
-export const OrderStatusMail = async (user, data) => {
+export const OrderStatusMail = async (user, data, item) => {
   try {
-    const subject = `Order status changed from ${data?.prev} to ${data?.new}`;
-    const html = generatOrderStatusEmail(user, data);
+    const subject = `Order is ${data?.new} - [Order #${data?.order_id}]`;
+    const html = generatOrderStatusEmail(user, data, item);
     const emailOptions = {
       ...mailOptions,
       to: user.email,

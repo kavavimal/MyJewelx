@@ -3,8 +3,9 @@ import React from "react";
 import ProductForm from "../../componets/ProductForm";
 import { attributeIDs } from "@/utils/constants";
 import { CharsType, ProductStatus } from "@prisma/client";
-import { getProducts } from "@/actions/product";
-
+import { getProducts } from "@/app/actions/product";
+import { AcountType } from "@prisma/client";
+import { checkUserSession } from "@/app/actions/users";
 export const revalidate = 0;
 
 export const getCategories = async (id = null) => {
@@ -131,6 +132,7 @@ const getTrends = () => {
 };
 
 const page = async ({ params: { id } }) => {
+  const user = await checkUserSession();
   const categories = await getCategories();
   const tags = await getTags();
   const attributes = await getAttributes();
@@ -146,7 +148,11 @@ const page = async ({ params: { id } }) => {
   const styles = await getStyles();
   const themes = await getThemes();
   const trends = await getTrends();
-  const allproducts = await getProducts({ status: [ProductStatus.PUBLISHED] });
+  const allproduct = await getProducts({ status: [ProductStatus.PUBLISHED] });
+  const allproducts =
+    user?.role?.role_name === AcountType.ADMIN
+      ? allproduct
+      : allproduct.filter((p) => p.user_id == user.id);
 
   return (
     <ProductForm

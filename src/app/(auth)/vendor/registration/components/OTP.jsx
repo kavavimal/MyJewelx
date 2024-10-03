@@ -1,14 +1,12 @@
 "use client";
 import { Button, Input, Typography } from "@material-tailwind/react";
 import { Form, Formik, useFormik } from "formik";
-import { enqueueSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import * as yup from "yup";
 import moment from "moment";
 import { useRouter } from "next/navigation";
-import { post } from "@/utils/api";
-import LoadingDots from "@/components/loading-dots";
 import { showToast } from "@/utils/helper";
+import LoadingDots from "@/app/components/LoadingDots";
 
 const OTP = ({ setShowOtp, onOTPVerified, email }) => {
   const router = useRouter();
@@ -112,8 +110,7 @@ const OTP = ({ setShowOtp, onOTPVerified, email }) => {
           className="text-[#676767] font-emirates font-extralight"
           variant="small"
         >
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias
-          fugiat ipsam natus dignissimos doloribus!
+          Enter the OTP we just sent yo your email.
         </Typography>
       </div>
       <Formik initialValues={formik.initialValues}>

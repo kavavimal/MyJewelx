@@ -1,0 +1,51 @@
+on:
+  push:
+    branches:
+      - main
+name: 🚀 Deploy website on push
+jobs:
+  web-sync:
+    name: 📂 Sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{secrets.FTP_SERVER}}
+          username: ${{secrets.FTP_USER_NAME}}
+          password: ${{secrets.FTP_PASSWORD}}
+
+  web-deploy:
+    needs: web-sync
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: executing remote ssh , install dependancies and create build
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PSWD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            source /home/myjefsfe/nodevenv/staging.myjewlex.com/18/bin/activate && cd /home/myjefsfe/staging.myjewlex.com
+            npm install
+            npm run build
+        env:
+          NODE_ENV: development

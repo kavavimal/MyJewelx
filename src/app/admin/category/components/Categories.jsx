@@ -9,6 +9,7 @@ import CategoryForm from "./CategoryForm";
 import Link from "next/link";
 import DeleteCategory from "./DeleteCategory";
 import moment from "moment";
+import Image from "next/image";
 const Categories = ({ categories }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredCategories, setFilteredCategories] = useState(categories);
@@ -26,6 +27,28 @@ const Categories = ({ categories }) => {
       sortable: true,
     },
     {
+      name: "Image",
+      cell: (row) => (
+        <>
+          {row?.image?.path ? (
+            <Image
+              src={row?.image?.path}
+              alt="Category Image"
+              width={50}
+              height={50}
+              unoptimized={true}
+              onError={(event) => {
+                event.target.src = "/assets/images/category.png";
+                event.target.alt = "/assets/images/category.png";
+              }}
+            />
+          ) : (
+            <div>No Image</div>
+          )}
+        </>
+      ),
+    },
+    {
       name: "Description",
       selector: (row) => row?.description,
       sortable: true,
@@ -33,6 +56,11 @@ const Categories = ({ categories }) => {
     {
       name: "Date",
       selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortFunction: (rowA, rowB) => {
+        const dateA = new Date(rowA.createdAt);
+        const dateB = new Date(rowB.createdAt);
+        return dateB - dateA;
+      },
       sortable: true,
     },
     {

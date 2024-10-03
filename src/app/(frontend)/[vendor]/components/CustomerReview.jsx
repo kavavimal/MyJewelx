@@ -17,7 +17,7 @@ import { useUserStore } from "@/contexts/userStore";
 import { showToast, truncate } from "@/utils/helper";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-
+import Image from "next/image";
 const CustomerReview = ({ vendor, reviews }) => {
   const session = useSession();
   const router = useRouter();
@@ -122,14 +122,23 @@ const CustomerReview = ({ vendor, reviews }) => {
                   <SwiperSlide key={index}>
                     <div className="relative flex w-[473px] flex-col rounded-xl bg-transparent bg-clip-border text-gray-700 shadow-none">
                       <div className="relative flex w-full max-w-[473px] items-start gap-[30px] pt-0 mx-0 overflow-hidden  bg-transparent shadow-none rounded-xl bg-clip-border">
-                        <img
-                          src={
-                            review.fromUser?.image?.path ??
-                            "/assets/images/avatar.jpg"
-                          }
-                          alt={review.name}
-                          className="relative inline-block h-[85px] w-[85px] !rounded-full object-cover object-center"
-                        />
+                        {review.fromUser?.image != null ? (
+                          <Image
+                            src={
+                              review.fromUser?.image?.path ??
+                              "/assets/images/avatar.jpg"
+                            }
+                            width={85}
+                            height={85}
+                            alt={review.name}
+                            className="relative inline-block h-[85px] w-[85px] !rounded-full object-cover object-center"
+                          />
+                        ) : (
+                          <div className="relative cursor-pointer inline-flex items-center justify-center w-10 h-10 select-none overflow-hidden hover:opacity-80 bg-primary-200/25 rounded-full dark:bg-gray-600">
+                            <span className="font-medium text-black uppercase">{`${review?.fromUser?.firstName[0]}${review?.fromUser?.lastName[0]}`}</span>
+                          </div>
+                        )}
+
                         <div className="flex w-full flex-col gap-0.5">
                           <div>
                             <p className="block text-[14px] antialiased leading-relaxed pb-[15px] text-secondary-100 font-emirates">

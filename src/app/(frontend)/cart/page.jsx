@@ -1,13 +1,11 @@
-import { getCart } from "@/actions/cart";
-import Breadcrumbs from "@/components/Breadcrumbs";
-import Container from "@/components/frontend/Container";
 import Link from "next/link";
-import CartItem from "./CartItem";
-import Paragraph from "@/components/Paragraph";
+import CartItem from "./components/CartItem";
 import prisma from "@/lib/prisma";
-import Ads from "./Ads";
-import CartSummary from "@/components/frontend/cart/CartSummary";
-
+import Ads from "./components/Ads";
+import CartSummeryData from "./components/CartSummeryData";
+import { getCart } from "@/app/actions/cart";
+import Breadcrumbs from "@/app/components/Breadcrumbs";
+import Paragraph from "@/app/components/Paragraph";
 export const revalidate = 0;
 
 const getAds = () =>
@@ -22,7 +20,7 @@ export default async function Cart() {
   const ads = await getAds();
   if (!cart.cartData || cart.cartData.cartItems.length === 0) {
     return (
-      <Container>
+      <div className="container">
         <Breadcrumbs
           items={[{ link: "/cart", label: "Cart", current: true }]}
         />
@@ -32,26 +30,22 @@ export default async function Cart() {
             Go to Shop
           </Link>
         </Paragraph>
-      </Container>
+      </div>
     );
   }
 
   return (
-    <Container>
+    <div className="container">
       <div className="border-b border-b-primary-200 py-[20px] mb-[30px]">
         <Breadcrumbs
           items={[{ link: "/cart", label: "Cart", current: true }]}
         />
       </div>
       <section className="bg-white pb-4 antialiased">
-        <div className="px-4 2xl:px-0">
+        <div className="p-0 sm:px-4 2xl:px-0">
           <div className="flex mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start xl:gap-6">
-            <div className="border p-3 w-[860px] border-blueGray-300">
-              <h3 className="my-2 pb-2 text-2xl">
-                {/* <input type="checkbox" name="selectall" value="all" /> */}
-                Item Summary
-                {/* <span>( {cart.cartData.cartItems?.length} )</span> */}
-              </h3>
+            <div className="border p-3 w-full sm:w-[860px] border-blueGray-300">
+              <h3 className="my-2 pb-2 text-2xl">Item Summary</h3>
               <div className="space-y-[15px]">
                 {cart.cartData.cartItems?.map((item, i) => {
                   return (
@@ -60,12 +54,11 @@ export default async function Cart() {
                 })}
               </div>
             </div>
-
-            <CartSummary cart={cart.cartData} />
+            <CartSummeryData cart={cart.cartData} />
           </div>
         </div>
       </section>
       <Ads ads={ads} />
-    </Container>
+    </div>
   );
 }

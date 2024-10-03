@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 import * as z from "zod";
 import { AcountType } from "@prisma/client";
 import { mailOptions, transporter } from "@/config/nodemailer";
-// import logo from "../../../../../public/logo.svg";
 
 //Define schema for input validation
 const userSchema = z.object({
@@ -89,14 +88,22 @@ export async function POST(req) {
                   }
                 </style>
             </head>
-            <body style="background-color: #ff0000;">
+            <body>
                 <div style="padding: 30px; font-family: 'Emirates', sans-serif; margin: 0 auto;">
                     <div style="background-color: #fff; border-radius: 20px; box-shadow: 0 0 20px 0px rgba(0, 0, 0, 0.1);">
-                      <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px; background-color: #fffbf2 ; border-top-left-radius: 20px; border-top-right-radius: 20px;">
-                        <img src="https://myjewlex.com/my-jewlex-logo.png" height="auto" alt="Jewlex Logo" style="width: 200px;">
-                        <img src="https://myjewlex.com/sub-logo.png" width="300px" alt="Jewlex Logo" style="width: 100px;">
-                        <h1 style="font-size: 22px; margin-bottom: 10px; font-style: italic">Discover The Beauty</h1>
-                      </div>
+                      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding: 20px; background-color: #fffbf2; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                        <tr>
+                          <td align="left" valign="middle" style="width: 33%;">
+                            <img src="https://myjewlex.com/my-jewlex-logo.png" height="auto" alt="Jewlex Logo" style="width: 200px;">
+                          </td>
+                          <td align="center" valign="middle" style="width: 33%;">
+                            <img src="https://myjewlex.com/sub-logo.png" width="300px" alt="Jewlex Logo" style="width: 100px;">
+                          </td>
+                          <td align="right" valign="middle" style="width: 33%;">
+                            <h1 style="font-size: 22px; margin-bottom: 10px; font-style: italic; margin: 0;">Discover The Beauty</h1>
+                          </td>
+                        </tr>
+                      </table>
                       <div style="font-size: 18px; margin-bottom: 20px; padding: 0 40px ;">
                         <h2 style="margin: 45px 0; text-align: center; font-size: 20px" >Welcome to myJewlex - Account Successfully Activated!</h2>
                         <p style="font-size: 18px; margin-bottom: 20px; font-weight: bold">Dear, ${

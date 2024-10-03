@@ -1,18 +1,18 @@
 import React from "react";
 import Products from "./componets/Products";
 import prisma from "@/lib/prisma";
-import { checkUserSession } from "@/app/(frontend)/layout";
 import { attributeIDs } from "@/utils/constants";
+import { checkUserSession } from "@/app/actions/users";
+import { AcountType } from "@prisma/client";
 export const revalidate = 0;
 
 const getProducts = async () => {
   const user = await checkUserSession();
   try {
-    if (user.role.role_name !== "ADMIN") {
+    if (user.role.role_name !== AcountType.ADMIN) {
       return prisma.product.findMany({
         where: {
           user_id: user.id,
-          // reviews: { some: {} },
         },
         include: {
           variations: {
@@ -45,10 +45,6 @@ const getProducts = async () => {
       });
     }
     return prisma.product.findMany({
-      // where: {
-      //   // user_id: user.id,
-      //   // reviews: { some: {} },
-      // },
       include: {
         variations: {
           include: {
@@ -115,7 +111,6 @@ const products = async () => {
   const response = await getProducts();
   const attr = await getAttributes();
   const karat = await getKarats();
-  console.log(response);
   return (
     <>
       <Products products={response} attributes={attr} karats={karat} />

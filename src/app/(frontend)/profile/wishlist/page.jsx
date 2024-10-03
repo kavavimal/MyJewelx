@@ -1,13 +1,11 @@
-import { fetchWishlist } from "@/actions/wishlist";
-import Breadcrumbs from "@/components/Breadcrumbs";
-import Container from "@/components/frontend/Container";
-import Paragraph from "@/components/Paragraph";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { checkUserSession } from "../../layout";
 import Ads from "./components/Ads";
 import Wishlist from "./components/WhishList";
-
+import { checkUserSession } from "@/app/actions/users";
+import Paragraph from "@/app/components/Paragraph";
+import Breadcrumbs from "@/app/components/Breadcrumbs";
+import { fetchWishlist } from "@/app/actions/wishlist";
 export const revalidate = 0;
 
 const getAds = () =>
@@ -26,7 +24,7 @@ export default async function WishlistPage() {
   const wishlist = await fetchWishlist();
   if (wishlist.status !== "success") {
     return (
-      <Container>
+      <div className="container">
         <Breadcrumbs
           items={[
             { link: "/", label: "Home" },
@@ -38,11 +36,11 @@ export default async function WishlistPage() {
           ]}
         />
         <Paragraph>No Wishlist record found</Paragraph>
-      </Container>
+      </div>
     );
   }
   return (
-    <Container>
+    <div className="container">
       <Ads promolist={promolist} />
       <Breadcrumbs
         items={[
@@ -55,6 +53,6 @@ export default async function WishlistPage() {
         showDevider={true}
       />
       <Wishlist wishlist={wishlist} />
-    </Container>
+    </div>
   );
 }

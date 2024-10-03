@@ -6,12 +6,33 @@ import { useRouter } from "next/navigation";
 import React from "react";
 
 const CustomerDetails = ({ total, user, order }) => {
-  console.log(order);
+  let subTotal = order.orderItems.reduce((acc, item) => acc + item.price, 0);
+  let vat = 0;
+  let shipping = 0;
+  let discountTotal = 0;
 
-  // Calculate Sub Total
-  const subTotal = order.orderItems.reduce((acc, item) => acc + item.price, 0);
-  const vat = subTotal * 0.05;
-  const subTotalFinal = subTotal + vat;
+  order.orderItems.forEach((item) => {
+    const variation = JSON.parse(item.variationData);
+    const other_charges = JSON.parse(variation.other_charges);
+    const vatTax = other_charges.find((a) => a.charge_type === "vat/tax");
+    const discount = other_charges.find((a) => a.charge_type === "discount");
+
+    if (vatTax) {
+      vat += Number(vatTax?.tax || 0) * Number(item.quantity || 0);
+    }
+
+    if (variation.shipping_charge) {
+      shipping += Number(variation.shipping_charge || 0);
+      //  * Number(item.quantity || 0);
+    }
+
+    if (discount) {
+      discountTotal +=
+        Number(discount?.discount || 0) * Number(item.quantity || 0);
+    }
+  });
+
+  subTotal = subTotal - vat - shipping + discountTotal;
   const router = useRouter();
   return (
     <>
@@ -67,10 +88,19 @@ const CustomerDetails = ({ total, user, order }) => {
 
               <tr>
                 <td className="text-left text-secondary-100 font-light text-base pb-2.5">
-                  VAT 5%
+                  Discount
                 </td>
                 <td className="text-right text-secondary-100 font-light text-base pb-2.5">
-                  {printFormatPrice(vat)}
+                  -{printFormatPrice(discountTotal)}
+                </td>
+              </tr>
+
+              <tr>
+                <td className="text-left text-secondary-100 font-light text-base pb-2.5">
+                  Shipping Charge
+                </td>
+                <td className="text-right text-secondary-100 font-light text-base pb-2.5">
+                  {printFormatPrice(shipping)}
                 </td>
               </tr>
 
@@ -79,7 +109,16 @@ const CustomerDetails = ({ total, user, order }) => {
                   Sub Total
                 </td>
                 <td className="text-right text-secondary-100 font-light text-base pb-2.5">
-                  {printFormatPrice(subTotal + vat)}
+                  {printFormatPrice(subTotal + shipping - discountTotal)}
+                </td>
+              </tr>
+
+              <tr>
+                <td className="text-left text-secondary-100 font-light text-base pb-2.5">
+                  VAT 5%
+                </td>
+                <td className="text-right text-secondary-100 font-light text-base pb-2.5">
+                  {printFormatPrice(vat)}
                 </td>
               </tr>
             </tbody>
@@ -96,7 +135,12 @@ const CustomerDetails = ({ total, user, order }) => {
           </table>
         </div>
       </div>
-      <Button fullWidth variant="outlined" onClick={() => router.push("/")}>
+      <Button
+        className="sm:block hidden hover:bg-primary-200 hover:text-white"
+        fullWidth
+        variant="outlined"
+        onClick={() => router.push("/")}
+      >
         Back To Home
       </Button>
     </>

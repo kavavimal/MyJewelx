@@ -9,7 +9,6 @@ export default function Paypal({ user, cart, amount, handlePlaceOrder }) {
         user_id: user.id,
         order_price: amount,
       });
-      console.log("create order response:sss ", response.data.order);
       return response.data.order.id;
     } catch (err) {
       // Your custom code to show an error like showing a toast:
@@ -22,11 +21,13 @@ export default function Paypal({ user, cart, amount, handlePlaceOrder }) {
       const response = await post(`/api/paypal/captureorder`, {
         orderID,
       });
-      console.log("capture order response: ", response);
       if (response.data.success) {
         // Order is successful
         // Your custom code
-        handlePlaceOrder({...response, paidAmount: response.request?.amount?.value});
+        handlePlaceOrder({
+          ...response,
+          paidAmount: response.request?.amount?.value,
+        });
         // Like showing a success toast:
         // toast.success('Amount Added to Wallet')
         // And/Or Adding Balance to Redux Wallet

@@ -14,7 +14,6 @@ const AttributeForm = ({ product_attribute }) => {
   const router = useRouter();
   const [attribute, setAttribute] = useState(false);
   const [search, setSearch] = useState("");
-  console.log(product_attribute);
   const [filteredAttributes, setFilteredAttributes] =
     useState(product_attribute);
 
@@ -32,6 +31,11 @@ const AttributeForm = ({ product_attribute }) => {
     {
       name: "Date",
       selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortFunction: (rowA, rowB) => {
+        const dateA = new Date(rowA.createdAt);
+        const dateB = new Date(rowB.createdAt);
+        return dateB - dateA;
+      },
       sortable: true,
     },
     {

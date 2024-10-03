@@ -1,6 +1,6 @@
 import React from "react";
 import DetailsForm from "./components/DetailsForm";
-import { getAccountNumbers, getLicenseNumbers } from "@/actions/vendor";
+import { getAccountNumbers, getLicenseNumbers } from "@/app/actions/vendor";
 
 const page = async () => {
   const accountNumbers = await getAccountNumbers();

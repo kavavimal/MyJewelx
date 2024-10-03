@@ -1,7 +1,7 @@
 "use client";
 
-import ProductLikes from "@/components/frontend/ProductLikes";
-import LoadingDots from "@/components/loading-dots";
+import ProductLikes from "@/app/components/ProductLikes";
+import LoadingDots from "@/app/components/LoadingDots";
 import { useWishlistStore } from "@/contexts/wishlistStore";
 import {
   Dialog,
@@ -14,21 +14,25 @@ import {
   Popover,
   PopoverHandler,
   PopoverContent,
+  Tooltip,
 } from "@material-tailwind/react";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  FacebookShareButton,
-  InstapaperShareButton,
-  LinkedinShareButton,
-} from "react-share";
-const StarRatings = dynamic(() => import("@/components/frontend/StarRatings"), {
+import { FacebookShareButton, LinkedinShareButton } from "react-share";
+
+const StarRatings = dynamic(() => import("@/app/components/StarRatings"), {
   ssr: false,
 });
 
-const Engagement = ({ product_id, averateRating, variation }) => {
+const Engagement = ({
+  product_id,
+  averateRating,
+  product_name,
+  variation,
+  likes,
+}) => {
   const user = useSession();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -42,7 +46,6 @@ const Engagement = ({ product_id, averateRating, variation }) => {
   );
   useEffect(() => {
     setIsInWishlist(findWishlist(product_id));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product_id, wishlistItems]);
 
   const updateWishlistStatus = async () => {
@@ -66,7 +69,7 @@ const Engagement = ({ product_id, averateRating, variation }) => {
           <StarRatings starRatings={averateRating ? averateRating : 0} />
         </div>
         <div className="flex items-center gap-2">
-          <ProductLikes product_id={product_id} />
+          <ProductLikes like={likes} product_id={product_id} />
           <Popover placement="bottom">
             <PopoverHandler>
               <button className="rounded-full">
@@ -87,8 +90,8 @@ const Engagement = ({ product_id, averateRating, variation }) => {
             <PopoverContent>
               <div className="flex gap-2 items-center">
                 <FacebookShareButton
-                  url="https://tailwindcss.com/"
-                  title="Hello"
+                  url={`/product/${product_id}`}
+                  title={`${product_name}`}
                   separator=": "
                 >
                   <span className="flex items-center gap-2 text-black text-base">
@@ -110,8 +113,8 @@ const Engagement = ({ product_id, averateRating, variation }) => {
                   </span>
                 </FacebookShareButton>
                 <LinkedinShareButton
-                  url="https://tailwindcss.com/"
-                  title="Hello"
+                  url={`/product/${product_id}`}
+                  title={`${product_name}`}
                   separator=": "
                 >
                   <span className="flex items-center gap-2 text-black text-base">
@@ -146,22 +149,28 @@ const Engagement = ({ product_id, averateRating, variation }) => {
             </PopoverContent>
           </Popover>
           {loading && <LoadingDots />}
-          <button className="rounded-full" onClick={updateWishlistStatus}>
-            <svg
-              width="15"
-              height="15"
-              toolTip="hello"
-              viewBox="0 0 15 15"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className={`fill-black hover:text-primary-200 hover:fill-primary-200`}
-            >
-              <path
-                d="M10.4297 2.34375C9.21973 2.34375 8.16035 2.86406 7.5 3.74355C6.83965 2.86406 5.78027 2.34375 4.57031 2.34375C3.60716 2.34484 2.68377 2.72793 2.00273 3.40898C1.32168 4.09002 0.938586 5.01341 0.9375 5.97656C0.9375 10.0781 7.01895 13.398 7.27793 13.5352C7.34619 13.5719 7.42249 13.5911 7.5 13.5911C7.57751 13.5911 7.65381 13.5719 7.72207 13.5352C7.98105 13.398 14.0625 10.0781 14.0625 5.97656C14.0614 5.01341 13.6783 4.09002 12.9973 3.40898C12.3162 2.72793 11.3928 2.34484 10.4297 2.34375ZM7.5 12.5859C6.43008 11.9625 1.875 9.12246 1.875 5.97656C1.87593 5.26201 2.1602 4.57698 2.66547 4.07172C3.17073 3.56645 3.85576 3.28218 4.57031 3.28125C5.70996 3.28125 6.6668 3.88828 7.06641 4.86328C7.10172 4.94926 7.1618 5.02279 7.239 5.07454C7.31621 5.12629 7.40706 5.15392 7.5 5.15392C7.59295 5.15392 7.68379 5.12629 7.761 5.07454C7.8382 5.02279 7.89828 4.94926 7.93359 4.86328C8.3332 3.88652 9.29004 3.28125 10.4297 3.28125C11.1442 3.28218 11.8293 3.56645 12.3345 4.07172C12.8398 4.57698 13.1241 5.26201 13.125 5.97656C13.125 9.11777 8.56875 11.9619 7.5 12.5859Z"
-                fill={isInWishlist ? "#F0AE11" : ""}
-              />
-            </svg>
-          </button>
+          <Tooltip
+            content="Wishlist"
+            className="bg-gray-800 text-white text-xs p-2 rounded shadow-lg"
+            placement="top-end"
+          >
+            <button className="rounded-full" onClick={updateWishlistStatus}>
+              <svg
+                width="15"
+                height="15"
+                toolTip="hello"
+                viewBox="0 0 15 15"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className={`fill-black hover:text-primary-200 hover:fill-primary-200`}
+              >
+                <path
+                  d="M10.4297 2.34375C9.21973 2.34375 8.16035 2.86406 7.5 3.74355C6.83965 2.86406 5.78027 2.34375 4.57031 2.34375C3.60716 2.34484 2.68377 2.72793 2.00273 3.40898C1.32168 4.09002 0.938586 5.01341 0.9375 5.97656C0.9375 10.0781 7.01895 13.398 7.27793 13.5352C7.34619 13.5719 7.42249 13.5911 7.5 13.5911C7.57751 13.5911 7.65381 13.5719 7.72207 13.5352C7.98105 13.398 14.0625 10.0781 14.0625 5.97656C14.0614 5.01341 13.6783 4.09002 12.9973 3.40898C12.3162 2.72793 11.3928 2.34484 10.4297 2.34375ZM7.5 12.5859C6.43008 11.9625 1.875 9.12246 1.875 5.97656C1.87593 5.26201 2.1602 4.57698 2.66547 4.07172C3.17073 3.56645 3.85576 3.28218 4.57031 3.28125C5.70996 3.28125 6.6668 3.88828 7.06641 4.86328C7.10172 4.94926 7.1618 5.02279 7.239 5.07454C7.31621 5.12629 7.40706 5.15392 7.5 5.15392C7.59295 5.15392 7.68379 5.12629 7.761 5.07454C7.8382 5.02279 7.89828 4.94926 7.93359 4.86328C8.3332 3.88652 9.29004 3.28125 10.4297 3.28125C11.1442 3.28218 11.8293 3.56645 12.3345 4.07172C12.8398 4.57698 13.1241 5.26201 13.125 5.97656C13.125 9.11777 8.56875 11.9619 7.5 12.5859Z"
+                  fill={isInWishlist ? "#F0AE11" : ""}
+                />
+              </svg>
+            </button>
+          </Tooltip>
         </div>
       </div>
     </>

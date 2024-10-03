@@ -52,6 +52,11 @@ const OrdersPage = ({ orders }) => {
     {
       name: "Date",
       selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortFunction: (rowA, rowB) => {
+        const dateA = new Date(rowA.createdAt);
+        const dateB = new Date(rowB.createdAt);
+        return dateB - dateA;
+      },
       sortable: true,
     },
     {
@@ -118,7 +123,6 @@ const OrdersPage = ({ orders }) => {
 
     setFilteredOrders(filtered);
   };
-  console.log(orders);
   const customStyles = {
     cells: {
       style: {

@@ -115,7 +115,7 @@ export const truncate = (string, n) => {
 };
 
 export const getProductPriceString = (product, variation) => {
-  let price = printPrice(variation.selling_price);
+  let price = printPrice(variation?.selling_price);
   if (product) {
     let productPrices = product.variations.reduce(
       (arr, item) => [

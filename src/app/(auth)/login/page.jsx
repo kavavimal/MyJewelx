@@ -1,7 +1,6 @@
-import Image from "next/image";
-import Form from "@/components/Form";
+import Form from "@/app/components/Form";
 import Link from "next/link";
-import Button from "@/components/Button";
+import Button from "@/app/components/Button";
 
 export default async function Login() {
   return (

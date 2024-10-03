@@ -1,21 +1,19 @@
-import { getEmails } from "@/actions/users";
+import { AcountType } from "@prisma/client";
+import React from "react";
+import Adminform from "./components/Adminform";
+import { checkUserSession, getEmails } from "@/app/actions/users";
+import VendorForm from "../vendors/components/VendorForm";
 import {
   getAccountNumbers,
   getLicenseNumbers,
   getStoreURLs,
-} from "@/actions/vendor";
-import PaymentSetup from "@/app/(auth)/vendor/details/components/PaymentSetup";
+} from "@/app/actions/vendor";
 import StoreSetup from "@/app/(auth)/vendor/details/components/StoreSetup";
-import { checkUserSession } from "@/app/(frontend)/layout";
-import { AcountType } from "@prisma/client";
-import React from "react";
-import VendorForm from "../vendors/components/VendorForm";
-import Adminform from "./components/Adminform";
+import PaymentSetup from "@/app/(auth)/vendor/details/components/PaymentSetup";
 export const revalidate = 0;
 
 const page = async () => {
   const user = await checkUserSession();
-  console.log(user);
   const accountNumbers = await getAccountNumbers();
   const licenseNumbers = await getLicenseNumbers();
   const storeURLs = await getStoreURLs();

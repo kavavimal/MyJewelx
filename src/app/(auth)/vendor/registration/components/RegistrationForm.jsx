@@ -17,8 +17,8 @@ import React, { useEffect, useState } from "react";
 import * as Yup from "yup";
 import OTP from "./OTP";
 import { useCountries } from "use-react-countries";
-import FileUploadIcon from "@/components/FileUploadIcon";
 import { post } from "@/utils/api";
+import FileUploadIcon from "@/app/components/FileUploadIcon";
 
 const RegistrationForm = ({ storeURLs, emails }) => {
   const { countries } = useCountries();
@@ -28,7 +28,7 @@ const RegistrationForm = ({ storeURLs, emails }) => {
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [file, setFile] = useState("");
-
+  const [bannerfile, setBannerFile] = useState("");
   const { name, flags, countryCallingCode } = countries?.find(
     (item) => item.name === country
   );
@@ -74,11 +74,25 @@ const RegistrationForm = ({ storeURLs, emails }) => {
           ["image/png", "image/jpg", "image/jpeg"].includes(value.type)
       )
       .required("Please upload an image"),
+    bannerfile: Yup.mixed()
+      .test(
+        "is-image",
+        "Image should be png, jpg or jpeg",
+        (value) =>
+          !value ||
+          ["image/png", "image/jpg", "image/jpeg"].includes(value.type)
+      )
+      .required("Please upload an image"),
   });
 
   const handleFileChange = (e) => {
     if (e.target.files[0]) {
       setFile(e.target.files[0]);
+    }
+  };
+  const handlebannerFileChange = (e) => {
+    if (e.target.files[0]) {
+      setBannerFile(e.target.files[0]);
     }
   };
 
@@ -94,6 +108,7 @@ const RegistrationForm = ({ storeURLs, emails }) => {
       confirm_password: "",
       role_id: VENDOR_ID,
       file: "",
+      bannerfile: "",
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
@@ -132,6 +147,7 @@ const RegistrationForm = ({ storeURLs, emails }) => {
       ...formik.values,
       phone_number: `${countryCallingCode} ${formik.values?.phone_number}`,
       file: file,
+      bannerfile: bannerfile,
     });
 
     if (registration.status === 201) {
@@ -146,7 +162,12 @@ const RegistrationForm = ({ storeURLs, emails }) => {
 
   useEffect(() => {
     formik.setFieldValue("file", file);
+    console.log("file : ", file);
   }, [file]);
+  useEffect(() => {
+    formik.setFieldValue("bannerfile", bannerfile);
+    console.log("Bannerfile : ", bannerfile);
+  }, [bannerfile]);
 
   useEffect(() => {
     if (!open) {
@@ -465,42 +486,91 @@ const RegistrationForm = ({ storeURLs, emails }) => {
                         )}
                     </div>
                   </div>
-                  <div>
-                    <label
-                      htmlFor={`vendor-image`}
-                      className={`flex h-28 w-full flex-col items-center justify-center border-2 ${
-                        formik.errors.file && formik.touched.file
-                          ? "border-red-500"
-                          : "border-blueGray-100"
-                      } border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600`}
-                    >
-                      {file && file !== "" ? (
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt="preview image"
-                          height="100px"
-                          width="100px"
+                  <div className="flex items-start gap-5  w-full">
+                    <div className="w-[33.33%]">
+                      <label
+                        htmlFor={`vendor-image`}
+                        className={`flex h-29 w-full flex-col items-center justify-center border-2 ${
+                          formik.errors.file && formik.touched.file
+                            ? "border-red-500"
+                            : "border-blueGray-100"
+                        } border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600`}
+                      >
+                        {file && file !== "" ? (
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt="preview image"
+                            height="100px"
+                            width="100px"
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center">
+                            <FileUploadIcon />
+                            <span className="text-sm text-blueGray-200">
+                              {" "}
+                              Store Logo
+                            </span>
+                          </div>
+                        )}
+                        <input
+                          id={`vendor-image`}
+                          type="file"
+                          name="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={(e) => handleFileChange(e)}
                         />
-                      ) : (
-                        <FileUploadIcon />
+                      </label>
+
+                      {formik?.errors?.file && formik?.touched?.file && (
+                        <div className="text-red-500 text-xs mt-2 ms-2">
+                          {formik.errors.file}
+                        </div>
                       )}
-                      <input
-                        id={`vendor-image`}
-                        type="file"
-                        name="file"
-                        className="hidden"
-                        accept="image/*"
-                        onChange={(e) => handleFileChange(e)}
-                      />
-                    </label>
+                    </div>
+                    <div className="w-[66.67%]">
+                      <label
+                        htmlFor={`vendor-banner-image`}
+                        className={`flex h-28 w-full flex-col items-center justify-center border-2 ${
+                          formik.errors.bannerfile && formik.touched.bannerfile
+                            ? "border-red-500"
+                            : "border-blueGray-100"
+                        } border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600`}
+                      >
+                        {bannerfile && bannerfile !== "" ? (
+                          <img
+                            src={URL.createObjectURL(bannerfile)}
+                            alt="preview image"
+                            height="100px"
+                            width="100px"
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center">
+                            <FileUploadIcon />
+                            <span className="text-sm text-blueGray-200">
+                              {" "}
+                              Store Banner
+                            </span>
+                          </div>
+                        )}
+                        <input
+                          id={`vendor-banner-image`}
+                          type="file"
+                          name="bannerfile"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={(e) => handlebannerFileChange(e)}
+                        />
+                      </label>
 
-                    {formik?.errors?.file && formik?.touched?.file && (
-                      <div className="text-red-500 text-xs mt-2 ms-2">
-                        {formik.errors.file}
-                      </div>
-                    )}
+                      {formik?.errors?.bannerfile &&
+                        formik?.touched?.bannerfile && (
+                          <div className="text-red-500 text-xs mt-2 ms-2">
+                            {formik.errors.bannerfile}
+                          </div>
+                        )}
+                    </div>
                   </div>
-
                   <div>
                     <Button
                       fullWidth
@@ -531,5 +601,4 @@ const RegistrationForm = ({ storeURLs, emails }) => {
     </div>
   );
 };
-
 export default RegistrationForm;

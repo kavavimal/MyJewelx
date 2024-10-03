@@ -15,7 +15,6 @@ const DataTable = dynamic(() => import("react-data-table-component"), {
 
 const Vendors = ({ vendors }) => {
   const [filterVendors, setFilterVendors] = useState(vendors);
-  console.log(filterVendors);
   const columns = [
     {
       name: "Name",
@@ -37,22 +36,41 @@ const Vendors = ({ vendors }) => {
       selector: (row) => (
         <>
           {row?.image !== null ? (
-            <Image src={row?.image?.path} width={50} height={50} />
+            <Image
+              src={row?.image?.path}
+              alt="Vendor Image"
+              width={50}
+              height={50}
+              unoptimized={true}
+              onError={(event) => {
+                event.target.src = "/assets/images/vendor1.jpg";
+                event.target.alt = "/assets/images/vendor1.jpg";
+              }}
+            />
           ) : null}
         </>
       ),
-      sortable: true,
     },
-    // {
-    //   name: "Account Type",
-    //   selector: (row) => row.account_type,
-    //   sortable: true,
-    // },
-    // {
-    //   name: "Vendor Role",
-    //   selector: (row) => row?.role?.role_name,
-    //   sortable: true,
-    // },
+    {
+      name: "Store Banner",
+      selector: (row) => (
+        <>
+          {row?.banner_image !== null ? (
+            <Image
+              src={row?.banner_image?.path}
+              alt="Vendor Image"
+              width={50}
+              height={50}
+              unoptimized={true}
+              onError={(event) => {
+                event.target.src = "/assets/images/vendor1.jpg";
+                event.target.alt = "/assets/images/vendor1.jpg";
+              }}
+            />
+          ) : null}
+        </>
+      ),
+    },
     {
       name: "Status",
       cell: (row) => {
@@ -63,6 +81,11 @@ const Vendors = ({ vendors }) => {
     {
       name: "Date",
       selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortFunction: (rowA, rowB) => {
+        const dateA = new Date(rowA.createdAt);
+        const dateB = new Date(rowB.createdAt);
+        return dateB - dateA;
+      },
       sortable: true,
     },
     {

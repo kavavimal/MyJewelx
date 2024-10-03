@@ -2,6 +2,8 @@ import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+export const revalidate = 0;
+
 const addTagSchema = z.object({
   name: z.string().min(1, "Tag name required").max(50),
   description: z.string().min(1, "Tag description required").max(100),

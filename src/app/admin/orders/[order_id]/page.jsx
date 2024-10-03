@@ -2,6 +2,9 @@ import prisma from "@/lib/prisma";
 import UpdateOrderStatus from "./UpdateOrderStatus";
 import moment from "moment";
 import Link from "next/link";
+import { checkUserSession } from "@/app/actions/users";
+import { AcountType } from "@prisma/client";
+import Image from "next/image";
 export const revalidate = 0;
 
 const getOrders = async (order_id) => {
@@ -9,14 +12,36 @@ const getOrders = async (order_id) => {
     where: { id: Number(order_id) },
     include: {
       user: true,
-      orderItems: true,
+      orderItems: {
+        include: {
+          productVariation: {
+            include: {
+              image: true,
+            },
+          },
+        },
+      },
       seller: { include: { user: true } },
     },
   });
 };
 
 const OrdersPage = async ({ params: { order_id } }) => {
+  const session = await checkUserSession();
+  // console.log(session);
   const order = await getOrders(order_id);
+  let filteredOrders;
+  if (session?.account_type !== AcountType.VENDOR) {
+    filteredOrders = order.orderItems;
+  } else {
+    filteredOrders = order.orderItems.filter(
+      (item) => item.sellerId === session.id
+    );
+  }
+
+  const totalPrice = filteredOrders.reduce((total, item) => {
+    return total + item.quantity * item.price;
+  }, 0);
   const shippingAddress = JSON.parse(order.shippingAddress);
   const billingAddress = JSON.parse(order.billingAddress);
 
@@ -29,12 +54,19 @@ const OrdersPage = async ({ params: { order_id } }) => {
       : "";
 
   const uppercase = (str) => (str ? str.toUpperCase() : " ");
+  const variationDataSplit = filteredOrders
+    ? filteredOrders[0].productVariation?.variation_name?.split(",")
+    : "";
 
   return (
     <section className="py-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-3xl font-bold">Order Details</h2>
-        <UpdateOrderStatus status={order.status} order_id={order.id} />
+        <UpdateOrderStatus
+          status={order.status}
+          order_id={order.id}
+          item={filteredOrders}
+        />
       </div>
       <div className="flex py-2 justify-between ">
         <div>
@@ -118,17 +150,62 @@ const OrdersPage = async ({ params: { order_id } }) => {
             </tr>
           </thead>
           <tbody>
-            {order.orderItems.map((item, index) => (
+            {filteredOrders.map((item, index) => (
               <tr key={index} className="border border-gray-200">
-                <td className="p-1">
-                  <Link
-                    href={`/product/${
-                      JSON.parse(item.variationData).product_id ?? "0"
+                <td className="p-1 !max-w-[500px] !w-[500px] ">
+                  <div
+                    className={`flex max-w-[500px] pr-3 items-center gap-[15px] ${
+                      index === 0
+                        ? "pt-0"
+                        : "pt-[15px] border-t border-blueGray-300 mt-[15px]"
                     }`}
                   >
-                    {item.name}
-                  </Link>
+                    <div className="w-[100px] bg-clip-border overflow-hidden rounded-sm border border-blueGray-300">
+                      {item?.productVariation?.image[0] && (
+                        <Image
+                          src={item?.productVariation?.image[0].path}
+                          height={200}
+                          width={200}
+                          className="w-full h-[127px] object-cover"
+                          alt=""
+                        />
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-0.5 flex-1">
+                      <div className="flex justify-between items-center">
+                        <Link
+                          href={`/product/${
+                            JSON.parse(item.variationData).product_id ?? "0"
+                          }`}
+                        >
+                          {item.name}
+                        </Link>
+                      </div>
+                      <div className="py-0.5">
+                        {variationDataSplit?.map((item, index) => {
+                          return (
+                            <span
+                              key={index}
+                              className={`size-sm text-secondary-100 pr-[6px] 
+                                 ${
+                                   index !== variationDataSplit.length - 1 &&
+                                   "border-r"
+                                 }
+                                 border-blueGray-300 text-sm`}
+                            >
+                              {item}
+                            </span>
+                          );
+                        })}
+                      </div>
+                      <p className="size-sm text-secondary-100  text-sm">
+                        Seller: Malabar&apos;s Gold and Diamonds
+                      </p>
+                    </div>
+                  </div>
                 </td>
+
                 <td>{item.quantity}</td>
                 <td>{item.price}</td>
                 <td>{(item.quantity * item.price).toFixed(2)}</td>
@@ -137,7 +214,7 @@ const OrdersPage = async ({ params: { order_id } }) => {
           </tbody>
         </table>
         <h3 className="text-lg font-bold mt-4">
-          Total Amount: AED {order.orderTotal.toFixed(2)}
+          Total Amount: AED {totalPrice.toFixed(2)}
         </h3>
       </div>
     </section>

@@ -23,7 +23,7 @@ const Ads = ({ ads }) => {
             }}
             grid={{ rows: 1, fill: "row" }}
             breakpoints={{
-              540: {
+              700: {
                 slidesPerView: 2,
                 spaceBetween: 15,
                 grid: { rows: 1, fill: "row" },

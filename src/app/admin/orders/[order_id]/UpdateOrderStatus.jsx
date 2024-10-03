@@ -1,12 +1,11 @@
 "use client";
-import { updateOrderStatus } from "@/actions/orders";
-import LoadingDots from "@/components/loading-dots";
+import { updateOrderStatus } from "@/app/actions/orders";
 import { showToast } from "@/utils/helper";
 import { Button, Option, Select } from "@material-tailwind/react";
 import { OrderStatus } from "@prisma/client";
 import { useState } from "react";
 
-export default function UpdateOrderStatus({ order_id, status }) {
+export default function UpdateOrderStatus({ order_id, status, item }) {
   const [loading, setLoading] = useState(false);
   const [updateStatus, setUpdatedStatus] = useState(status);
   const handleChange = (newVal) => {
@@ -15,7 +14,7 @@ export default function UpdateOrderStatus({ order_id, status }) {
   const saveStatus = async () => {
     if (status !== updateStatus) {
       setLoading(true);
-      const update = await updateOrderStatus(order_id, updateStatus);
+      const update = await updateOrderStatus(order_id, updateStatus, item);
       if (update.message) {
         showToast({
           message: update.message,

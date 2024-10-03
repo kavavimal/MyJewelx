@@ -17,7 +17,7 @@ export default function ShopBannerCraousel({ promolist }) {
                   alt="image 2"
                   className="!min-h-[350px] w-full object-cover"
                 />
-                <div className="absolute inset-0 flex flex-col justify-center items-center gap-4 bg-black/25">
+                <div className="absolute inset-0 flex flex-col justify-center items-center gap-4">
                   <Typography
                     variant="h1"
                     color="black"

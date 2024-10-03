@@ -1,8 +1,8 @@
-import Paragraph from "@/components/Paragraph";
-import { ATTRIBUTE_ORDER, attributeIDs } from "@/utils/constants";
+import { attributeIDs } from "@/utils/constants";
 import { transformAttributeName } from "@/utils/helper";
 import { useEffect, useState } from "react";
 import AttributeRadioButton from "./AttributeRadioButton";
+import Paragraph from "@/app/components/Paragraph";
 
 export default function ProductAttributeSelections({
   product,
@@ -55,7 +55,7 @@ export default function ProductAttributeSelections({
   };
 
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex items-center flex-wrap justify-between sm:gap-4">
       {filteredAttributes.map((group, index) => {
         if (
           !group ||
@@ -66,7 +66,7 @@ export default function ProductAttributeSelections({
           return "";
 
         return (
-          <div key={index}>
+          <div key={index} className="sm:w-fit w-1/2 pb-[15px]">
             <Paragraph color="black" classes="font-bold block my-2">
               {group[0].attribute.name}
             </Paragraph>

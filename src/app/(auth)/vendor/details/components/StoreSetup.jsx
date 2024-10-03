@@ -17,7 +17,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { update } from "@/utils/api";
 import * as Yup from "yup";
 
-const StoreSetup = ({ setActiveStep, vendor, licenseNumbers }) => {
+const StoreSetup = ({
+  setActiveStep,
+  vendor,
+  licenseNumbers,
+  setIsFormSubmitted,
+}) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const id = vendor ? vendor?.id : searchParams.get("id");
@@ -82,6 +87,7 @@ const StoreSetup = ({ setActiveStep, vendor, licenseNumbers }) => {
               variant: "success",
             });
           } else {
+            setIsFormSubmitted((prev) => ({ ...prev, 0: true }));
             setActiveStep((curr) => curr + 1);
           }
         }
@@ -614,6 +620,7 @@ const StoreSetup = ({ setActiveStep, vendor, licenseNumbers }) => {
                       variant="outlined"
                       type="button"
                       onClick={() => setActiveStep((curr) => curr + 1)}
+                      className="hover:bg-primary-200 hover:text-black hover:opacity-100"
                     >
                       Skip for now
                     </Button>

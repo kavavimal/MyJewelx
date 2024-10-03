@@ -1,7 +1,9 @@
 "use client";
 import dynamic from "next/dynamic";
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@material-tailwind/react";
 const DataTable = dynamic(() => import("react-data-table-component"), {
   ssr: false,
 });
@@ -17,7 +19,16 @@ const OrderTable = ({ orders }) => {
     {
       name: "Order Items",
       cell: (row) => (
-        <div className="flex flex-col justify-left items-start">
+        <div className="flex gap-3 w-full justify-left items-center">
+          {row.orderItems[0]?.productVariation?.image[0] && (
+            <Image
+              src={row.orderItems[0]?.productVariation?.image[0].path}
+              alt="product image"
+              width={50}
+              height={50}
+              className="w-full max-w-[50px] max-h-[50px] h-full object-cover"
+            />
+          )}
           {row.orderItems?.map((item, i) => (
             <div className="flex flex-col justify-left items-start" key={i}>
               <Link
@@ -49,7 +60,31 @@ const OrderTable = ({ orders }) => {
     {
       name: "Actions",
       cell: (row) => (
-        <Link href={`/profile/orders/${row.id}`}>View Order Details</Link>
+        <Link href={`/profile/orders/${row.id}`}>
+          <Button
+            variant="contained"
+            // color="red"
+            className="rounded-full items-center flex gap-2 py-2 px-4"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={18}
+              height={18}
+              viewBox="0 0 32 32"
+            >
+              <circle cx="22" cy="24" r="2" fill="currentColor" />
+              <path
+                fill="currentColor"
+                d="M29.777 23.479A8.64 8.64 0 0 0 22 18a8.64 8.64 0 0 0-7.777 5.479L14 24l.223.522A8.64 8.64 0 0 0 22 30a8.64 8.64 0 0 0 7.777-5.478L30 24zM22 28a4 4 0 1 1 4-4a4.005 4.005 0 0 1-4 4M7 17h5v2H7zm0-5h12v2H7zm0-5h12v2H7z"
+              />
+              <path
+                fill="currentColor"
+                d="M22 2H4a2.006 2.006 0 0 0-2 2v24a2.006 2.006 0 0 0 2 2h8v-2H4V4h18v11h2V4a2.006 2.006 0 0 0-2-2"
+              />
+            </svg>
+            View Order
+          </Button>
+        </Link>
       ),
       center: true,
     },
@@ -62,12 +97,11 @@ const OrderTable = ({ orders }) => {
         justifyContent: "center",
       },
     },
-    // cells: {
-    //   style: {
-    //     alignItems: "center",
-    //     justifyContent: "center",
-    //   },
-    // },
+    cells: {
+      style: {
+        padding: "10px 0",
+      },
+    },
   };
 
   return (

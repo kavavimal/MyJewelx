@@ -3,6 +3,8 @@ import { NextResponse, userAgent } from "next/server";
 import { z } from "zod";
 import { getServerSession } from "next-auth";
 
+export const revalidate = 0;
+
 const productSchema = z.object({
   product_name: z.string().min(1, "Product name required").max(50),
   status: z.string().optional(),
@@ -106,6 +108,7 @@ export async function POST(request) {
 export async function GET() {
   const products = await prisma.product.findMany({
     include: {
+      likes: true,
       variations: {
         include: {
           image: true,

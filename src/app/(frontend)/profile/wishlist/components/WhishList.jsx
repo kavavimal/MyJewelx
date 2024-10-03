@@ -2,9 +2,8 @@
 import Image from "next/image";
 import React from "react";
 import dynamic from "next/dynamic";
-import { removeFromWishlist } from "@/actions/wishlist";
 import { IconButton } from "@material-tailwind/react";
-import { Button } from "@material-tailwind/react";
+import { removeFromWishlist } from "@/app/actions/wishlist";
 const DataTable = dynamic(() => import("react-data-table-component"), {
   ssr: false,
 });

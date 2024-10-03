@@ -5,7 +5,11 @@ import prisma from "@/lib/prisma";
 export const revalidate = 0;
 
 const getCategories = () => {
-  return prisma.category.findMany({});
+  return prisma.category.findMany({
+    include: {
+      image: true,
+    },
+  });
 };
 
 const category = async () => {

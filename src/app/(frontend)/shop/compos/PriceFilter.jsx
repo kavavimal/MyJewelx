@@ -40,7 +40,7 @@ export default function PriceFilter({ filterByPrice, max }) {
   }, [minVal, maxVal]);
 
   return (
-    <div className="ms-80">
+    <div className="xl:ms-80 lg:mt-0 mt-5">
       <input
         type="range"
         min={min}

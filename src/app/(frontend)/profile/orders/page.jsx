@@ -1,10 +1,9 @@
-import { getOrders } from "@/actions/orders";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import Breadcrumbs from "@/components/Breadcrumbs";
-import Container from "@/components/frontend/Container";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import OrderTable from "./components/Orders";
+import Breadcrumbs from "@/app/components/Breadcrumbs";
+import { getOrders } from "@/app/actions/orders";
 
 export const revalidate = 0;
 
@@ -15,7 +14,7 @@ export default async function OrderPage() {
   }
   const orders = await getOrders();
   return (
-    <Container>
+    <div className="container">
       <div className="py-7">
         <Breadcrumbs autoBread={true} showDevider={true} />
         <OrderTable orders={orders} />
@@ -50,6 +49,6 @@ export default async function OrderPage() {
           </div>
         );
       })} */}
-    </Container>
+    </div>
   );
 }

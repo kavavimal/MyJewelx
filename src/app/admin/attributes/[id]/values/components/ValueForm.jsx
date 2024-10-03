@@ -24,6 +24,8 @@ const ValueForm = ({ attribute_values, attribute_id }) => {
     {
       name: "Date",
       selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortFunction: (a, b) => new Date(b.date) - new Date(a.date),
+
       sortable: true,
     },
   ];

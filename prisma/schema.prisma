@@ -28,13 +28,12 @@ model Account {
 }
 
 model StoreLikes {
-  id         Int      @id @default(autoincrement())
-  likerId    String
-  likedId    String
-  likedAt    DateTime @default(now())
-
-  liker      User     @relation("LikesGiven", fields: [likerId], references: [id])
-  liked      User     @relation("LikesReceived", fields: [likedId], references: [id])
+  id      Int      @id @default(autoincrement())
+  likerId String
+  likedId String
+  likedAt DateTime @default(now())
+  liked   User     @relation("LikesReceived", fields: [likedId], references: [id])
+  liker   User     @relation("LikesGiven", fields: [likerId], references: [id])
 
   @@unique([likerId, likedId])
 }
@@ -55,7 +54,8 @@ model User {
   emailVerified   DateTime?
   addresses       Address[]
   carts           Cart?
-  image           Image?
+  image           Image?                @relation("UserImage")
+  banner_image    Image?                @relation("BannerUserImage")
   likes           Like[]
   orders          Order[]               @relation("buyerOrders")
   sellerOrders    OrderSellerRelation[]
@@ -63,15 +63,32 @@ model User {
   ProductOnDemand ProductOnDemand[]
   myreviews       Review[]              @relation("myreviews")
   reviews         Review[]
+  likesReceived   StoreLikes[]          @relation("LikesReceived")
+  likesGiven      StoreLikes[]          @relation("LikesGiven")
+  support         Support[]
   role            Role                  @relation(fields: [role_id], references: [role_id])
   vendor          Vendor?
   viewProducts    ViewedProduct[]
   wishlist        Wishlist[]
   accounts        Account[]
-
-  likesGiven    StoreLikes[] @relation("LikesGiven")
-  likesReceived StoreLikes[] @relation("LikesReceived")
+  contacts        Contact[] @relation("UserContactsSent")
+  contactsReceived Contact[] @relation("UserContactsReceived")
 }
+
+model Contact {
+  id               Int       @id @default(autoincrement())
+  name             String    
+  userId           String
+  vendorId         String
+  email            String  
+  phone_number     String  
+  message          String
+  createdAt        DateTime @default(now())
+
+  sender     User     @relation("UserContactsSent", fields: [userId], references: [id])
+  receiver   User     @relation("UserContactsReceived", fields: [vendorId], references: [id])
+}
+
 
 model Address {
   id        Int         @id @default(autoincrement())
@@ -132,6 +149,7 @@ model Product {
   return_policy         String?
   featured              Boolean                 @default(false)
   labels                String?
+  createdAt             DateTime                @default(now())
   likes                 Like[]
   category              Category                @relation("CategoryProducts", fields: [categoryId], references: [category_id])
   country               Country?                @relation(fields: [country_id], references: [country_id])
@@ -151,6 +169,7 @@ model Product {
   reviews               Review[]
   viewedBy              ViewedProduct[]
   wishlist              Wishlist[]
+  Support               Support[]
 }
 
 model ViewedProduct {
@@ -171,6 +190,23 @@ model RelatedProduct {
   relatedProduct   Product @relation("RelatedTo", fields: [relatedProductId], references: [product_id], onDelete: Cascade)
 
   @@unique([productId, relatedProductId])
+}
+
+model Support {
+  id          Int      @id @default(autoincrement())   
+  userId      String
+  title       String?
+  orderId     Int?                                      
+  reasonType  SUPPORTStatus                                  
+  reasonText  String?                                  
+  status      String?                                   
+  createdAt   DateTime  @default(now())                
+  productId   Int              
+  response    String?
+
+  user        User     @relation(fields: [userId], references: [id])          
+  product     Product  @relation(fields: [productId] , references: [product_id])
+  order       Order?   @relation(fields: [orderId], references: [id])
 }
 
 model Vendor {
@@ -199,7 +235,9 @@ model Vendor {
   routing_number   String?
   bank_state       String?
   user             User      @relation(fields: [user_id], references: [id])
+  
 }
+
 
 model Category {
   category_id         Int       @id @default(autoincrement())
@@ -383,6 +421,7 @@ model Characteristic {
   chars_id     Int            @id @default(autoincrement())
   name         String
   chars_type   CharsType
+  image        String?
   productChars ProductChars[]
 }
 
@@ -419,6 +458,7 @@ model ProductVariation {
   isDiscount                Boolean                     @default(false)
   variation_discount        Float?
   variation_discount_type   Int?
+  shipping_charge           Float?
   cartItems                 CartItem[]
   gemstoneProductVariations GemstoneProductVariation[]
   image                     Image[]
@@ -433,13 +473,15 @@ model Image {
   image_type       String
   variation_id     Int?
   user_id          String?           @unique
+  banner_user_id   String?           @unique
   category_id      Int?              @unique
   review_id        Int?
   pod_id           Int?
   category         Category?         @relation(fields: [category_id], references: [category_id], onDelete: Cascade)
   productOnDemand  ProductOnDemand?  @relation(fields: [pod_id], references: [id], onDelete: Cascade)
   review           Review?           @relation(fields: [review_id], references: [id], onDelete: Cascade)
-  user             User?             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user             User?             @relation("UserImage",fields: [user_id], references: [id], onDelete: Cascade)
+  banner           User?             @relation("BannerUserImage",fields: [banner_user_id], references: [id], onDelete: Cascade)
   productvariation ProductVariation? @relation(fields: [variation_id], references: [variation_id], onDelete: Cascade)
 }
 
@@ -520,6 +562,7 @@ model Order {
   user               User                  @relation("buyerOrders", fields: [userId], references: [id])
   orderItems         OrderItem[]
   seller             OrderSellerRelation[]
+  support            Support[]
 }
 
 model OrderSellerRelation {
@@ -600,6 +643,7 @@ model ProductOnDemand {
   contact     String
   Status      PODStatus @default(DRAFT)
   Note        String?
+  createdAt   DateTime  @default(now())
   Images      Image[]
   user        User      @relation(fields: [userId], references: [id])
 }
@@ -632,15 +676,6 @@ model Promotional {
   ads_type    adsType
   createdAt   DateTime @default(now())
 }
-
-// model StoreLike {
-//   id         Int      @id @default(autoincrement())
-//   likerId    Int
-//   likedId    Int
-//   likedAt    DateTime @default(now())
-
-//   @@unique([likerId, likedId])  // Ensure a user can only like another user once
-// }
 
 enum AcountType {
   CUSTOMER
@@ -692,6 +727,12 @@ enum PODStatus {
   SOLD
   CANCELED
   ARCHIVED
+}
+
+enum SUPPORTStatus {
+  INQUIRIES
+  COMPLAINTS
+  RETURNS
 }
 
 enum LOGTYPES {

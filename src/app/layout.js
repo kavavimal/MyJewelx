@@ -1,11 +1,10 @@
-import SessionWrapper from "@/components/SessionWrapper";
-import SnackbarWrapper from "@/components/SnackbarWrapper";
-import ThemeWrapper from "@/components/ThemeWrapper";
-import LoaderRoute from "@/components/frontend/common/progressbar";
-import Hydration from "@/contexts/hydration";
 import { Inter } from "next/font/google";
 import Script from "next/script";
+import ProgressBar from "./components/ProgressBar";
 import "./globals.css";
+import SessionWrapper from "./components/SessionWrapper";
+import ThemeWrapper from "./components/ThemeWrapper";
+import SnackbarWrapper from "./components/SnackbarWrapper";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -17,8 +16,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Hydration />
-        <LoaderRoute />
+        <ProgressBar />
         <SessionWrapper>
           <ThemeWrapper>
             <SnackbarWrapper>{children}</SnackbarWrapper>

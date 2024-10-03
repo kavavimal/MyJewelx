@@ -1,7 +1,9 @@
-import { checkUserSession } from "@/app/(frontend)/layout";
+import { checkUserSession } from "@/app/actions/users";
 import prisma from "@/lib/prisma";
 import { AcountType } from "@prisma/client";
 import { NextResponse } from "next/server";
+
+export const revalidate = 0;
 
 export async function GET() {
   const user = await checkUserSession();

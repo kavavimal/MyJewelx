@@ -1,15 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import {
-  Button,
-  Input,
-  Option,
-  Select,
-  Step,
-  Stepper,
-  Textarea,
-  Typography,
-} from "@material-tailwind/react";
+import { Button, Step, Stepper, Typography } from "@material-tailwind/react";
 import StoreSetup from "./StoreSetup";
 import PaymentSetup from "./PaymentSetup";
 import { useRouter } from "next/navigation";
@@ -19,6 +10,22 @@ const DetailsForm = ({ accountNumbers, licenseNumbers }) => {
   const [activeStep, setActiveStep] = useState(null);
   const [isLastStep, setIsLastStep] = useState(false);
   const [isFirstStep, setIsFirstStep] = useState(false);
+  const [isFormSubmitted, setIsFormSubmitted] = useState({
+    0: false,
+    1: false,
+  });
+
+  const handleStepClick = (step) => {
+    // Ensure that for every step less than the clicked step, the form has been submitted
+    for (let i = 0; i < step; i++) {
+      if (!isFormSubmitted[i]) {
+        return; // Prevent moving forward if any previous step is not submitted
+      }
+    }
+
+    // Set the active step if conditions are met
+    setActiveStep(step);
+  };
 
   return (
     <div className="py-16 bg-[#FFFCF5] w-full overflow-auto">
@@ -33,7 +40,7 @@ const DetailsForm = ({ accountNumbers, licenseNumbers }) => {
               activeLineClassName="bg-primary-200"
             >
               <Step
-                onClick={() => setActiveStep(0)}
+                onClick={() => handleStepClick(0)}
                 className="h-12 w-12 text-[#808080]"
                 activeClassName="bg-primary-200 text-black"
                 completedClassName="bg-primary-200 text-black"
@@ -52,7 +59,7 @@ const DetailsForm = ({ accountNumbers, licenseNumbers }) => {
                 </svg>
               </Step>
               <Step
-                onClick={() => setActiveStep(1)}
+                onClick={() => handleStepClick(1)}
                 className="h-12 w-12 text-[#808080]"
                 activeClassName="bg-primary-200 text-black"
                 completedClassName="bg-primary-200 text-black"
@@ -65,13 +72,13 @@ const DetailsForm = ({ accountNumbers, licenseNumbers }) => {
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M5.57143 5C4.62423 5 3.71582 5.37627 3.04605 6.04605C2.37627 6.71582 2 7.62423 2 8.57143V9.28571H22V8.57143C22 7.62423 21.6237 6.71582 20.954 6.04605C20.2842 5.37627 19.3758 5 18.4286 5H5.57143ZM22 10.7143H2V15.7143C2 16.6615 2.37627 17.5699 3.04605 18.2397C3.71582 18.9094 4.62423 19.2857 5.57143 19.2857H18.4286C19.3758 19.2857 20.2842 18.9094 20.954 18.2397C21.6237 17.5699 22 16.6615 22 15.7143V10.7143ZM15.5714 15H18.4286C18.618 15 18.7997 15.0753 18.9336 15.2092C19.0676 15.3432 19.1429 15.5248 19.1429 15.7143C19.1429 15.9037 19.0676 16.0854 18.9336 16.2194C18.7997 16.3533 18.618 16.4286 18.4286 16.4286H15.5714C15.382 16.4286 15.2003 16.3533 15.0664 16.2194C14.9324 16.0854 14.8571 15.9037 14.8571 15.7143C14.8571 15.5248 14.9324 15.3432 15.0664 15.2092C15.2003 15.0753 15.382 15 15.5714 15Z"
+                    d="M5.57143 5C4.62423 5 3.71582 5.37627 3.04605 6.04605C2.37627 6.71582 2 7.62423 2 8.57143V9.28571H22V8.57143C22 7.62423 21.6237 6.71582 20.954 6.04605C20.2842 5.37627 19.3758 5 18.4286 5H5.57143ZM22 10.7143H2V15.7143C2 16.6615 2.37627 17.5699 3.04605 18.2397C3.71582 18.9094 4.62423 19.2857 5.57143 19.2857H18.4286C19.3758 19.2857 20.2842 18.9094 20.954 18.2397C21.6237 17.5699 22 16.6615 22 15.7143V10.7143ZM15.5714 15H18.4286C18.618 15 18.7997 15.0753 18.9336 15.2092C19.0676 15.3432 19.1429 15.5248 19.1429 15.7143C19.1429 15.9037 19.0676 16.0854 18.9336 16.2194C18.7997 16.3533 18.618 16.4286 18.4286 16.4286H15.5714C15.382 16.4286 15.2003 16.3533 15.0664 16.2194C14.9324 16 .0854 14.8571 15.9037 14.8571 15.7143C14.8571 15.5248 14.9324 15.3432 15.0664 15.2092C15.2003 15.0753 15.382 15 15.5714 15Z"
                     fill="currentColor"
                   />
                 </svg>
               </Step>
               <Step
-                onClick={() => setActiveStep(2)}
+                onClick={() => handleStepClick(2)}
                 className="h-12 w-12 text-[#808080]"
                 activeClassName="bg-primary-200 text-black"
                 completedClassName="bg-primary-200 text-black"
@@ -110,7 +117,15 @@ const DetailsForm = ({ accountNumbers, licenseNumbers }) => {
                   <Button className="w-3/12" onClick={() => setActiveStep(0)}>
                     Do it now
                   </Button>
-                  <Button variant="outlined" className="w-3/12">
+                  <Button
+                    variant="outlined"
+                    onClick={() =>
+                      setActiveStep(
+                        activeStep === null ? 1 : activeStep === 1 ? 2 : 0
+                      )
+                    }
+                    className="w-3/12 hover:bg-primary-200 hover:text-black hover:opacity-100"
+                  >
                     Skip for now
                   </Button>
                 </div>
@@ -121,6 +136,7 @@ const DetailsForm = ({ accountNumbers, licenseNumbers }) => {
             <StoreSetup
               setActiveStep={setActiveStep}
               licenseNumbers={licenseNumbers}
+              setIsFormSubmitted={setIsFormSubmitted}
             />
           )}
 
@@ -128,6 +144,7 @@ const DetailsForm = ({ accountNumbers, licenseNumbers }) => {
             <PaymentSetup
               setActiveStep={setActiveStep}
               accountNumbers={accountNumbers}
+              setIsFormSubmitted={setIsFormSubmitted}
             />
           )}
 
@@ -163,5 +180,4 @@ const DetailsForm = ({ accountNumbers, licenseNumbers }) => {
     </div>
   );
 };
-
 export default DetailsForm;

@@ -1,4 +1,4 @@
-import { fetchCurrentUser } from "@/actions/users";
+import { fetchCurrentUser } from "@/app/actions/users";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 

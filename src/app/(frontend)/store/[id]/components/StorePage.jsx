@@ -54,9 +54,9 @@ const StorePage = () => {
             </div>
             <div>
               <p className="text-secondary-200 text-center text-base">
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry. Lorem Ipsum has been the industry's standard dummy
-                text ever since the 1500s,
+                Lorem Ipsum is simply dummy text of the printing and typesetting
+                industry. Lorem Ipsum has been the industry&apos;s standard
+                dummy text ever since the 1500s&#44;
               </p>
             </div>
             <div className="flex items-center gap-[15px]">
@@ -339,6 +339,11 @@ const StorePage = () => {
                               )}
                               product_id={product.product_id}
                               variation={variation}
+                              product_name={product.product_name}
+                              likes={product?.likes ? product.likes.length : ""}
+                              reviews={
+                                product?.reviews ? product.reviews.length : ""
+                              }
                             />
                           </div>
                         </CardBody>
@@ -405,6 +410,11 @@ const StorePage = () => {
                               )}
                               product_id={product.product_id}
                               variation={variation}
+                              product_name={product.product_name}
+                              likes={product?.likes ? product.likes.length : ""}
+                              reviews={
+                                product?.reviews ? product.reviews.length : ""
+                              }
                             />
                           </div>
                         </CardBody>

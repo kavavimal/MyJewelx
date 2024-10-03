@@ -1,8 +1,8 @@
-import Breadcrumbs from "@/components/Breadcrumbs";
 import { Suspense } from "react";
 import ShopBannerCraousel from "./compos/ShopBannerCraousel";
-import DeviderX from "@/components/frontend/DeviderX";
 import prisma from "@/lib/prisma";
+import Breadcrumbs from "@/app/components/Breadcrumbs";
+import DeviderX from "@/app/components/DeviderX";
 
 const getPromoList = async () =>
   await prisma.promotional.findMany({
@@ -22,19 +22,24 @@ export default async function ShopLayout({ children }) {
             role="status"
           >
             <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-              Loading...  
+              Loading...
             </span>
           </div>
         </div>
       }
     >
-      <section className="container pb-20 pt-5">
-        <ShopBannerCraousel promolist={promolist} />
-        <Breadcrumbs
-          items={[{ link: "/shop", label: "Shop", current: true }]}
-        />
-        <DeviderX />
-        {children}
+      <section className="pb-5 md:pb-20 pt-5">
+        <div
+          // className="w-[1280px] max-w-[96%] mx-auto my-0"
+          className="container mx-auto my-0"
+        >
+          <ShopBannerCraousel promolist={promolist} />
+          <Breadcrumbs
+            items={[{ link: "/shop", label: "Shop", current: true }]}
+          />
+          <DeviderX />
+          {children}
+        </div>
       </section>
     </Suspense>
   );

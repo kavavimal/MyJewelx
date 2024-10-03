@@ -1,10 +1,5 @@
 "use client";
-import {
-  updateProductFeaturedStatus,
-  updateProductStatus,
-} from "@/actions/product";
-import { ADMIN_ID, theme, VENDOR_ID } from "@/utils/constants";
-import { showToast } from "@/utils/helper";
+import { ADMIN_ID, VENDOR_ID } from "@/utils/constants";
 import {
   Button,
   IconButton,
@@ -19,7 +14,6 @@ import {
   Badge,
 } from "@material-tailwind/react";
 import Image from "next/image";
-import StarRatings from "@/components/frontend/StarRatings";
 import { AcountType, ProductStatus } from "@prisma/client";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -27,6 +21,8 @@ import DeleteProduct from "./DeleteProduct";
 import { useEffect, useState } from "react";
 import { useUserStore } from "@/contexts/userStore";
 import moment from "moment";
+import StarRatings from "@/app/components/StarRatings";
+import { updateProductStatus } from "@/app/actions/product";
 const DataTable = dynamic(() => import("react-data-table-component"), {
   ssr: false,
 });
@@ -40,13 +36,22 @@ const Products = ({ products, attributes, karats }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [productReviews, setProductReviews] = useState([]);
+  const [openStatusDialog, setOpenStatusDialog] = useState(false);
   const user = useUserStore((state) => state.user);
-  console.log(user);
+
   const handleOpenDialog = async (product) => {
-    console.log(product);
     setSelectedProduct(product);
     setProductReviews(product.reviews);
     setIsDialogOpen(true);
+  };
+
+  const handleOpenStatusDialog = async (product) => {
+    setSelectedProduct(product);
+    setOpenStatusDialog(true);
+  };
+
+  const handleStatusCloseDialog = () => {
+    setOpenStatusDialog(!openStatusDialog);
   };
 
   const handleCloseDialog = () => {
@@ -56,9 +61,7 @@ const Products = ({ products, attributes, karats }) => {
   };
 
   useEffect(() => {
-    // if (typeof window !== "undefined") {
     localStorage.setItem("activeStep", 0);
-    // }
   }, []);
 
   const columns = [
@@ -66,8 +69,6 @@ const Products = ({ products, attributes, karats }) => {
       name: "Images",
       selector: (row) => (
         <>
-          {console.log(row)}
-
           {row?.variations?.length > 0 &&
           row?.variations[0]?.image?.length > 0 &&
           row?.variations[0]?.image[0]?.path ? (
@@ -110,57 +111,28 @@ const Products = ({ products, attributes, karats }) => {
         <>
           <div className="flex items-center grow">
             <Switch
-              checked={row.status === ProductStatus.PUBLISHED}
-              label={row.status}
+              checked={row?.status === ProductStatus.PUBLISHED}
+              label={row?.status}
               ripple={false}
-              onChange={() =>
-                updateProductStatus(
-                  row.product_id,
-                  row.status === ProductStatus.PUBLISHED
-                    ? ProductStatus.DRAFT
-                    : ProductStatus.PUBLISHED
-                )
-              }
+              onChange={() => handleOpenStatusDialog(row)}
             />
           </div>
         </>
       ),
     },
-    // {
-    //   name: "Featured",
-    //   cell: (row) => (
-    //     <>
-    //       <div className="flex items-center grow">
-    //         <Switch
-    //           checked={row.featured === true}
-    //           // label={"Featured"}
-    //           ripple={false}
-    //           onChange={async () => {
-    //             let rs = await updateProductFeaturedStatus(
-    //               row.product_id,
-    //               !row.featured
-    //             );
-    //             if (rs.success) {
-    //               showToast({
-    //                 message: "Product Featured Status updated",
-    //               });
-    //             }
-    //           }}
-    //         />
-    //       </div>
-    //     </>
-    //   ),
-    // },
     {
       name: "Date",
       selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortFunction: (rowA, rowB) => {
+        const dateA = new Date(rowA.createdAt);
+        const dateB = new Date(rowB.createdAt);
+        return dateB - dateA;
+      },
     },
     {
       name: "Actions",
       cell: (row) => (
         <>
-          {/* {console.log(row)} */}
-
           <Badge
             overlap="circular"
             placement="top-end"
@@ -189,16 +161,6 @@ const Products = ({ products, attributes, karats }) => {
               </svg>
             </IconButton>
           </Badge>
-
-          {/*           
-          <Button
-            className="rounded-full py-[6px] !text-[10px] px-2"
-            variant="gradient"
-            color="orange"
-            onClick={() => handleOpenDialog(row)}
-          >
-            Reviews
-          </Button> */}
           <Link href={`/admin/products/edit/${row.product_id}`}>
             <IconButton variant="text" className="rounded-full">
               <svg
@@ -458,6 +420,64 @@ const Products = ({ products, attributes, karats }) => {
               Close
             </Button>
           </DialogFooter>
+        </Dialog>
+      )}
+      {selectedProduct && (
+        <Dialog
+          open={openStatusDialog}
+          handler={handleStatusCloseDialog}
+          size="sm"
+          className="p-4 rounded-lg shadow-lg bg-white"
+        >
+          <DialogHeader className="border-b border-gray-300">
+            <h3 className="text-xl font-semibold">Change Product Status</h3>
+          </DialogHeader>
+          <DialogBody className="border-b-0 overflow-auto p-4" divider>
+            <section>
+              <h4 className="text-2xl font-bold mb-4">Product Reviews</h4>
+              <p className="mb-6">
+                Are you sure you want to change the status of this product?
+              </p>
+              <div className="flex justify-center gap-4 mt-8">
+                <Button
+                  variant="outlined"
+                  color="grey"
+                  onClick={handleStatusCloseDialog}
+                  className="flex-1"
+                >
+                  No
+                </Button>
+                <Button
+                  variant="gradient"
+                  color="blue"
+                  onClick={async () => {
+                    const newStatus =
+                      selectedProduct.status === ProductStatus.PUBLISHED
+                        ? ProductStatus.DRAFT
+                        : ProductStatus.PUBLISHED;
+                    const result = await updateProductStatus(
+                      selectedProduct.product_id,
+                      newStatus
+                    );
+                    if (result?.success) {
+                      setFilterProducts((prev) =>
+                        prev.map((product) =>
+                          product.product_id === selectedProduct.product_id
+                            ? { ...product, status: newStatus }
+                            : product
+                        )
+                      );
+                      // router.refresh();
+                      setOpenStatusDialog(false);
+                    }
+                  }}
+                  className="flex-1"
+                >
+                  Yes
+                </Button>
+              </div>
+            </section>
+          </DialogBody>
         </Dialog>
       )}
     </>

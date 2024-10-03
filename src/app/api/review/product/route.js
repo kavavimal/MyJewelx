@@ -17,12 +17,11 @@ export async function POST(request) {
     const req = await request.formData();
 
     const productId = Number(req.get("productId"));
-    const userId = req.get("userId");// from user login user id
+    const userId = req.get("userId"); // from user login user id
     const rating = Number(req.get("rating"));
     const text = req.get("review");
     const recommandation = req.get("recommandation");
     const files = req.getAll("files[]");
-    console.log("files upload", files);
     const parsedAttributeAndValues = reviewSchema.parse({
       productId: productId,
       userId: userId,
@@ -36,7 +35,7 @@ export async function POST(request) {
       rating: rating,
       text: text,
       productId: productId,
-      recommandation: recommandation
+      recommandation: recommandation,
     };
 
     let images = [];
@@ -46,11 +45,11 @@ export async function POST(request) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
         const dateSuffix = Date.now();
-        const uploadPath = '/assets/uploads/review';
+        const uploadPath = "/assets/uploads/review";
         const dynamicFileName = `${dateSuffix}_${i}_${file.name}`;
         const path = join(
           process.cwd(),
-          "/public"+uploadPath,
+          "/public" + uploadPath,
           dynamicFileName
         );
         await writeFile(path, buffer);
@@ -60,7 +59,7 @@ export async function POST(request) {
           image_type: "review",
         });
       }
-      if (images.length > 0){
+      if (images.length > 0) {
         createReviewQueryData.images = {
           //check this query for updating relations with images and variation and for delete support
           createMany: {
@@ -73,7 +72,10 @@ export async function POST(request) {
       data: createReviewQueryData,
     });
 
-    return NextResponse.json({message: "Review Added Successfully", review: result }, {status: 201});
+    return NextResponse.json(
+      { message: "Review Added Successfully", review: result },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error in POST:", error);
     if (error.name === "ZodError") {

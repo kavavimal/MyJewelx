@@ -8,7 +8,7 @@ export async function PUT(request, { params }) {
   try {
     const existingUser = await prisma.user.findUnique({
       where: { id: String(params.id) },
-      include: { image: true },
+      include: { image: true, banner_image: true },
     });
 
     if (!existingUser) {
@@ -17,7 +17,7 @@ export async function PUT(request, { params }) {
 
     const req = await request.formData();
     const file = req.get("file");
-
+    const bannerfile = req.get("bannerfile");
     let updateData = {};
 
     if (
@@ -70,6 +70,52 @@ export async function PUT(request, { params }) {
         updateData.image = {
           create: {
             path: user_image,
+            image_type: "user",
+          },
+        };
+      }
+    }
+
+    let banner_image;
+
+    if (bannerfile) {
+      const bytes = await bannerfile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      const path = join(
+        process.cwd(),
+        "/public/assets/uploads",
+        `${updateData.firstName}_${bannerfile.name}`
+      );
+      await writeFile(path, buffer);
+
+      banner_image = `/assets/uploads/${updateData.firstName}_${bannerfile.name}`;
+
+      if (existingUser.banner_image?.path) {
+        const oldFilePath = join(
+          process.cwd(),
+          "public",
+          existingUser.banner_image.path
+        );
+        try {
+          await unlink(oldFilePath);
+          console.log(`Successfully deleted ${oldFilePath}`);
+        } catch (error) {
+          console.error(`Error deleting file ${oldFilePath}:`, error);
+        }
+      }
+
+      if (existingUser.banner_image) {
+        updateData.banner_image = {
+          update: {
+            path: banner_image,
+            image_type: "user",
+          },
+        };
+      } else {
+        updateData.banner_image = {
+          create: {
+            path: banner_image,
             image_type: "user",
           },
         };

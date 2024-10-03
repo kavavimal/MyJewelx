@@ -8,6 +8,8 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 import { AcountType, PODStatus } from "@prisma/client";
 import { JODMail } from "@/lib/sendMails";
 
+export const revalidate = 0;
+
 const productPODSchema = z.object({
   name: z.string().min(1, "Product name required").max(50),
   description: z.string().optional(),

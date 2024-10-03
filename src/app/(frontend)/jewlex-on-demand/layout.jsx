@@ -1,16 +1,8 @@
-import Breadcrumbs from "@/components/Breadcrumbs";
-import Container from "@/components/frontend/Container";
-import LoadingDots from "@/components/loading-dots";
 import { Suspense } from "react";
 import ShopBannerCraousel from "../shop/compos/ShopBannerCraousel";
-import AdsBanner from "@/components/frontend/AdsBanner";
-
-import { AcountType, PODStatus } from "@prisma/client";
-import Link from "next/link";
-import SearchPODForm from "./components/SearchPODForm";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { redirect } from "next/navigation";
+import Breadcrumbs from "@/app/components/Breadcrumbs";
+import LoadingDots from "@/app/components/LoadingDots";
+import prisma from "@/lib/prisma";
 
 export const revalidate = 0;
 const getPromoList = async () =>
@@ -30,10 +22,7 @@ const getAds = () =>
 export default async function RootLayout({ children }) {
   const ads = await getAds();
   const promolist = await getPromoList();
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return redirect("/login");
-  }
+
   return (
     <Suspense
       fallback={
@@ -42,10 +31,10 @@ export default async function RootLayout({ children }) {
         </div>
       }
     >
-      <Container>
+      <div className="container">
         <ShopBannerCraousel promolist={promolist} />
         <Breadcrumbs autoBread={true} showDevider={true} />
-      </Container>
+      </div>
 
       {/* <div className="flex items-center justify-between mt-5 flex-wrap ">
           <Suspense fallback={<div>Loading...</div>}>

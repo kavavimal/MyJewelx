@@ -35,6 +35,36 @@ const Variation = ({
   setVariations,
   pricing,
 }) => {
+  const router = useRouter();
+  const isVariation = Boolean(variation?.variation_id);
+  const [isGemstone, setIsGemstone] = useState(false);
+  const [gemstone, setGemstone] = useState("");
+  const [gemstoneAmount, setGemstoneAmount] = useState("");
+  const [gemstoneCharges, setGemstoneCharges] = useState([]);
+  const [isDiscount, setIsDiscount] = useState(false);
+  const [discountType, setDiscountType] = useState("");
+  const [discountValue, setDiscountValue] = useState("");
+  const [isAddtionalCharges, setIsAdditionalCharges] = useState(false);
+  const [additionalChargesType, setAdditionalChargesType] = useState("");
+  const [additionalCharges, setAdditionalCharges] = useState([]);
+  const [additionalCharge, setAdditionalCharge] = useState("");
+  const [taxValue, setTaxValue] = useState("5");
+  const [makingCharge, setMakingCharge] = useState("Per Gram On Net Weight");
+  const [files, setFiles] = useState([]);
+  const [previewURLs, setPreviewURLs] = useState([]);
+  const [chargeValue, setChargeValue] = useState("");
+  const [gemstoneRemark, setGemstoneRemark] = useState("");
+  const [chargeRemark, setChargeRemark] = useState("");
+  const [uploadedImages, setUploadedImages] = useState([]);
+  const [totalAdditionalCharge, setTotalAdditionalCharge] = useState(0);
+  const [totalOtherCharge, setTotalOtherCharge] = useState(0);
+  const [appliedDiscout, setAppliedDiscout] = useState(0);
+  const [totalMakingCharge, setTotalMakingCharge] = useState(0);
+  const [appliedVatTax, setAppliedVatTax] = useState(0);
+  const [subtotal, setSubTotal] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [isShippingCharge, setIsShippingCharge] = useState(false);
+
   let isMaterialGold = false,
     findGoldKarat = false,
     materialSilver = false,
@@ -102,34 +132,6 @@ const Variation = ({
         a.id === attributeIDs.MATERIAL_PALLADIUM
     );
   }
-  const router = useRouter();
-  const isVariation = Boolean(variation?.variation_id);
-  const [isGemstone, setIsGemstone] = useState(false);
-  const [gemstone, setGemstone] = useState("");
-  const [gemstoneAmount, setGemstoneAmount] = useState("");
-  const [gemstoneCharges, setGemstoneCharges] = useState([]);
-  const [isDiscount, setIsDiscount] = useState(false);
-  const [discountType, setDiscountType] = useState("");
-  const [discountValue, setDiscountValue] = useState("");
-  const [isAddtionalCharges, setIsAdditionalCharges] = useState(false);
-  const [additionalChargesType, setAdditionalChargesType] = useState("");
-  const [additionalCharges, setAdditionalCharges] = useState([]);
-  const [additionalCharge, setAdditionalCharge] = useState("");
-  const [taxValue, setTaxValue] = useState("5");
-  const [makingCharge, setMakingCharge] = useState("Per Gram On Net Weight");
-  const [files, setFiles] = useState([]);
-  const [previewURLs, setPreviewURLs] = useState([]);
-  const [chargeValue, setChargeValue] = useState("");
-  const [gemstoneRemark, setGemstoneRemark] = useState("");
-  const [chargeRemark, setChargeRemark] = useState("");
-  const [uploadedImages, setUploadedImages] = useState([]);
-  const [totalAdditionalCharge, setTotalAdditionalCharge] = useState(0);
-  const [totalOtherCharge, setTotalOtherCharge] = useState(0);
-  const [appliedDiscout, setAppliedDiscout] = useState(0);
-  const [totalMakingCharge, setTotalMakingCharge] = useState(0);
-  const [appliedVatTax, setAppliedVatTax] = useState(0);
-  const [subtotal, setSubTotal] = useState(0);
-  const [total, setTotal] = useState(0);
 
   const handleFileChange = (e) => {
     setFiles((prev) => [...prev, ...e.target.files]);
@@ -167,7 +169,7 @@ const Variation = ({
       }
     }
 
-    return "";
+    return 0;
   };
 
   useEffect(() => {
@@ -258,7 +260,9 @@ const Variation = ({
         ? JSON.parse(variation.making_charges).value
         : "",
       files: [],
+      shipping_charge: variation.shipping_charges ?? "",
     },
+    enableReinitialize: true,
     validationSchema: variatonValidationSchema,
     onSubmit: async (values) => {
       const otherCharges = [];
@@ -290,6 +294,7 @@ const Variation = ({
           charge_type: "discount",
           name: discountType,
           value: discountValue,
+          discount: appliedDiscout,
         });
       }
 
@@ -298,6 +303,7 @@ const Variation = ({
           charge_type: "vat/tax",
           name: "vattaxes",
           value: taxValue,
+          tax: appliedVatTax,
         });
       }
 
@@ -514,13 +520,13 @@ const Variation = ({
         }
       }
 
-      if (gemstoneAmounts.length > 0) {
+      if (gemstoneAmounts.length >= 0) {
         let gemstoneAmount = gemstoneAmounts.reduce((a, b) => a + b, 0);
         price = price + gemstoneAmount;
         setTotalOtherCharge(gemstoneAmount);
       }
 
-      if (additionalAmounts.length > 0) {
+      if (additionalAmounts.length >= 0) {
         let additionalAmount = additionalAmounts.reduce((a, b) => a + b, 0);
         price = price + additionalAmount;
         setTotalAdditionalCharge(additionalAmount);
@@ -551,6 +557,12 @@ const Variation = ({
           default:
             break;
         }
+      } else {
+        setAppliedDiscout(0);
+      }
+
+      if (isShippingCharge) {
+        price = price + parseFloat(formik.values?.shipping_charge || 0);
       }
 
       if (taxValue === "5") {
@@ -596,7 +608,15 @@ const Variation = ({
     makingCharge,
     chargeValue,
     formik.values.metal_amount,
+    isShippingCharge,
+    formik.values?.shipping_charge,
   ]);
+
+  useEffect(() => {
+    if (!isShippingCharge) {
+      formik.setFieldValue("shipping_charge", 0);
+    }
+  }, [isShippingCharge]);
 
   useEffect(() => {
     if (isVariation) {
@@ -679,6 +699,11 @@ const Variation = ({
         }
 
         setUploadedImages(variation?.image.map((image) => image?.path));
+
+        if (variation?.shipping_charge) {
+          setIsShippingCharge(true);
+          formik.setFieldValue("shipping_charge", variation?.shipping_charge);
+        }
       } catch (error) {
         console.log(error);
       }
@@ -743,7 +768,7 @@ const Variation = ({
                       <Editor
                         apiKey={
                           process.env.NEXT_PUBLIC_TINY_MCE_KEY ||
-                          "kcvt74ak3m6obm71iminsf87md1n56lm5b6nrtndf3ptm75z"
+                          "exrtc5unpz0rnnqzlce7w4eh4pww5sj8woyuvnwgy1e9w2l5"
                         }
                         init={{
                           height: 400,
@@ -974,23 +999,6 @@ const Variation = ({
                     </div>
 
                     <div className="flex flex-col gap-5">
-                      {/* <Select
-                        label="Weight"
-                        size="lg"
-                        name="weight_unit"
-                        error={
-                          formik.errors.weight_unit &&
-                          formik.touched.weight_unit
-                        }
-                        value={formik.values?.weight_unit ?? ""}
-                        onChange={(value) =>
-                          formik.setFieldValue("weight_unit", value)
-                        }
-                      >
-                        <Option value="Ounces">Ounces</Option>
-                        <Option value="Grams">Grams</Option>
-                      </Select> */}
-
                       {formik.values?.weight_unit === "Grams" && (
                         <div className="flex gap-5 items-center">
                           <div className="w-1/2">
@@ -1410,6 +1418,29 @@ const Variation = ({
                         )}
                       </div>
                     </div>
+                    <div>
+                      <div className="border-t pt-2 mt-5">
+                        <div>
+                          <Checkbox
+                            label={<Typography>Shipping Charge</Typography>}
+                            checked={isShippingCharge}
+                            onChange={(e) =>
+                              setIsShippingCharge(e.target.checked)
+                            }
+                          />
+                        </div>
+                        {isShippingCharge && (
+                          <div className="mt-3">
+                            <Input
+                              label="Shipping Charge"
+                              name="shipping_charge"
+                              value={formik.values?.shipping_charge}
+                              onChange={formik.handleChange}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
                     <div className="border-t pt-2 mt-5">
                       <div className="mb-3">
                         <Checkbox
@@ -1468,26 +1499,7 @@ const Variation = ({
                         <Option value="5">5</Option>
                       </Select>
                     </div>
-
-                    {/* <div className="mt-5 flex gap-5 items-center">
-                      <Input
-                        disabled
-                        label="Subtotal"
-                        size="lg"
-                        type="number"
-                        value={subtotal}
-                      />
-
-                      <Input
-                        disabled
-                        label="Total"
-                        size="lg"
-                        type="number"
-                        value={total}
-                      />
-                    </div> */}
                   </div>
-
                   <div className="mt-5">
                     <div className="flex gap-5">
                       <Button type="submit" loading={formik.isSubmitting}>
@@ -1661,8 +1673,9 @@ const Variation = ({
                               </td>
                               <td className="text-right text-gray-700">
                                 {(
-                                  formik?.values?.metal_amount *
-                                  parseFloat(formik.values?.net_weight || 0)
+                                  parseFloat(
+                                    formik?.values?.metal_amount || 0
+                                  ) * parseFloat(formik.values?.net_weight || 0)
                                 ).toLocaleString("en-IN", {
                                   minimumFractionDigits: 2,
                                   maximumFractionDigits: 2,
@@ -1746,6 +1759,18 @@ const Variation = ({
                                 maximumFractionDigits: 2,
                               }
                             )}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td className="text-left text-gray-700">Shipping</td>
+                          <td className="text-right text-gray-700">
+                            {parseFloat(
+                              formik.values?.shipping_charge || 0
+                            ).toLocaleString("en-IN", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
                           </td>
                         </tr>
                         <tr>

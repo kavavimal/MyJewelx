@@ -1,16 +1,23 @@
 "use client";
-import { updatePODStatus } from "@/actions/pod";
 import { showToast } from "@/utils/helper";
 import { Button, Option, Select } from "@material-tailwind/react";
 import { PODStatus } from "@prisma/client";
 import { useState } from "react";
-
+import { useSession } from "next-auth/react";
+import { updatePODStatus } from "@/app/actions/pod";
+import SessionLoader from "@/app/components/SessionLoader";
+import { useRouter } from "next/navigation";
 export default function UpdateStatus({ id, status, isAdmin = false }) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [updateRequestStatus, setUpdateRequestStatus] = useState(status);
   const handleChange = (newVal) => {
     setUpdateRequestStatus(newVal);
   };
+  const { data: session } = useSession();
+  if (!session) {
+    return <SessionLoader />;
+  }
   const saveStatus = async () => {
     if (status !== updateRequestStatus) {
       setLoading(true);
@@ -24,15 +31,19 @@ export default function UpdateStatus({ id, status, isAdmin = false }) {
           setUpdateRequestStatus(status);
         }
       }
+      router.refresh();
       setLoading(false);
     }
   };
-  const StatusList = isAdmin
+
+  const checkadmin = session?.user?.role === "ADMIN";
+
+  const StatusList = checkadmin
     ? [
         PODStatus.DRAFT,
         PODStatus.REQUESTED,
         PODStatus.PUBLISHED,
-        PODStatus.ACCEPTEDBYSELLER,
+        // PODStatus.ACCEPTEDBYSELLER,
         // PODStatus.SOLD,
         // PODStatus.ARCHIVED,
         PODStatus.CANCELED,
@@ -43,15 +54,19 @@ export default function UpdateStatus({ id, status, isAdmin = false }) {
         // PODStatus.ARCHIVED,
         PODStatus.CANCELED,
       ];
+
+  const checkurs = StatusList.includes(updateRequestStatus);
+
   return (
-    <div className="flex items-center">
-      <div className="!w-[130px] mr-3">
+    <div className="flex items-center gap-2 w-full">
+      <div className="w-[150px]">
         <Select
-          className="!min-w-full !w-[120px]"
-          containerProps={{ className: "!min-w-0 w-[120px]" }}
-          label="Request Status"
+          label="JOD Status"
+          containerProps={{
+            style: { minWidth: "150px" },
+          }}
           name="updateRequestStatus"
-          value={updateRequestStatus}
+          value={checkurs ? updateRequestStatus : ""}
           onChange={handleChange}
         >
           {StatusList.map((item) => (
@@ -61,16 +76,9 @@ export default function UpdateStatus({ id, status, isAdmin = false }) {
           ))}
         </Select>
       </div>
-      <div>
-        <Button
-          fullWidth
-          className="!flex-1"
-          onClick={saveStatus}
-          loading={loading}
-        >
-          Update
-        </Button>
-      </div>
+      <Button onClick={saveStatus} loading={loading} className="w-32">
+        Update
+      </Button>
     </div>
   );
 }

@@ -1,11 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Variation from "./Variation";
-import { getProduct } from "@/actions/product";
-import LoadingDots from "@/components/loading-dots";
 import { Option, Select, Button } from "@material-tailwind/react";
 import { ATTRIBUTE_ORDER, attributeIDs } from "@/utils/constants";
 import { transformAttributeName } from "@/utils/helper";
+import LoadingDots from "@/app/components/LoadingDots";
+import { getProduct } from "@/app/actions/product";
 
 const buildCustomOrder = (groupedData, defaultOrder) => {
   return defaultOrder.filter((attributeId) =>

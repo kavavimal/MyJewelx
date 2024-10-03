@@ -13,7 +13,12 @@ import { update } from "@/utils/api";
 import * as Yup from "yup";
 import { showToast } from "@/utils/helper";
 
-const PaymentSetup = ({ setActiveStep, vendor, accountNumbers }) => {
+const PaymentSetup = ({
+  setActiveStep,
+  vendor,
+  accountNumbers,
+  setIsFormSubmitted,
+}) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const id = vendor ? vendor?.id : searchParams.get("id");
@@ -77,6 +82,7 @@ const PaymentSetup = ({ setActiveStep, vendor, accountNumbers }) => {
             });
             router.refresh();
           } else {
+            setIsFormSubmitted((prev) => ({ ...prev, 0: true }));
             setActiveStep((curr) => curr + 1);
           }
         }
@@ -499,6 +505,7 @@ const PaymentSetup = ({ setActiveStep, vendor, accountNumbers }) => {
                       variant="outlined"
                       type="button"
                       onClick={() => setActiveStep((curr) => curr + 1)}
+                      className="hover:bg-primary-200 hover:text-black hover:text-opacity-100 hover:bg-opacity-100 hover:opacity-100"
                     >
                       Skip for now
                     </Button>

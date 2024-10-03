@@ -22,36 +22,4 @@ module.exports = [
     description: "User can delete Vendors",
   },
   { permission_name: "vendor_read", description: "User can read Vendors" },
-  {
-    permission_name: "categories_view",
-    description: "categories_view",
-  },
-  {
-    permission_name: "category_create",
-    description: "category_create",
-  },
-  {
-    permission_name: "category_delete",
-    description: "category_delete",
-  },
-  {
-    permission_name: "category_update",
-    description: "category_update",
-  },
-  {
-    permission_name: "jods_view",
-    description: "jods_view",
-  },
-  {
-    permission_name: "jod_create",
-    description: "jod_create",
-  },
-  {
-    permission_name: "jod_delete",
-    description: "jod_delete",
-  },
-  {
-    permission_name: "jod_update",
-    description: "jod_update",
-  },
 ];

@@ -25,13 +25,11 @@ import {
 } from "@/schemas/ValidationSchema";
 import { attributeIDs, theme } from "@/utils/constants";
 import ProductAttributeItem from "./ProductAttributeItem";
-import { Router } from "next/router";
 import { AcountType, CharsType } from "@prisma/client";
-import Link from "next/link";
 import ProductVariationsStepWrap from "./ProductVariationsStepWrap";
-import { getProduct } from "@/actions/product";
 import AsignProduct from "./AsignProduct";
 import { useUserStore } from "@/contexts/userStore";
+import { getProduct } from "@/app/actions/product";
 
 const lables = [
   {

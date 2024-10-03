@@ -1,6 +1,5 @@
-import { getEmails } from "@/actions/users";
-import Form from "@/components/Form";
-import "@/styles/globals.css";
+import { getEmails } from "@/app/actions/users";
+import Form from "@/app/components/Form";
 
 export default async function Register() {
   const emails = await getEmails();

@@ -1,4 +1,4 @@
-import { asignProduct } from "@/actions/product";
+import { asignProduct } from "@/app/actions/product";
 import { useUserStore } from "@/contexts/userStore";
 import { get } from "@/utils/api";
 import { showToast } from "@/utils/helper";
@@ -26,9 +26,9 @@ const AsignProduct = ({ id, product }) => {
     });
     setLoading(false);
   };
+
   useEffect(() => {
     getVendors();
-    console.log(product);
 
     if (product?.user) {
       setVendor(product?.user?.id);

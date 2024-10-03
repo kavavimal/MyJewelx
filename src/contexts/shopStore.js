@@ -1,4 +1,4 @@
-import { searchProducts } from "@/actions/product";
+import { searchProducts } from "@/app/actions/product";
 import { create } from "zustand";
 export const initFilterData = {
   categories: [],
@@ -9,6 +9,9 @@ export const initFilterData = {
   characteristics: [],
   sort: "Ascending",
   price: { min: 0, max: 2000000 },
+  karats: [],
+  rating: [],
+  weights: [],
 };
 export const useShopStore = create()(
   (set, get) => ({

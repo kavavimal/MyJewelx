@@ -2,6 +2,8 @@ import prisma from "@/lib/prisma";
 import { VENDOR_ID } from "@/utils/constants";
 import { NextResponse } from "next/server";
 
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const response = await prisma.user.findMany({

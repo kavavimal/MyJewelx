@@ -4,7 +4,6 @@ import { join } from "path";
 import { writeFile } from "fs/promises";
 
 export async function POST(request) {
-  console.log(request);
   try {
     const res = await request.formData();
 

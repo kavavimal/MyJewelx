@@ -7,10 +7,10 @@ const DataTable = dynamic(() => import("react-data-table-component"), {
 import AddPermission from "./AddPermission";
 import DeletePermission from "./DeletePermission";
 import { useState } from "react";
-import SessionLoader from "@/components/SessionLoader";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import moment from "moment";
+import SessionLoader from "@/app/components/SessionLoader";
 const Permissions = ({ permissions }) => {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -36,6 +36,11 @@ const Permissions = ({ permissions }) => {
     {
       name: "Date",
       selector: (row) => moment(row?.createdAt).format("DD/MM/YYYY"),
+      sortFunction: (rowA, rowB) => {
+        const dateA = new Date(rowA.createdAt);
+        const dateB = new Date(rowB.createdAt);
+        return dateB - dateA;
+      },
       sortable: true,
     },
     {

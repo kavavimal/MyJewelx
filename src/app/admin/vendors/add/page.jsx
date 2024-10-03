@@ -1,7 +1,7 @@
 import React from "react";
 import VendorForm from "../components/VendorForm";
-import { getStoreURLs } from "@/actions/vendor";
-import { getEmails } from "@/actions/users";
+import { getStoreURLs } from "@/app/actions/vendor";
+import { getEmails } from "@/app/actions/users";
 
 export const revalidate = 0;
 

@@ -8,7 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
 } from "@material-tailwind/react";
-import { changeVendorStatus } from "@/actions/vendor";
+import { changeVendorStatus } from "@/app/actions/vendor";
 
 const VendorStatus = ({ row, isActive }) => {
   const [loading, setLoading] = useState(false);

@@ -1,5 +1,9 @@
-import { getCart, removeFromCart, updateCartQuantity } from "@/actions/cart";
-import addToCart from "@/actions/cart/addToCart";
+import {
+  getCart,
+  removeFromCart,
+  updateCartQuantity,
+} from "@/app/actions/cart";
+import addToCart from "@/app/actions/cart/addToCart";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 

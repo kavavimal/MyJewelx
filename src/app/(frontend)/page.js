@@ -1,18 +1,23 @@
 import prisma from "@/lib/prisma";
-import Hero from "./components/Hero";
-import TopVendors from "./components/TopVendors";
-import Testimonial from "./components/Testimonial";
-import PopularProducts from "./components/PopularProducts";
-import { getProducts } from "@/actions/product";
-import Ads from "./components/Ads";
-import NewProdFeatureProd from "./components/NewProdFeatureProd";
-import Topcategories from "./components/TopCategories";
-import Editions from "./components/Editions";
-import Trending from "./components/Trending";
+import Hero from "./components/home/Hero";
+import PopularProducts from "./components/home/PopularProducts";
+import Ads from "./components/home/Ads";
+import NewProdFeatureProd from "./components/home/NewProdFeatureProd";
+import Topcategories from "./components/home/TopCategories";
+import TopVendors from "./components/home/TopVendors";
+import Editions from "./components/home/Editions";
+import Trending from "./components/home/Trending";
+import Testimonial from "./components/home/Testimonial";
+import { getProducts } from "../actions/product";
 
 export const revalidate = 0;
 
-const getCategories = () => prisma.category.findMany({});
+const getCategories = () =>
+  prisma.category.findMany({
+    include: {
+      image: true,
+    },
+  });
 const getVendors = () =>
   prisma.user.findMany({
     where: {
@@ -21,15 +26,10 @@ const getVendors = () =>
     include: {
       vendor: true,
       image: true,
+      banner_image: true,
     },
   });
 
-// const getPopularProducts = () =>
-//   prisma.product.findMany({
-//     where: {
-//       labels: "Popular",
-//     },
-//   });
 const homeSlider = () => prisma.homeSlider.findMany({});
 const getPromoList = () =>
   prisma.promotional.findMany({
@@ -54,7 +54,6 @@ export default async function Home() {
     status: ["PUBLISHED"],
     featured: true,
   });
-  // const popularProducts = await getPopularProducts({ status: ["PUBLISHED"] });
   return (
     <>
       <Hero

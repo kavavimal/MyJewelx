@@ -1,15 +1,5 @@
 "use client";
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  IconButton,
-  Input,
-  Rating,
-  Textarea,
-  Typography,
-} from "@material-tailwind/react";
+import { Card, CardBody, CardHeader } from "@material-tailwind/react";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -32,9 +22,10 @@ import {
   AccordionHeader,
   AccordionBody,
 } from "@material-tailwind/react";
-import "../../../../styles/globals.css";
+// import "../../../../styles/globals.css";
 import StoreProducts from "./StoreProducts";
 import CustomerReview from "./CustomerReview";
+import QuickContact from "./QuickContact";
 
 function Icon({ id, open }) {
   return (
@@ -71,8 +62,9 @@ function Icon({ id, open }) {
 }
 const StorePage = ({ vendor, reviews }) => {
   const [open, setOpen] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState("");
 
-  console.log(vendor);
   const handleOpen = (value) => setOpen(open === value ? 0 : value);
   const totalOrderItems = vendor.products.reduce((totalItems, product) => {
     const productOrderItems = product.variations.reduce(
@@ -112,6 +104,21 @@ const StorePage = ({ vendor, reviews }) => {
     getProducts();
   }, []);
 
+  const handleSearchChange = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchTerm(value);
+
+    const filtered = vendor.products.filter((product) =>
+      product.product_name.toLowerCase().includes(value)
+    );
+
+    setFilteredProducts(filtered);
+  };
+
+  const publishedProducts = vendor.products.filter((product) => {
+    return product.status === "PUBLISHED";
+  });
+
   const totalReviews = vendor.products.reduce((total, product) => {
     return total + (product.reviews?.length || 0);
   }, 0);
@@ -144,20 +151,57 @@ const StorePage = ({ vendor, reviews }) => {
             <div>
               <p className="text-secondary-200 text-center text-base">
                 Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry. Lorem Ipsum has been the industry's standard dummy
-                text ever since the 1500s,
+                industry. Lorem Ipsum has been the industry&apos;s standard
+                dummy text ever since the 1500s,
               </p>
             </div>
-            <div className="flex items-center gap-[15px]">
-              <Button>Shop Now</Button>
-              <div className="flex-1">
+            <div className="flex items-center flex-col gap-[15px]">
+              <div className="relative w-[253px]">
                 <input
-                  type="search"
-                  name=""
-                  id=""
+                  type="text"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
                   placeholder="Search Product"
-                  className="border w-full rounded px-[15px] py-[9px] border-secondary-100 placeholder:text-secondary-100 focus:outline-none"
-                />
+                  className="border pl-[15px] pr-6 py-[9px] w-full border-secondary-100 rounded-md bg-white"
+                />{" "}
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M9.10527 8.27779C9.83267 7.34 10.1755 6.16031 10.064 4.97873C9.95247 3.79714 9.395 2.70242 8.50499 1.91727C7.61498 1.13212 6.45929 0.715527 5.27302 0.752235C4.08675 0.788943 2.95903 1.2762 2.11927 2.11487C1.27877 2.95413 0.789925 4.08229 0.752339 5.26946C0.714754 6.45663 1.13126 7.61346 1.91698 8.5042C2.7027 9.39494 3.79851 9.95256 4.98108 10.0634C6.16366 10.1743 7.34401 9.83006 8.2816 9.10087L8.30668 9.12712L10.7812 11.6022C10.8354 11.6564 10.8997 11.6994 10.9705 11.7287C11.0413 11.7581 11.1172 11.7732 11.1939 11.7732C11.2705 11.7732 11.3464 11.7581 11.4172 11.7287C11.4881 11.6994 11.5524 11.6564 11.6066 11.6022C11.6608 11.548 11.7038 11.4837 11.7331 11.4129C11.7625 11.342 11.7775 11.2661 11.7775 11.1895C11.7775 11.1129 11.7625 11.037 11.7331 10.9661C11.7038 10.8953 11.6608 10.831 11.6066 10.7768L9.13152 8.30229C9.12299 8.29389 9.11424 8.28572 9.10527 8.27779ZM7.89427 2.94029C8.22362 3.26432 8.48555 3.65035 8.66497 4.07612C8.84438 4.50189 8.93772 4.95897 8.9396 5.42099C8.94148 5.88301 8.85187 6.34083 8.67593 6.76804C8.49999 7.19526 8.2412 7.58341 7.9145 7.91011C7.5878 8.23681 7.19965 8.4956 6.77243 8.67154C6.34522 8.84748 5.8874 8.93709 5.42538 8.93521C4.96336 8.93333 4.50628 8.83999 4.08051 8.66057C3.65474 8.48116 3.26871 8.21923 2.94468 7.88987C2.29713 7.23169 1.9359 6.3443 1.93966 5.42099C1.94342 4.49767 2.31187 3.61325 2.96475 2.96036C3.61764 2.30748 4.50206 1.93903 5.42538 1.93527C6.34869 1.93151 7.23608 2.29274 7.89427 2.94029Z"
+                    fill="#676767"
+                  />
+                </svg>
+                <div
+                  className={`absolute bg-white w-full border border-secondary-100 mt-1 rounded-md max-h-60 overflow-y-auto ${
+                    searchTerm && searchTerm.length > 2 ? "visible" : "hidden"
+                  } `}
+                >
+                  {filteredProducts && filteredProducts.length > 0 ? (
+                    filteredProducts.map((product) => (
+                      <Link
+                        className="block w-full"
+                        key={product.product_id}
+                        href={`/product/${product.product_id}`}
+                      >
+                        <div className="px-3 py-2 hover:bg-gray-100">
+                          {product.product_name}
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="px-3 py-2 text-gray-500">
+                      No products found
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -241,11 +285,13 @@ const StorePage = ({ vendor, reviews }) => {
             <hr className="h-px bg-primary-200 border-0 mb-[15.5px]" />
             <div>
               <p className="mb-2.5 text-blueGray-500 text-[30px] text-center">
-                {totalReviews > 0
-                  ? totalReviews < 10
-                    ? `0${totalReviews}`
-                    : totalReviews
-                  : ""}{" "}
+                {vendor?._count?.reviews == 0
+                  ? "00"
+                  : vendor?._count?.reviews > 0
+                  ? vendor?._count?.reviews < 10
+                    ? `0${vendor?._count?.reviews}`
+                    : vendor?._count?.reviews
+                  : ""}
               </p>
               <p className="text-secondary-100 text-base text-center">
                 Customer reviews
@@ -270,11 +316,11 @@ const StorePage = ({ vendor, reviews }) => {
             <hr className="h-px bg-primary-200 border-0 mb-[15.5px]" />
             <div>
               <p className="mb-2.5 text-blueGray-500 text-[30px] text-center">
-                {vendor.likes.length < 10
-                  ? `0${vendor.likes.length}`
-                  : vendor.likes.length > 300
+                {vendor?._count?.likesReceived < 10
+                  ? `0${vendor?._count?.likesReceived}`
+                  : vendor?._count?.likesReceived > 300
                   ? "300+"
-                  : vendor.likes.length}
+                  : vendor?._count?.likesReceived}
               </p>
               <p className="text-secondary-100 text-base text-center">
                 Store Likes
@@ -283,7 +329,7 @@ const StorePage = ({ vendor, reviews }) => {
           </div>
         </div>
       </section>
-      <StoreProducts products={vendor.products} />
+      <StoreProducts products={publishedProducts} />
       <section className="bg-[url('/assets/images/background.png')] bg-no-repeat bg-cover pt-20 pb-[116px]">
         <div className="container">
           <h3 className="text-[34px] text-center font-playfairdisplay font-semibold mb-[50px]">
@@ -359,7 +405,7 @@ const StorePage = ({ vendor, reviews }) => {
                                 {getProductPriceString(product, variation)}
                               </span>
                               <span className="font-light text-base">
-                                {variation.net_weight} gram
+                                {variation?.net_weight ?? 0} gram
                               </span>
                             </div>
                             <Engagement
@@ -368,6 +414,11 @@ const StorePage = ({ vendor, reviews }) => {
                               )}
                               product_id={product.product_id}
                               variation={variation}
+                              product_name={product.product_name}
+                              likes={product?.likes ? product.likes.length : ""}
+                              reviews={
+                                product?.reviews ? product.reviews.length : ""
+                              }
                             />
                           </div>
                         </CardBody>
@@ -425,7 +476,7 @@ const StorePage = ({ vendor, reviews }) => {
                                 {getProductPriceString(product, variation)}
                               </span>
                               <span className="font-light text-base">
-                                {variation.net_weight} gram
+                                {variation?.net_weight ?? 0} gram
                               </span>
                             </div>
                             <Engagement
@@ -434,6 +485,11 @@ const StorePage = ({ vendor, reviews }) => {
                               )}
                               product_id={product.product_id}
                               variation={variation}
+                              product_name={product.product_name}
+                              likes={product?.likes ? product.likes.length : ""}
+                              reviews={
+                                product?.reviews ? product.reviews.length : ""
+                              }
                             />
                           </div>
                         </CardBody>
@@ -544,7 +600,7 @@ const StorePage = ({ vendor, reviews }) => {
                   slidesPerView={2}
                   spaceBetween={10}
                   loop={true}
-                  speed={1000}
+                  speed={3000}
                   autoplay={{
                     enabled: true,
                     delay: 0,
@@ -576,7 +632,7 @@ const StorePage = ({ vendor, reviews }) => {
                   slidesPerView={2}
                   spaceBetween={10}
                   loop={true}
-                  speed={1000}
+                  speed={3000}
                   autoplay={{
                     enabled: true,
                     delay: 0,
@@ -609,7 +665,7 @@ const StorePage = ({ vendor, reviews }) => {
                   slidesPerView={2}
                   spaceBetween={10}
                   loop={true}
-                  speed={1000}
+                  speed={3000}
                   autoplay={{
                     enabled: true,
                     delay: 0,
@@ -644,72 +700,6 @@ const StorePage = ({ vendor, reviews }) => {
               </h2>
             </div>
           </div>
-          {/* <Swiper
-                modules={[Grid, Autoplay]}
-                direction={"vertical"}
-                slidesPerView={3}
-                slidesPerGroup={3}
-                autoplay={{
-                  enabled: true,
-                  delay: 0,
-                  disableOnInteraction: false,
-                }}
-                spaceBetween={10}
-                grid={{ rows: 2, fill: "row" }}
-                className="h-[540px] overflow-hidden"
-              >
-                {products.map((product) => (
-                  <SwiperSlide
-                    key={product.product_id}
-                    className="!w-[335.75px] !h-[265.9px] border-[5px] border-red-300 overflow-hidden mr-5 mb-5"
-                  >
-                    <Image
-                      src={product?.variations[0]?.image[0].path}
-                      height={270}
-                      width={245}
-                      alt=""
-                      className="w-[335.75px] !h-[265.9px] object-cover"
-                    />
-                  </SwiperSlide>
-                ))}
-              </Swiper> */}
-          {/* <div className="flex items-center overflow-hidden">
-            <div className="flex items-center rotate-[14deg] ml-[-100px] h-[651px] overflow-hidden">
-              <Swiper
-                modules={[Autoplay, Grid]}
-                autoplay={{
-                  enabled: true,
-                  delay: 2500,
-                  disableOnInteraction: false,
-                }}
-                slidesPerView={3}
-                spaceBetween={20}
-                grid={{ rows: 2, fill: "row" }}
-                className="flex-1 overflow-hidden"
-              >
-                {products.map((product) => (
-                  <SwiperSlide
-                    key={product.product_id}
-                    className="w-[335.75px] border-[5px] border-red-300  overflow-hidden"
-                  >
-                    <Image
-                      src={product?.variations[0]?.image[0].path}
-                      height={270}
-                      width={245}
-                      alt=""
-                      className="!w-full !h-full object-cover"
-                    />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </div>
-
-            <div>
-              <h2 className="text-[49.11px] font-playfairdisplay w-[320px] leading-[44.2px] text-right text-white font-semibold ml-6 ">
-                Our Trending Products
-              </h2>
-            </div>
-          </div> */}
         </div>
       </section>
       <section className="pt-[81px] pb-[120px]">
@@ -763,8 +753,8 @@ const StorePage = ({ vendor, reviews }) => {
               </h3>
               <p className="text-lg font-light text-blueGray-700 mb-5">
                 Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry. Lorem Ipsum has been the industry's standard dummy
-                text ever since the 1500s,
+                industry. Lorem Ipsum has been the industry&apos;s standard
+                dummy text ever since the 1500s,
               </p>
               <ul className="grid grid-cols-2 items-center gap-x-[78px] gap-y-[30px]">
                 <li className="flex gap-2 place-items-center">
@@ -865,8 +855,221 @@ const StorePage = ({ vendor, reviews }) => {
             </div>
           </div>
           <div className="flex-1">
+            {/* <div className="grid grid-cols-3 gap-5 items-start"> */}
             <div className="grid grid-cols-3 gap-5 items-start">
-              <div className="grid gap-5">
+              <Swiper
+                direction="vertical"
+                slidesPerView={3}
+                spaceBetween={20}
+                loop={true}
+                speed={3000}
+                autoplay={{
+                  enabled: true,
+                  delay: 0,
+                  disableOnInteraction: false,
+                  pauseOnMouseEnter: true,
+                  reverseDirection: true,
+                }}
+                modules={[Autoplay, Pagination, Navigation]}
+                className="h-[736px]"
+              >
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration30.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration31.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>{" "}
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration32.png"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>{" "}
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration30.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration31.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>{" "}
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration32.png"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>
+              </Swiper>
+              <Swiper
+                direction="vertical"
+                slidesPerView={3}
+                spaceBetween={20}
+                loop={true}
+                speed={3000}
+                autoplay={{
+                  enabled: true,
+                  delay: 0,
+                  disableOnInteraction: false,
+                  pauseOnMouseEnter: true,
+                }}
+                modules={[Autoplay, Pagination, Navigation]}
+                className="h-[736px]"
+                // className="h-[736px]"
+              >
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration33.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-full object-cover"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration34.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration35.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration36.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-full object-cover"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration33.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-full object-cover"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration34.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration35.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration36.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-full object-cover"
+                  />
+                </SwiperSlide>
+              </Swiper>
+              <Swiper
+                direction="vertical"
+                slidesPerView={3}
+                spaceBetween={20}
+                loop={true}
+                speed={3000}
+                autoplay={{
+                  enabled: true,
+                  delay: 0,
+                  disableOnInteraction: false,
+                  pauseOnMouseEnter: true,
+                  reverseDirection: true,
+                }}
+                modules={[Autoplay, Pagination, Navigation]}
+                className="h-[736px]"
+              >
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration37.png"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration38.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>{" "}
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration39.png"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration37.png"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration38.jpg"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>{" "}
+                <SwiperSlide>
+                  <Image
+                    src={"/assets/images/Illustration39.png"}
+                    height={232}
+                    width={200}
+                    className="w-full h-[232px] object-cover"
+                  />
+                </SwiperSlide>
+              </Swiper>
+            </div>
+            {/* <div className="grid gap-5">
                 <div>
                   <Image
                     src={"/assets/images/Illustration30.jpg"}
@@ -951,8 +1154,8 @@ const StorePage = ({ vendor, reviews }) => {
                     className="w-full h-[232px] object-cover"
                   />
                 </div>
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
           </div>
         </div>
       </section>
@@ -1093,85 +1296,6 @@ const StorePage = ({ vendor, reviews }) => {
                 />
               </svg>
             </button>
-            {/* <div className="pt-[60px] pb-[61px] pl-[110px] pr-[227px] relative">
-            <Card className="w-full max-w-[1053px] h-[429px] rounded-[20px] flex-row">
-              <CardBody className="overflow-y-scroll mt-[30px] mb-[51px] ml-[30px] mr-[13px] custom-scrollbar !p-0">
-                <h2 className="text-[34px] font-playfairdisplay leading-[30.6px] text-blueGray-500 pb-[30px]">
-                  About us
-                </h2>
-                <div className="pr-[10px]">
-                  <p className="text-[20px] font-emirates leading-[28px] text-secondary-100">
-                    Welcome to myJewlex, your premier online jewelry marketplace
-                    where elegance meets authenticity. At myJewlex, we are
-                    dedicated to connecting discerning customers with a curated
-                    selection of exquisite jewelry from trusted stores and
-                    skilled craftsmen around the world. myJewlex platform is
-                    designed to offer a seamless shopping experience, ensuring
-                    every piece of jewelry meets the highest standards of
-                    quality and craftsmanship. Discover the Beauty with us as we
-                    redefine the jewelry shopping experience.
-                  </p>
-                  <h3 className="text-[22px] text-secondary-100 font-bold leading-[30.8px]">
-                    Our Mission
-                  </h3>
-                  <p className="text-[20px] font-emirates leading-[28px] text-secondary-100">
-                    Our mission is to revolutionize the jewelry shopping
-                    experience by providing a trustworthy and transparent
-                    platform. We strive to offer a diverse range of jewelry Our
-                    mission is to revolutionize the jewelry shopping experience
-                    by providing a trustworthy and transparent platform. We
-                    strive to offer a diverse range of jewelryOur mission is to
-                    revolutionize the jewelry shopping experience by providing a
-                    trustworthy and transparent platform. We strive to offer a
-                    diverse range of jewelry
-                  </p>
-                  <h3 className="text-[22px] text-secondary-100 font-bold leading-[30.8px]">
-                    Our Mission
-                  </h3>
-                  <p className="text-[20px] font-emirates leading-[28px] text-secondary-100">
-                    Our mission is to revolutionize the jewelry shopping
-                    experience by providing a trustworthy and transparent
-                    platform. We strive to offer a diverse range of jewelry Our
-                    mission is to revolutionize the jewelry shopping experience
-                    by providing a trustworthy and transparent platform. We
-                    strive to offer a diverse range of jewelryOur mission is to
-                    revolutionize the jewelry shopping experience by providing a
-                    trustworthy and transparent platform. We strive to offer a
-                    diverse range of jewelry
-                  </p>
-                  <h3 className="text-[22px] text-secondary-100 font-bold leading-[30.8px]">
-                    Our Mission
-                  </h3>
-                  <p className="text-[20px] font-emirates leading-[28px] text-secondary-100">
-                    Our mission is to revolutionize the jewelry shopping
-                    experience by providing a trustworthy and transparent
-                    platform. We strive to offer a diverse range of jewelry Our
-                    mission is to revolutionize the jewelry shopping experience
-                  </p>
-                </div>
-              </CardBody>
-              <CardHeader
-                shadow={false}
-                floated={false}
-                className="m-0 w-[284px] shrink-0 rounded-tr-[20px] rounded-br-[20px]"
-              >
-                <Image
-                  src={"/assets/images/card-bg1.png"}
-                  alt="lyft"
-                  width={284}
-                  height={429}
-                  className="w-[284px] h-[429px] object-cover rounded-tr-[20px] rounded-br-[20px]"
-                />
-              </CardHeader>
-            </Card>
-            <Image
-              src={`/assets/images/adnan.png`}
-              alt="adnan"
-              width={300}
-              height={300}
-              className="absolute h-[357.1px] w-[283.97px] right-[110px] top-[79px] rounded-[20px] object-cover"
-            />
-          </div> */}
           </div>
         </div>
       </section>
@@ -1298,7 +1422,8 @@ const StorePage = ({ vendor, reviews }) => {
           </div>
         </div>
       </section>
-      <section className="pt-5 pb-[70px]">
+      <QuickContact vendor={vendor} />
+      {/* <section className="pt-5 pb-[70px]">
         <div className="container">
           <div className="flex flex-col items-center">
             <div className="border-2 rounded-[4px] border-primary-200 border-l-0 border-r-0 border-b-0 bg-primary-50 pt-[50px] pl-[50px] pb-[46px] pr-[60px] w-[1100px] max-w-[1100px] ">
@@ -1488,7 +1613,7 @@ const StorePage = ({ vendor, reviews }) => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
     </>
   );
 };

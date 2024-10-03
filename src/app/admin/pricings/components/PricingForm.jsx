@@ -8,11 +8,11 @@ import DataTable from "react-data-table-component";
 import { useRouter } from "next/navigation";
 import * as Yup from "yup";
 import Moment from "react-moment";
+import moment from "moment";
 import { formatDateString } from "@/utils/helper";
 
 const PricingForm = ({ pricing, pricings }) => {
   const router = useRouter();
-
   // Sort pricings by date in descending order (latest first)
   const sortedPricings = [...pricings].sort(
     (a, b) => new Date(b.date) - new Date(a.date)
@@ -21,11 +21,14 @@ const PricingForm = ({ pricing, pricings }) => {
   const columns = [
     {
       name: "Date",
-      selector: (row) => formatDateString(row?.date),
+      selector: (row) => moment(row?.date).format("DD-MM-YYYY"),
       sortable: true,
+      sortFunction: (a, b) =>
+        moment(b.date).valueOf() - moment(a.date).valueOf(),
       style: {
         textAlign: "left",
       },
+      width: "8%",
     },
     {
       name: "Time",
@@ -177,7 +180,7 @@ const PricingForm = ({ pricing, pricings }) => {
   return (
     <>
       <div className="flex items-center justify-between mb-5 intro-y">
-        <h2 className="text-2xl font-semibold">Today's Metal Rate</h2>
+        <h2 className="text-2xl font-semibold">Today&apos;s Metal Rate</h2>
 
         <div>
           <p>

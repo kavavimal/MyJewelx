@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  FacebookShareButton,
-  InstapaperShareButton,
-  LinkedinShareButton,
-  WhatsappIcon,
-  WhatsappShareButton,
-} from "react-share";
+import { FacebookShareButton, LinkedinShareButton } from "react-share";
 
 export default function Share({ product }) {
   return (

@@ -11,6 +11,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 
 export default function ImageCarousel({ images }) {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(0); // Track the active index
 
   return (
     <div className="w-[370px]">
@@ -22,17 +23,21 @@ export default function ImageCarousel({ images }) {
               spaceBetween={10}
               thumbs={{ swiper: thumbsSwiper }}
               modules={[FreeMode, Thumbs]}
+              onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)} // Update active index
             >
               {images?.map((image, index) => {
                 return (
-                  <SwiperSlide key={index}>
+                  <SwiperSlide
+                    key={index}
+                    className="w-[370px] !h-[280px] bg-[#FFFDF8] !flex !items-center !flex-col !justify-center"
+                  >
                     <Image
-                      className="border h-[280px] w-full object-cover border-blueGray-300"
+                      className="h-[250px] w-[250px] object-contain"
                       key={index}
                       src={image.path}
                       alt="Gallery Image"
-                      width={150}
-                      height={150}
+                      width={500}
+                      height={500}
                     />
                   </SwiperSlide>
                 );
@@ -53,12 +58,16 @@ export default function ImageCarousel({ images }) {
                 return (
                   <SwiperSlide key={index}>
                     <Image
-                      className="border h-[64px] w-[80px] object-cover border-blueGray-300"
+                      className={`h-[64px] border transition-all w-[80px] opacity-70 object-cover ${
+                        activeIndex === index
+                          ? "border-primary-200 !opacity-100"
+                          : "border-blueGray-300"
+                      }`}
                       key={index}
                       src={image.path}
                       alt="Gallery Image"
-                      width={20}
-                      height={50}
+                      width={150}
+                      height={150}
                     />
                   </SwiperSlide>
                 );

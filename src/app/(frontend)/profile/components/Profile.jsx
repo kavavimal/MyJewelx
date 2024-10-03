@@ -83,12 +83,9 @@ const Profile = ({ user }) => {
   }, [user]);
 
   return (
-    <div>
+    <div className="bg-white p-7 shadow-3xl rounded-2xl">
       <Formik initialValues={formik.initialValues}>
-        <form
-          onSubmit={formik.handleSubmit}
-          className="bg-white p-7 shadow-3xl rounded-2xl"
-        >
+        <form onSubmit={formik.handleSubmit}>
           <div className="grid grid-cols-2 gap-5 items-center">
             <div className="w-full">
               <Input

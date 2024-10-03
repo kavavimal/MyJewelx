@@ -8,7 +8,7 @@ import ReactSelect from "react-select";
 import { useRouter } from "next/navigation";
 import { enqueueSnackbar } from "notistack";
 import { useSession } from "next-auth/react";
-import SessionLoader from "@/components/SessionLoader";
+import SessionLoader from "@/app/components/SessionLoader";
 const RoleForm = ({ permissions, role }) => {
   const { data: session, status } = useSession();
   const router = useRouter();

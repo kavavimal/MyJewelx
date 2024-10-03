@@ -1,11 +1,32 @@
 import { mailOptions, transporter } from "@/config/nodemailer";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 
 const CONTACT_MESSAGE_FIELDS = {
   name: "Name",
   email: "Email",
   subject: "Subject",
   message: "Message",
+};
+
+const checkUserSession = async () => {
+  const session = await getServerSession();
+  if (session?.user?.email) {
+    const user = await prisma.user.findUnique({
+      where: {
+        email: session?.user?.email,
+      },
+      include: {
+        role: {
+          select: {
+            role_name: true,
+          },
+        },
+      },
+    });
+    return user;
+  }
+  return false;
 };
 
 const generateEmailContent = (data) => {
@@ -24,20 +45,39 @@ const generateEmailContent = (data) => {
   };
 };
 export async function POST(req) {
-  const data = await req.json();
-  if (!data || !data.name || !data.email || !data.subject || !data.message) {
-    return NextResponse.json({ message: "Bad request" }, { status: 500 });
+  const user = await checkUserSession();
+  if (!user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
+  const data = await req.formData();
+  const name = data.get("name");
+  const email = data.get("email");
+  const message = data.get("message");
+  const phone = data.get("phone"); // Make sure it matches the form input name
+  const vendorId = data.get("vendorId");
+  const userId = user?.id;
+  // if (!data || !data.name || !data.email || !data.message || !data.phone) {
+  //   return NextResponse.json({ message: "Bad request" }, { status: 500 });
+  // }
 
   try {
-    await transporter.sendMail({
-      ...mailOptions,
-      to: data.email,
-      ...generateEmailContent(data),
-      subject: data.subject,
+    // await transporter.sendMail({
+    //   ...mailOptions,
+    //   to: data.email,
+    //   ...generateEmailContent(data),
+    //   subject: "Your Feedback Has Been Sent!",
+    // });
+    const contact = await prisma.Contact.create({
+      data: {
+        name,
+        email,
+        phone_number: phone,
+        message,
+        userId: userId,
+        vendorId: vendorId,
+      },
     });
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, data: contact }, { status: 200 });
   } catch (err) {
     console.log(err);
     return NextResponse.json({ message: err.message }, { status: 400 });

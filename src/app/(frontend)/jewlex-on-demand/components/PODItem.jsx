@@ -1,5 +1,4 @@
 "use client";
-import Paragraph from "@/components/Paragraph";
 import ImageCarousel from "./ImageCarousel";
 import { CURRENCY_SYMBOL } from "@/utils/constants";
 import {
@@ -17,6 +16,7 @@ import {
   LinkedinShareButton,
   WhatsappShareButton,
 } from "react-share";
+import Paragraph from "@/app/components/Paragraph";
 export default function PODItem({ pod }) {
   const weight_print = () => {
     let weight = "";
@@ -55,26 +55,34 @@ export default function PODItem({ pod }) {
     return price;
   };
   return (
-    <div className="border rounded-sm shadow-sm flex items-start relative ">
-      <div className="w-[370px] relative overflow-hidden">
+    <div className="border rounded-sm border-blueGray-150 flex md:flex-row flex-col items-start relative ">
+      <div className="w-full md:w-[370px] relative overflow-hidden">
         <ImageCarousel images={pod.Images} />
       </div>
-      <div className="flex-1 border-l px-5 py-[10px] ">
+      <div className="flex-1 border-l w-full p-[15px] md:px-5 md:py-[10px] ">
         <div className="flex items-center justify-between pb-4">
           <h4 className="text-dark-50 text-[18px]">{pod.name}</h4>
-          <Paragraph color={"secondary-100"} classes="text-right text-[13px]">
+          <Paragraph
+            color={"secondary-100"}
+            classes="text-right leading-[18px]"
+            size={"[12px]"}
+          >
             POD ID: {`myjewlex${pod.id}`}
           </Paragraph>
         </div>
         <div className="grid grid-cols-2 pb-2">
           <div>
-            <h4 className="text-secondary-100">Material</h4>
-            <Paragraph>{pod.metal_type}</Paragraph>
+            <h4 className="text-[#a9a9a9] text-[14px] leading-[20.4px]">
+              Material
+            </h4>
+            <Paragraph color="blueGray-500">{pod.metal_type}</Paragraph>
           </div>
           {pod.metal_type === "Gold" ? (
             <div>
-              <h4 className="text-secondary-100">Karat</h4>
-              <Paragraph>{pod.karat}</Paragraph>
+              <h4 className="text-[#a9a9a9] text-[14px] leading-[20.4px]">
+                Karat
+              </h4>
+              <Paragraph color="blueGray-500">{pod.karat}</Paragraph>
             </div>
           ) : (
             ""
@@ -82,29 +90,37 @@ export default function PODItem({ pod }) {
         </div>
         <div className="grid grid-cols-2 pb-2">
           <div>
-            <h4 className="text-secondary-100 ">Weight</h4>
-            <Paragraph>{weight_print()}</Paragraph>
+            <h4 className="text-[#a9a9a9] text-[14px] leading-[20.4px] ">
+              Weight
+            </h4>
+            <Paragraph color="blueGray-500">{weight_print()}</Paragraph>
           </div>
           <div>
-            <h4 className="text-secondary-100 ">Made in</h4>
-            <Paragraph>{String(pod.made_in).split(",").join(" | ")}</Paragraph>
+            <h4 className="text-[#a9a9a9] text-[14px] leading-[20.4px] ">
+              Made in
+            </h4>
+            <Paragraph color="blueGray-500">
+              {String(pod.made_in).split(",").join(" | ")}
+            </Paragraph>
           </div>
         </div>
         <div className="grid grid-cols-2 pb-1">
           <div>
-            <h4 className="text-secondary-100">Price</h4>
-            <Paragraph>{price_print()}</Paragraph>
+            <h4 className="text-[#a9a9a9] text-[14px] leading-[20.4px]">
+              Price
+            </h4>
+            <Paragraph color="blueGray-500">{price_print()}</Paragraph>
           </div>
         </div>
         <div className="border-t flex flex-col justify-between pt-1">
-          <Paragraph color={"secondary-100"} classes={"mb-[74px]"}>
+          <Paragraph color={"secondary-100"} classes={"h-[95px]"}>
             {truncate(pod.description, 70)}
           </Paragraph>
           <div>
-            <div className="flex items-center justify-between">
+            <div className="flex gap-1 leading-[25.2px] items-center justify-between">
               <Link
                 data-ripple-light="true"
-                className="flex gap-[8px] w-[150px] border border-primary-200 hover:shadow-none hover:bg-transparent hover:text-primary-200 text-dark-50 text-center justify-center rounded-sm items-center  middle none bg-primary-200 py-[5px] px-[14px] align-middle text-[14px]  shadow-md shadow-primary-200/10 transition-all focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-50 "
+                className="flex gap-[8px] max-w-full w-[188px] sm:w-[150px] border border-primary-200 hover:shadow-none hover:bg-transparent hover:text-primary-200 text-dark-50 text-center justify-center rounded-sm items-center  middle none bg-primary-200 py-[5px] px-[14px] align-middle text-[14px]  shadow-md shadow-primary-200/10 transition-all focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-50 "
                 href={`tel:${pod.contact}`}
               >
                 <svg
@@ -127,7 +143,7 @@ export default function PODItem({ pod }) {
                 title="Hello"
                 separator=": "
               >
-                <Button className="bg-primary-200 border border-primary-200 hover:shadow-none hover:bg-transparent hover:text-primary-200 text-[14px] text-dark-50 flex gap-[8px] w-[150px] text-center justify-center rounded-sm items-center px-[14px] py-[5px] font-normal font-emirates normal-case">
+                <Button className="bg-primary-200 border border-primary-200 hover:shadow-none hover:bg-transparent hover:text-primary-200 text-[14px] text-dark-50 flex gap-[8px] w-[80px] max-w-full sm:w-[150px] text-center justify-center rounded-sm items-center px-[14px] py-[5px] font-normal font-emirates normal-case">
                   <svg
                     width="17"
                     height="16"
@@ -146,7 +162,7 @@ export default function PODItem({ pod }) {
               </WhatsappShareButton>
               <Menu>
                 <MenuHandler>
-                  <Button className="bg-primary-200 border border-primary-200 hover:shadow-none hover:bg-transparent hover:text-primary-200 text-[14px] text-dark-50 flex gap-[8px] w-[150px] text-center justify-center rounded-sm items-center px-[14px] py-[5px] font-normal font-emirates normal-case">
+                  <Button className="bg-primary-200 border border-primary-200 hover:shadow-none hover:bg-transparent hover:text-primary-200 text-[14px] text-dark-50 flex gap-[8px] w-[80px] max-w-full sm:w-[150px] text-center justify-center rounded-sm items-center px-[14px] py-[5px] font-normal font-emirates normal-case">
                     <svg
                       className="mb-1"
                       width="17"

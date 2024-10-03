@@ -2,24 +2,42 @@
 import { printPrice } from "@/utils/helper";
 import { CURRENCY_SYMBOL } from "@/utils/constants";
 import React, { useState } from "react";
-import ButtonComponent from "@/components/frontend/ButtonComponent";
 import { useChekcoutStore } from "@/contexts/checkoutStore";
 import SubscribeComponent from "./Stripe";
 import Paypal from "./Paypal";
 import { post } from "@/utils/api";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/contexts/cartStore";
-import LoadingDots from "@/components/loading-dots";
+import { Button } from "@material-tailwind/react";
 
 export default function CheckoutSummary({ cart, user, showCoupon = false }) {
   const router = useRouter();
-  const { cartItems } = cart;
-  const totalAmount = cartItems
-    .reduce((total, item) => total + item.price * item.quantity, 0)
-    .toFixed(2);
   const { shippingAddress, paymentMethod, errors } = useChekcoutStore(
     (state) => state
   );
+  const { cartItems } = cart;
+  let totalAmount = cartItems
+    .reduce((total, item) => total + item.price * item.quantity, 0)
+    .toFixed(2);
+
+  let totalVat = 0;
+
+  cartItems.forEach((items) => {
+    if (items?.productVariation?.other_charges) {
+      const other_charges = JSON.parse(items?.productVariation?.other_charges);
+      const vat = other_charges.find((item) => item.charge_type === "vat/tax");
+      if (vat) {
+        totalVat += Number(vat?.tax || 0) * Number(items?.quantity || 0);
+      }
+    }
+  });
+
+  let totalShippingCharge = 0;
+  cartItems.forEach((items) => {
+    totalShippingCharge += Number(items?.productVariation?.shipping_charge);
+    //  *Number(items?.quantity || 0);
+  });
+
   const emptyCart = useCartStore((state) => state.emptyStore);
   const setErrors = useChekcoutStore((state) => state.setError);
   const [loading, setLoading] = useState(false);
@@ -71,7 +89,7 @@ export default function CheckoutSummary({ cart, user, showCoupon = false }) {
       // Handle successful order placement (e.g., navigate to order confirmation page)
     } else {
       setLoading(false);
-      console.error("Error placing order:", data);
+      console.error("Error placing order:", response.data);
       // Handle error
     }
   };
@@ -84,39 +102,45 @@ export default function CheckoutSummary({ cart, user, showCoupon = false }) {
         </h3>
 
         <div className="space-y-4">
-          <div className="space-y-2">
-            <dl className="flex items-center justify-between gap-4">
-              <dt className="text-base font-normal text-gray-900">Cost Type</dt>
-              <dd className="text-base font-medium text-gray-900">
-                Amount {CURRENCY_SYMBOL}
-              </dd>
-            </dl>
-            <dl className="flex items-center justify-between gap-4">
-              <dt className="text-base font-normal text-gray-500">
-                Price ({cartItems.length} Product Selected)
-              </dt>
-              <dd className="text-base font-medium text-gray-500">
-                {printPrice(totalAmount)}
-              </dd>
-            </dl>
-            <dl className="flex items-center justify-between gap-4">
-              <dt className="text-base font-normal text-gray-500">VAT 5%</dt>
-              <dd className="text-base font-medium text-gray-500">
-                {totalAmount > 0 ? printPrice((totalAmount * 5) / 100) : 0}
-              </dd>
-            </dl>
-            {showCoupon === true && (
-              <dl className="flex items-center justify-between gap-4">
-                <dt className="text-base font-normal text-gray-500">
-                  Coupon discount
-                </dt>
-                <dd className="text-base font-medium text-gray-500">-0.00</dd>
-              </dl>
-            )}
-          </div>
+          <dl className="flex items-center justify-between gap-4">
+            <dt className="text-base font-normal text-gray-900">Cost Type</dt>
+            <dd className="text-base font-medium text-gray-900">
+              Amount {CURRENCY_SYMBOL}
+            </dd>
+          </dl>
+          <dl className="flex items-center justify-between gap-4">
+            <dt className="text-base font-normal text-gray-500">
+              Price ({cartItems.length} Product Selected)
+            </dt>
+            <dd className="text-base font-medium text-gray-500">
+              {printPrice(totalAmount - totalVat - totalShippingCharge)}
+            </dd>
+          </dl>
+          <dl className="flex items-center justify-between gap-4">
+            <dt className="text-base font-normal text-gray-500">
+              Shipping Charge
+            </dt>
+            <dd className="text-base font-medium text-gray-500">
+              {printPrice(totalShippingCharge)}
+            </dd>
+          </dl>
+
+          <dl className="flex items-center justify-between gap-4">
+            <dt className="text-base font-normal text-gray-500">Subtotal</dt>
+            <dd className="text-base font-medium text-gray-500">
+              {printPrice(totalAmount - totalVat)}
+            </dd>
+          </dl>
+
+          <dl className="flex items-center justify-between gap-4">
+            <dt className="text-base font-normal text-gray-500">VAT 5%</dt>
+            <dd className="text-base font-medium text-gray-500">
+              {printPrice(totalVat)}
+            </dd>
+          </dl>
 
           <dl className="flex items-center justify-between gap-4 border-t border-blueGray-300 pt-2">
-            <dt className="text-base font-bold text-gray-900">Sub Total</dt>
+            <dt className="text-base font-bold text-gray-900">Total</dt>
             <dd className="text-base font-bold text-gray-900">
               {printPrice(totalAmount)}
             </dd>
@@ -138,10 +162,15 @@ export default function CheckoutSummary({ cart, user, showCoupon = false }) {
           </div>
         )}
         {paymentMethod === "cod" && (
-          <ButtonComponent onClick={() => handlePlaceOrder(JSON.stringify({paymentMethod: 'cod'}))}>
+          <Button
+            fullWidth
+            onClick={() =>
+              handlePlaceOrder(JSON.stringify({ paymentMethod: "cod" }))
+            }
+          >
             {/* {loading && <LoadingDots />} */}
             Place Order
-          </ButtonComponent>
+          </Button>
         )}
         {paymentMethod === "paypal" && (
           <Paypal

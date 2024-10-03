@@ -100,33 +100,5 @@ const page = async () => {
     />
   );
 };
-// const page = async () => {
-//   const session = await getServerSession(authOptions);
-//   if (session?.user?.role === AcountType.VENDOR) {
-//     const counts = await getCountsData(session.user.id);
-//     return (
-//       <Dashboard
-//         vendors={false}
-//         products={counts.products}
-//         allUsers={false}
-//         allOrders={counts.sellerOrders}
-//       />
-//     );
-//   } else {
-//     const vendors = await getVendors();
-//     const products = await getProducts();
-//     const allUsers = await getUsers();
-//     const allOrders = await getOrders();
-
-//     return (
-//       <Dashboard
-//         vendors={vendors}
-//         products={products}
-//         allUsers={allUsers}
-//         allOrders={allOrders}
-//       />
-//     );
-//   }
-// };
 
 export default page;

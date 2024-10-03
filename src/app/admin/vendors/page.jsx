@@ -13,6 +13,7 @@ async function getVendors() {
       vendor: true,
       role: true,
       image: true,
+      banner_image: true,
     },
     where: {
       role_id: VENDOR_ID,

@@ -1,17 +1,15 @@
 "use client";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AcountType } from "@prisma/client";
-import LoadingDots from "@/components/loading-dots";
 import Image from "next/image";
-import { Alert, Button, Input, Option, Select } from "@material-tailwind/react";
+import { Button, Input, Option, Select } from "@material-tailwind/react";
 import { Formik, useFormik } from "formik";
 import { post, update } from "@/utils/api";
 import { userValidationSchema } from "@/schemas/ValidationSchema";
 import { enqueueSnackbar } from "notistack";
 import { useSession } from "next-auth/react";
-import SessionLoader from "@/components/SessionLoader";
+import SessionLoader from "@/app/components/SessionLoader";
 export default function UserForm({ roles, user }) {
   const { data: session, status } = useSession();
 
@@ -107,8 +105,6 @@ export default function UserForm({ roles, user }) {
       }
     },
   });
-
-  console.log(user);
 
   useEffect(() => {
     if (file) {

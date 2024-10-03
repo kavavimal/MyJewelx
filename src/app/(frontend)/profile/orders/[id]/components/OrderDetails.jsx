@@ -1,15 +1,21 @@
 "use client";
-import Breadcrumbs from "@/components/Breadcrumbs";
 import { get } from "@/utils/api";
 import React, { useEffect, useState } from "react";
 import moment from "moment";
+import Image from "next/image";
 import Link from "next/link";
+import Breadcrumbs from "@/app/components/Breadcrumbs";
+
 const OrderDetails = ({ id }) => {
   const [order, setOrder] = useState({});
   const [shippingAddress, setShippingAddress] = useState({});
   const [billingAddress, setBillingAddress] = useState({});
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const variationDataSplit = order.orderItems
+    ? order.orderItems[0].productVariation?.variation_name?.split(",")
+    : "";
+
   const getOrder = async () => {
     setLoading(true);
     const response = await get(`/api/order/${id}`);
@@ -149,14 +155,60 @@ const OrderDetails = ({ id }) => {
           <tbody>
             {order.orderItems.map((item, index) => (
               <tr key={index} className="border border-gray-200">
-                <td className="p-1">
-                  <Link
-                    href={`/product/${
-                      JSON.parse(item.variationData).product_id ?? "0"
+                <td className="p-1 !max-w-[500px] !w-[500px] ">
+                  <div
+                    className={`flex max-w-[500px] pr-3 items-center gap-[15px] ${
+                      index === 0
+                        ? "pt-0"
+                        : "pt-[15px] border-t border-blueGray-300 mt-[15px]"
                     }`}
                   >
-                    {item.name}
-                  </Link>
+                    <div className="w-[100px] bg-clip-border overflow-hidden rounded-sm border border-blueGray-300">
+                      {order.orderItems[0]?.productVariation?.image[0] && (
+                        <Image
+                          src={
+                            order.orderItems[0]?.productVariation?.image[0].path
+                          }
+                          height={200}
+                          width={200}
+                          className="w-full h-[127px] object-cover"
+                          alt=""
+                        />
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-0.5 flex-1">
+                      <div className="flex justify-between items-center">
+                        <Link
+                          href={`/product/${
+                            JSON.parse(item.variationData).product_id ?? "0"
+                          }`}
+                        >
+                          {item.name}
+                        </Link>
+                      </div>
+                      <div className="py-0.5">
+                        {variationDataSplit?.map((item, index) => {
+                          return (
+                            <span
+                              key={index}
+                              className={`size-sm text-secondary-100 pr-[6px] 
+                                 ${
+                                   index !== variationDataSplit.length - 1 &&
+                                   "border-r"
+                                 }
+                                 border-blueGray-300 text-sm`}
+                            >
+                              {item}
+                            </span>
+                          );
+                        })}
+                      </div>
+                      <p className="size-sm text-secondary-100  text-sm">
+                        Seller: Malabar&apos;s Gold and Diamonds
+                      </p>
+                    </div>
+                  </div>
                 </td>
                 <td>{item.quantity}</td>
                 <td>{item.price}</td>

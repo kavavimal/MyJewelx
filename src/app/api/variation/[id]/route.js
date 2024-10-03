@@ -89,6 +89,7 @@ export async function PUT(request, { params }) {
         req.get("old_img_change") !== ""
           ? req.get("old_img_change").split(",")
           : [],
+      shipping_charge: Number(req.get("shipping_charge")) ?? "",
     };
     const parsedVariation = productVariationSchema.parse(variationData);
 
@@ -184,6 +185,7 @@ export async function PUT(request, { params }) {
       isPriceFixed: parsedVariation.isPriceFixed,
       other_charges: parsedVariation.other_charges,
       making_charges: parsedVariation.making_charges,
+      shipping_charge: variationData.shipping_charge,
     };
 
     if (images.length > 0) {

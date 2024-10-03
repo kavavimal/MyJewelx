@@ -68,7 +68,6 @@ export async function PUT(request, { params }) {
         );
         try {
           await unlink(oldFilePath);
-          console.log(`Successfully deleted ${oldFilePath}`);
         } catch (error) {
           console.error(`Error deleting file ${oldFilePath}:`, error);
         }

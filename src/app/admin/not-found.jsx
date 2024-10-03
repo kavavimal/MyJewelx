@@ -1,6 +1,6 @@
-import FrontendHeader from "@/components/frontend/common/Header";
-import Link from "next/link";
 import React from "react";
+import FrontendHeader from "../(frontend)/components/FrontendHeader";
+import Link from "next/link";
 
 export default function NotFound() {
   return (

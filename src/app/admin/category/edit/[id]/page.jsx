@@ -6,6 +6,9 @@ async function getCategory(id) {
   try {
     const category = await prisma.category.findFirst({
       where: { category_id: Number(id) },
+      include: {
+        image: true,
+      },
     });
     return category;
   } catch (error) {

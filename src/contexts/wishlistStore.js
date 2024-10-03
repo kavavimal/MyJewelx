@@ -1,9 +1,9 @@
-import { addToLikedlist, fetchLikelist, removeFromLikedlist } from "@/actions/likes";
+import { addToLikedlist, fetchLikelist, removeFromLikedlist } from "@/app/actions/likes";
 import {
   addToWishlist,
   fetchWishlist,
   removeFromWishlist,
-} from "@/actions/wishlist";
+} from "@/app/actions/wishlist";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 

@@ -1,5 +1,3 @@
-import Breadcrumbs from "@/components/Breadcrumbs";
-import Container from "@/components/frontend/Container";
 import prisma from "@/lib/prisma";
 import { sendOrderEmail } from "@/lib/sendMails";
 import { stripe } from "@/lib/stripe";
@@ -7,6 +5,7 @@ import { OrderStatus } from "@prisma/client";
 import Link from "next/link";
 import CheckoutItem from "./components/CheckoutItem";
 import CustomerDetails from "./components/CustomerDetails";
+import Breadcrumbs from "@/app/components/Breadcrumbs";
 
 export const revalidate = 0;
 
@@ -104,7 +103,7 @@ export default async function OrderDetailsPage({ params, searchParams }) {
   );
 
   return (
-    <Container>
+    <div className="container">
       <section className="relative">
         <div className="container">
           <div className="border-b border-b-primary-200 py-[20px] mb-[30px]">
@@ -120,8 +119,8 @@ export default async function OrderDetailsPage({ params, searchParams }) {
           </div>
           <div className="pb-[30px] flex gap-4">
             <div className="flex-1">
-              <div className="pb-[15px] border-b border-b-blueGray-300">
-                <div className="w-[350px]">
+              <div className="pb-[15px] sm:border-b border-b-blueGray-300">
+                <div className="w-full sm:w-[350px]">
                   <h3 className="text-black text-[28px]">
                     Thank you for your order!
                   </h3>
@@ -160,7 +159,10 @@ export default async function OrderDetailsPage({ params, searchParams }) {
                   </div>
                 </div>
               </div>
-              <div className="pt-[15px]">
+              <div className="w-full sm:hidden block sm:w-[400px]">
+                <CustomerDetails order={order} total={orderTotal} user={user} />
+              </div>
+              <div className="pt-0 sm:pt-[15px]">
                 <h3 className="text-xl py-[15px]">
                   {order.orderItems?.length || 0} Product Checkout
                 </h3>
@@ -190,12 +192,12 @@ export default async function OrderDetailsPage({ params, searchParams }) {
                 </div>
               </div>
             </div>
-            <div className="w-[400px]">
+            <div className="w-full sm:block hidden sm:w-[400px]">
               <CustomerDetails order={order} total={orderTotal} user={user} />
             </div>
           </div>
         </div>
       </section>
-    </Container>
+    </div>
   );
 }

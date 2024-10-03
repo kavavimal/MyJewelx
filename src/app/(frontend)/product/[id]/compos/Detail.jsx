@@ -1,17 +1,17 @@
 "use client";
-import StarRatings from "@/components/frontend/StarRatings";
 import { useState } from "react";
-import AddToCart from "@/components/frontend/cart/AddToCart";
 import ProductImages from "./ProductImages";
-import Paragraph from "@/components/Paragraph";
 import Share from "./Share";
 import ProductMeta from "./ProductMeta";
 import { printFormatPrice, printPrice, truncate } from "@/utils/helper";
 import ProductAttributeSelections from "./ProductAttributeSelections";
-import AddToWishlist from "@/components/frontend/cart/AddToWishlist";
-import ProductLikes from "@/components/frontend/ProductLikes";
 import Image from "next/image";
-import Breadcrumbs from "@/components/Breadcrumbs";
+import Breadcrumbs from "@/app/components/Breadcrumbs";
+import ProductLikes from "@/app/components/ProductLikes";
+import AddToWishlist from "@/app/(frontend)/components/AddToWishlist";
+import Paragraph from "@/app/components/Paragraph";
+import AddToCart from "@/app/(frontend)/components/AddToCart";
+import StarRatings from "@/app/components/StarRatings";
 
 const Detail = ({
   product,
@@ -45,6 +45,7 @@ const Detail = ({
   const metalPrice = makingCharge?.metalPrice || 0;
   const makingChargeValue = makingCharge?.value || 0;
   const net_weight = Number(variation?.net_weight);
+  const shipping_charge = Number(variation?.shipping_charge || 0);
 
   const getMetalCharge = () => {
     switch (makingCharge?.charge_type) {
@@ -55,7 +56,11 @@ const Detail = ({
       case "Per Piece / Flat":
         return parseFloat(makingChargeValue) || 0;
       case "Per(%) On Metal Rate On Karat":
-        return metalPrice * (parseFloat(makingChargeValue) || 0) || 0;
+        return (
+          metalPrice *
+            net_weight *
+            ((parseFloat(makingChargeValue) || 0) / 100) || 0
+        );
       default:
         return 0;
     }
@@ -73,7 +78,11 @@ const Detail = ({
           return parseFloat(discount?.value) || 0;
 
         case "Per(%) On Metal Rate On Karat":
-          return metalPrice * (parseFloat(discount?.value) || 0) || 0;
+          return (
+            metalPrice *
+              net_weight *
+              ((parseFloat(discount?.value) || 0) / 100) || 0
+          );
 
         default:
           return 0;
@@ -82,22 +91,29 @@ const Detail = ({
     return 0;
   };
 
-  let subtotal =
-    metalPrice * net_weight +
-    getMetalCharge() +
-    gemstone_total +
-    other_charges_total -
-    getDiscount();
-  let vatTax = 0;
+  let subtotal = 0;
 
-  if (Boolean(vat)) {
-    vatTax = parseFloat((subtotal * vat.value) / 100) || 0;
+  if (variation.isPriceFixed) {
+    subtotal =
+      variation?.regular_price +
+      getMetalCharge() +
+      gemstone_total +
+      other_charges_total -
+      getDiscount() +
+      shipping_charge;
+  } else {
+    subtotal =
+      metalPrice * net_weight +
+      getMetalCharge() +
+      gemstone_total +
+      other_charges_total -
+      getDiscount() +
+      shipping_charge;
   }
-
   return (
     <>
       <section className="body-font overflow-hidden">
-        <div className="container mx-auto">
+        <div className="container mx-auto px-2">
           <div className="border-b border-primary-200 py-[20px] mb-[30px]">
             <Breadcrumbs
               items={[
@@ -110,13 +126,13 @@ const Detail = ({
               ]}
             />
           </div>
-          <div className="mx-auto flex justify-center items-start gap-[50px]">
+          <div className="mx-auto flex flex-col sm:flex-col md:flex-row justify-center items-start gap-[30px] md:gap-[20px] xl:gap-[50px]">
             <ProductImages variation={variation} />
-            <div className="lg:w-1/2 w-full">
-              <div className="p-5 px-4 pt-7 pb-[15px] lg:mt-0 border border-blueGray-300 rounded-sm">
-                <div className="flex justify-between items-center pb-2.5 border-b border-b-blueGray-300">
+            <div className="md:w-1/2 w-full">
+              <div className="p-0 sm:p-5 sm:px-4 sm:pt-7 sm:pb-[15px] lg:mt-0 border-0 sm:border border-blueGray-300 rounded-sm">
+                <div className="flex sm:gap-0 gap-4 sm:flex-row flex-row-reverse justify-end sm:justify-between items-center pb-2.5 border-b border-b-blueGray-300">
                   <div className="flex items-center gap-2.5">
-                    <div>
+                    <div className="sm:block hidden">
                       <Image
                         src="/assets/images/Mark.svg"
                         width={30}
@@ -124,13 +140,16 @@ const Detail = ({
                         alt="Mark"
                       />
                     </div>
-                    <h4 className="text-black text-xl">
-                      Malabar Golds and Diamonds
+                    <h4 className="text-black text-xl sm:text-lg md:text-lg lg:text-xl">
+                      {product?.user?.vendor?.store_name}
                     </h4>
                   </div>
                   <div className="w-[55px] h-[55px] bg-clip-border overflow-hidden rounded-sm">
                     <Image
-                      src="/assets/images/brand.png"
+                      src={`${
+                        product?.user?.image?.path ||
+                        "/assets/images/logo-jewelry-store.png"
+                      }`}
                       height={100}
                       width={100}
                       alt="brand"
@@ -138,12 +157,12 @@ const Detail = ({
                     />
                   </div>
                 </div>
-                <h1 className="text-gray-900 text-3xl title-font font-medium mt-2.5 leading-[40px]">
+                <h1 className="text-gray-900 text-3xl md:text-xl lg:text-2xl xl:text-3xl title-font font-medium mt-2.5 leading-[40px]">
                   {product.product_name}
                 </h1>
                 <div className="flex items-center">
                   <StarRatings starRatings={avgRating ? avgRating : 0} />
-                  <p className="ml-3 leading-5 text-sm">
+                  <p className="ml-3 leading-5 text-sm xl:text-sm sm:text-xs">
                     {product?.reviews?.length} Customer Reviews
                   </p>
 
@@ -157,6 +176,8 @@ const Detail = ({
                             ? product.likes.length
                             : "0"
                         }
+                        like={product.likes ? product.likes.length : ""}
+                        isproductid
                       />
                     </Paragraph>
                   </span>
@@ -166,14 +187,18 @@ const Detail = ({
                 </div>
 
                 <div className="w-1/2 mb-1 flex ">
-                  <strong className="md:w-1/2 text-lg font-medium">
+                  <strong
+                    className="md:w-1/2 pr-5 sm:text-sm 
+                  md:text-base
+                   xl:text-lg text-lg font-medium"
+                  >
                     {printPrice(
                       variation?.selling_price
                         ? variation?.selling_price
                         : variation?.regular_price
                     )}
                   </strong>
-                  <p className="md:w-1/2 ps-5 border-l text-base text-secondary-100">
+                  <p className="md:w-1/2 ps-5 border-l text-base lg:text-base sm:text-sm text-secondary-100">
                     {variation?.net_weight} gram
                   </p>
                 </div>
@@ -189,7 +214,7 @@ const Detail = ({
                   {variation?.description?.length > 300 && (
                     <div>
                       <button
-                        className="font-medium text-base"
+                        className="font-medium text-base lg:text-base sm:text-sm"
                         onClick={() => setIsReadMore(!isReadMore)}
                       >
                         {isReadMore ? "Less..." : "Read More..."}
@@ -199,6 +224,7 @@ const Detail = ({
                 </div>
                 <div className="border-b border-b-blueGray-300 py-3">
                   <ProductAttributeSelections
+                    className="!gap-0 !flex-wrap"
                     product={product}
                     setVariation={setVariation}
                     variation={variation}
@@ -208,92 +234,103 @@ const Detail = ({
                 </div>
 
                 <div className="pb-3 border-b border-b-blueGray-300 pt-2.5">
-                  <table className="w-1/2">
+                  <table className="w-3/4 sm:w-10/12 xl:w-1/2">
                     <thead>
                       <tr>
-                        <th className="text-left font-medium text-base text-black py-1">
+                        <th className="text-left font-medium text-base lg:text-base sm:text-sm text-black py-1">
                           Cost Type
                         </th>
-                        <th className="text-right font-medium text-base text-black py-1">
+                        <th className="text-right font-medium text-base lg:text-base sm:text-sm text-black py-1">
                           Amount AED
                         </th>
                       </tr>
                     </thead>
                     <tbody>
+                      {variation.isPriceFixed ? (
+                        <tr>
+                          {" "}
+                          <td className="text-left text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
+                            Fixed Price <span>:</span>
+                          </td>
+                          <td className="text-right text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
+                            {printFormatPrice(variation?.regular_price)}
+                          </td>
+                        </tr>
+                      ) : (
+                        <tr>
+                          <td className="text-left text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
+                            Metal Amount <span>:</span>
+                          </td>
+                          <td className="text-right text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
+                            {printFormatPrice(metalPrice * net_weight)}
+                          </td>
+                        </tr>
+                      )}
                       <tr>
-                        <td className="text-left text-secondary-100 font-light text-base py-1">
-                          Metal Amount <span>:</span>
-                        </td>
-                        <td className="text-right text-secondary-100 font-light text-base py-1">
-                          {printFormatPrice(metalPrice * net_weight)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="text-left text-secondary-100 font-light text-base py-1">
+                        <td className="text-left text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
                           Metal Charges <span>:</span>
                         </td>
-                        <td className="text-right text-secondary-100 font-light text-base py-1">
+                        <td className="text-right text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
                           {printFormatPrice(getMetalCharge())}
                         </td>
                       </tr>
 
                       <tr>
-                        <td className="text-left text-secondary-100 font-light text-base py-1">
+                        <td className="text-left text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
                           Other Charges <span>:</span>
                         </td>
-                        <td className="text-right text-secondary-100 font-light text-base py-1">
+                        <td className="text-right text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
                           {printFormatPrice(gemstone_total)}
                         </td>
                       </tr>
 
                       <tr>
-                        <td className="text-left text-secondary-100 font-light text-base py-1">
+                        <td className="text-left text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
                           Add Charges <span>:</span>
                         </td>
-                        <td className="text-right text-secondary-100 font-light text-base py-1">
+                        <td className="text-right text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
                           {printFormatPrice(other_charges_total)}
                         </td>
                       </tr>
                       <tr>
-                        <td className="text-left text-secondary-100 font-light text-base py-1">
+                        <td className="text-left text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
                           Discount <span>:</span>
                         </td>
-                        <td className="text-right text-secondary-100 font-light text-base py-1">
+                        <td className="text-right text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
                           -{isDiscount ? printFormatPrice(getDiscount()) : 0}
                         </td>
                       </tr>
-
                       <tr>
-                        <td className="text-left text-secondary-100 font-light text-base py-1">
+                        <td className="text-left text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
                           Shipping Charges <span>:</span>
                         </td>
-                        <td className="text-right text-secondary-100 font-light text-base py-1">
-                          0
+                        <td className="text-right text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
+                          {printFormatPrice(variation?.shipping_charge)}
                         </td>
                       </tr>
                       <tr>
-                        <td className="text-left text-secondary-100 font-light text-base py-1">
+                        <td className="text-left text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
                           Sub Total <span>:</span>
                         </td>
-                        <td className="text-right text-secondary-100 font-light text-base py-1">
+                        <td className="text-right text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
                           {printFormatPrice(subtotal)}
                         </td>
                       </tr>
                       <tr>
-                        <td className="text-left text-secondary-100 font-light text-base py-1">
-                          VAT {vat ? "(5%)" : "(0)"} <span>:</span>
+                        <td className="text-left text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
+                          VAT {vat?.tax > 0 ? "(5%)" : "(0)"} <span>:</span>
                         </td>
-                        <td className="text-right text-secondary-100 font-light text-base py-1">
-                          {printFormatPrice(vatTax)}
+                        <td className="text-right text-secondary-100 font-light text-base lg:text-base sm:text-sm py-1">
+                          {printFormatPrice(vat?.tax || 0)}
                         </td>
                       </tr>
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td className="text-left text-black font-medium text-base py-1">
+                        <td className="text-left text-black font-medium text-base lg:text-base sm:text-sm py-1">
                           Total <span>:</span>
                         </td>
-                        <td className="text-right text-black font-medium text-base py-1">
+                        <td className="text-right text-black font-medium text-base lg:text-base sm:text-sm py-1">
                           {printFormatPrice(
                             variation?.selling_price
                               ? variation?.selling_price
@@ -304,7 +341,7 @@ const Detail = ({
                     </tfoot>
                   </table>
                 </div>
-                <p className="text-base font-light text-secondary-100 mb-3 mt-2.5">
+                <p className="text-base lg:text-base sm:text-sm font-light text-secondary-100 mb-3 mt-2.5">
                   Seller :{" "}
                   {product.user.firstName + " " + product.user.lastName}
                 </p>

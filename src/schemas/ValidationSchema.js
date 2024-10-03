@@ -1,6 +1,5 @@
 import { INDIA, attributeIDs } from "@/utils/constants";
 import * as Yup from "yup";
-import { z } from "zod";
 
 export const permissionValidationSchema = Yup.object({
   permission_name: Yup.string().required("Please enter permission name"),
@@ -31,6 +30,40 @@ export const categoryValidationSchema = Yup.object({
   name: Yup.string().required("Name is required"),
   description: Yup.string().required("Description is required"),
   // category_image: Yup.string().required("Category image is required"),
+});
+
+export const shippingAddressValidationSchema = Yup.object({
+  firstName: Yup.string()
+    .min(2, "First Name must be at least 2 characters")
+    .required("First Name is required"),
+
+  lastName: Yup.string()
+    .min(2, "Last Name must be at least 2 characters")
+    .required("Last Name is required"),
+
+  email: Yup.string()
+    .email("Invalid email format")
+    .required("Email is required"),
+
+  street: Yup.string()
+    .min(5, "Address must be at least 5 characters")
+    .required("Address is required"),
+
+  phone: Yup.string()
+    .matches(/^(\+?\d{1,4}|\d{1,4})?\s?\d{7,10}$/, "Phone number is not valid")
+    .required("Phone is required"),
+
+  country: Yup.string()
+    .min(2, "Country name must be at least 2 characters")
+    .required("Country is required"),
+
+  city: Yup.string()
+    .min(2, "City must be at least 2 characters")
+    .required("City is required"),
+
+  zipCode: Yup.string()
+    .matches(/^\d{5}(-\d{4})?$/, "Invalid Zip Code format")
+    .required("Zip Code is required"),
 });
 
 export const tagsValidationSchema = Yup.object({

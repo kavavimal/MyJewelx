@@ -159,10 +159,10 @@ const ReviewForm = ({ product_id, user_id }) => {
         </div>
 
         <div className="flex space-x-4">
-          <Button type="submit" loading={loading}>
+          <Button type="submit" className="w-full sm:w-auto" loading={loading}>
             Submit review
           </Button>
-          <Button type="button" variant="outlined">
+          <Button type="button" className="w-full sm:w-auto" variant="outlined">
             Cancel
           </Button>
         </div>

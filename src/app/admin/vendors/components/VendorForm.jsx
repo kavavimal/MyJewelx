@@ -1,5 +1,5 @@
 "use client";
-import FileUploadIcon from "@/components/FileUploadIcon";
+import FileUploadIcon from "@/app/components/FileUploadIcon";
 import { post, update } from "@/utils/api";
 import { VENDOR_ID } from "@/utils/constants";
 import { showToast } from "@/utils/helper";
@@ -28,7 +28,9 @@ const VendorForm = ({ vendor, storeURLs, emails, FormHeader = true }) => {
   );
   const router = useRouter();
   const [previewURL, setPreviewURL] = useState("");
+  const [previewBannerURL, setPreviewBannerURL] = useState("");
   const [file, setFile] = useState("");
+  const [bannerfile, setBannerFile] = useState("");
 
   const validationSchema = Yup.object().shape({
     firstName: Yup.string().required("First Name is required"),
@@ -90,6 +92,7 @@ const VendorForm = ({ vendor, storeURLs, emails, FormHeader = true }) => {
           ...values,
           phone_number: `${countryCallingCode} ${values?.phone_number}`,
           file: file,
+          bannerfile: bannerfile,
         });
 
         if (response.status === 200) {
@@ -104,6 +107,7 @@ const VendorForm = ({ vendor, storeURLs, emails, FormHeader = true }) => {
             ...values,
             phone_number: `${countryCallingCode} ${values?.phone_number}`,
             file: file,
+            bannerfile: bannerfile,
           });
           if (response.status === 201) {
             enqueueSnackbar("Vendor Registration Success", {
@@ -171,12 +175,25 @@ const VendorForm = ({ vendor, storeURLs, emails, FormHeader = true }) => {
       if (vendor?.image?.path) {
         setPreviewURL(vendor?.image?.path);
       }
+      if (vendor?.banner_image?.path) {
+        setPreviewBannerURL(vendor?.banner_image?.path);
+      }
     }
   }, [vendor]);
 
   useEffect(() => {
     setPreviewURL(file ? URL.createObjectURL(file) : null);
   }, [file]);
+
+  useEffect(() => {
+    setPreviewBannerURL(bannerfile ? URL.createObjectURL(bannerfile) : null);
+  }, [bannerfile]);
+
+  useEffect(() => {
+    if (vendor && vendor?.banner_image?.path) {
+      setPreviewBannerURL(vendor?.banner_image?.path);
+    }
+  }, []);
 
   useEffect(() => {
     if (vendor && vendor?.image?.path) {
@@ -489,36 +506,80 @@ const VendorForm = ({ vendor, storeURLs, emails, FormHeader = true }) => {
                     </div>
                   </>
                 )}
-
-                <div className="col-span-2">
-                  <label
-                    htmlFor={`vendor-image`}
-                    className={`flex h-28 w-28 flex-col items-center rounded-full justify-center border-2 ${
-                      formik.errors.file && formik.touched.file
-                        ? "border-red-500"
-                        : "border-blueGray-100"
-                    } border-dashed cursor-pointer bg-gray-50 dark:hover :bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600`}
-                  >
-                    {previewURL ? (
-                      <div className="flex justify-center items-center h-full">
+                <div className="flex items-center gap-5 col-span-2">
+                  <div>
+                    <label
+                      htmlFor={`vendor-image`}
+                      className={`flex h-28 w-28 flex-col items-center rounded-full justify-center border-2 ${
+                        formik.errors.file && formik.touched.file
+                          ? "border-red-500"
+                          : "border-blueGray-100"
+                      } border-dashed cursor-pointer bg-gray-50 dark:hover :bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600`}
+                    >
+                      {previewURL ? (
+                        <div className="flex justify-center items-center h-full">
+                          <img
+                            className="object-cover w-full h-full rounded-full"
+                            src={previewURL}
+                            alt="Preview"
+                          />
+                        </div>
+                      ) : (
+                        <FileUploadIcon />
+                      )}
+                      <input
+                        id={`vendor-image`}
+                        type="file"
+                        name="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => setFile(e.target.files[0])}
+                      />
+                    </label>
+                  </div>
+                  <div className="w-[20%]">
+                    <label
+                      htmlFor={`vendor-banner-image`}
+                      className={`flex h-28 w-full flex-col items-center justify-center border-2 ${
+                        formik.errors.bannerfile && formik.touched.bannerfile
+                          ? "border-red-500"
+                          : "border-blueGray-100"
+                      } border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600`}
+                    >
+                      {previewBannerURL ? (
                         <img
-                          className="object-cover w-full h-full rounded-full"
-                          src={previewURL}
-                          alt="Preview"
+                          src={previewBannerURL}
+                          alt="preview image"
+                          height="100px"
+                          width="100px"
+                          className="h-full w-full rounded-lg"
                         />
-                      </div>
-                    ) : (
-                      <FileUploadIcon />
-                    )}
-                    <input
-                      id={`vendor-image`}
-                      type="file"
-                      name="file"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={(e) => setFile(e.target.files[0])}
-                    />
-                  </label>
+                      ) : (
+                        <div className="flex flex-col items-center">
+                          <FileUploadIcon />
+                          <span className="text-sm text-blueGray-200">
+                            {" "}
+                            Store Banner
+                          </span>
+                        </div>
+                      )}
+                      <input
+                        id={`vendor-banner-image`}
+                        type="file"
+                        name="bannerfile"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => setBannerFile(e.target.files[0])}
+                      />
+                    </label>
+
+                    {formik?.errors?.bannerfile &&
+                      formik?.touched?.bannerfile && (
+                        <div className="text-red-500 text-xs mt-2 ms-2">
+                          {formik.errors.bannerfile}
+                        </div>
+                      )}
+                  </div>
                 </div>
                 <div>
                   <Button
@@ -530,16 +591,6 @@ const VendorForm = ({ vendor, storeURLs, emails, FormHeader = true }) => {
                   >
                     {vendor ? "Update Vendor" : "Create Vendor"}
                   </Button>
-                  {/* <Typography className="text-sm text-secondary-100 mt-1.5 font-emirates">
-                    By proceeding next, you are agree with the my jewlex{" "}
-                    <Link href="/" className="text-primary-200">
-                      Term of use
-                    </Link>{" "}
-                    and{" "}
-                    <Link href="/" className="text-primary-200">
-                      Privacy Policy
-                    </Link>
-                  </Typography> */}
                 </div>
               </div>
             </Form>
